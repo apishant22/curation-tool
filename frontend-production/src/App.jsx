@@ -19,7 +19,6 @@ const App = () => {
       <Header />
       <div className="flex-1 flex justify-center items-center">
         <div className="h-[450px] flex flex-col items-center justify-start">
-          <h1 className="text-center mb-6">ACM-W Curation Tool</h1>
           <SearchBar setResults={setResults} />
           <SearchResults results={results} />
         </div>
