@@ -1,9 +1,7 @@
 import pytest
-from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
-from backend.db.models import Base, Researcher, Organisation, Dept, Researcher_Employment, Paper, Paper_Authors
-from backend.db.db_helper import add_record, get_records, update_record, delete_record, get_or_add_org_and_dept, \
-    get_author_details_from_db, store_author_details_in_db, update_researcher_summary
+from backend.db.clear_db import clear_all_tables
+from backend.db.models import *
+from backend.db.db_helper import *
 
 DATABASE_URL = "sqlite:///:memory:"
 
@@ -72,6 +70,7 @@ def test_delete_record(setup_database, session):
     assert deleted is None
 
 def test_get_author_details_from_db(setup_database, session):
+    clear_all_tables()
     author_details = {
         'Name': 'John Doe',
         'Orcid ID': '0000-0001-2345-6789',
@@ -147,4 +146,156 @@ def test_update_researcher_summary(setup_database, session):
     assert updated_researcher is not None
     assert updated_researcher.summary == new_summary
 
+def test_get_researcher_summary(setup_database, session):
+    researcher = Researcher(orcid='0000-0001-2345-6789', name='John Doe', bio='Researcher in AI', summary='Expert in machine learning')
+    session.add(researcher)
+    session.commit()
 
+    summary = get_researcher_summary('0000-0001-2345-6789', session=session)
+    assert summary == 'Expert in machine learning'
+
+    summary = get_researcher_summary('0000-0000-0000-0000', session=session)
+    assert summary == 'No researcher found with ORCID: 0000-0000-0000-0000'
+
+def test_update_author_details_in_db(setup_database, session):
+    clear_all_tables()
+    author_details_initial = {
+        'Name': 'John Doe',
+        'Orcid ID': '0000-0001-2345-6789',
+        'Biography': ['Researcher in AI'],
+        'Employment History': [
+            {
+                'Organization': 'University of Southampton',
+                'Department': 'School of Electronics and Computer Science',
+                'Start Date': '01/04/2023',
+                'End Date': 'Unknown',
+                'Role': 'Lecturer'
+            }
+        ],
+        'Education History': [
+            {
+                'Institution': 'University of Cambridge',
+                'Department': 'Computer Science',
+                'Start Date': '01/09/2015',
+                'End Date': '01/07/2019',
+                'Role': 'Student'
+            }
+        ],
+        'Publications': [
+            {
+                'Title': 'AI Revolution',
+                'DOI': '10.1234/airevolution2023',
+                'Abstract': 'A groundbreaking paper on AI.',
+                'Publication Date': '2023-05-01'
+            }
+        ]
+    }
+
+    store_author_details_in_db(author_details_initial)
+
+    author_details_updated = {
+        'Name': 'John Doe',
+        'Orcid ID': '0000-0001-2345-6789',
+        'Biography': ['Researcher in Robotics'],
+        'Employment History': [
+            {
+                'Organization': 'University of Southampton',
+                'Department': 'School of Electronics and Computer Science',
+                'Start Date': '01/04/2023',
+                'End Date': '31/12/2023',
+                'Role': 'Senior Lecturer'
+            }
+        ],
+        'Education History': [
+            {
+                'Institution': 'University of Cambridge',
+                'Department': 'Computer Science',
+                'Start Date': '01/09/2015',
+                'End Date': '01/07/2019',
+                'Role': 'Student'
+            }
+        ],
+        'Publications': [
+            {
+                'Title': 'AI Revolution',
+                'DOI': '10.1234/airevolution2023',
+                'Abstract': 'An updated groundbreaking paper on AI.',
+                'Publication Date': '2023-05-01'
+            },
+            {
+                'Title': 'Robotics Advancements',
+                'DOI': '10.1234/robotics2024',
+                'Abstract': 'A new paper on robotics.',
+                'Publication Date': '2024-03-01'
+            }
+        ]
+    }
+
+    update_author_details_in_db(author_details_updated)
+
+    retrieved_details = get_author_details_from_db('0000-0001-2345-6789')
+
+    assert retrieved_details is not None
+    assert retrieved_details['Name'] == 'John Doe'
+    assert retrieved_details['Orcid ID'] == '0000-0001-2345-6789'
+    assert 'Researcher in Robotics' in retrieved_details['Biography']
+
+    employment_history = retrieved_details['Employment History']
+    assert len(employment_history) == 1
+    assert employment_history[0]['Organization'] == 'University of Southampton'
+    assert employment_history[0]['Department'] == 'School of Electronics and Computer Science'
+    assert employment_history[0]['Role'] == 'Senior Lecturer'
+    assert employment_history[0]['End Date'] == '2023-12-31'
+
+    education_history = retrieved_details['Education History']
+    assert len(education_history) == 1
+    assert education_history[0]['Institution'] == 'University of Cambridge'
+    assert education_history[0]['Department'] == 'Computer Science'
+    assert education_history[0]['Role'] == 'Student'
+
+    publications = retrieved_details['Publications']
+    assert len(publications) == 2
+    assert publications[0]['Title'] == 'AI Revolution'
+    assert publications[0]['Abstract'] == 'An updated groundbreaking paper on AI.'
+    assert publications[1]['Title'] == 'Robotics Advancements'
+
+def test_delete_author_details_from_db(setup_database, session):
+    author_details_initial = {
+        'Name': 'John Doe',
+        'Orcid ID': '0000-0001-2345-6789',
+        'Biography': ['Researcher in AI'],
+        'Employment History': [
+            {
+                'Organization': 'University of Southampton',
+                'Department': 'School of Electronics and Computer Science',
+                'Start Date': '01/04/2023',
+                'End Date': 'Unknown',
+                'Role': 'Lecturer'
+            }
+        ],
+        'Education History': [
+            {
+                'Institution': 'University of Cambridge',
+                'Department': 'Computer Science',
+                'Start Date': '01/09/2015',
+                'End Date': '01/07/2019',
+                'Role': 'Student'
+            }
+        ],
+        'Publications': [
+            {
+                'Title': 'AI Revolution',
+                'DOI': '10.1234/airevolution2023',
+                'Abstract': 'A groundbreaking paper on AI.',
+                'Publication Date': '2023-05-01'
+            }
+        ]
+    }
+
+    store_author_details_in_db(author_details_initial)
+
+    delete_author_details_from_db('0000-0001-2345-6789')
+
+    retrieved_details = get_author_details_from_db('0000-0001-2345-6789')
+
+    assert retrieved_details is None

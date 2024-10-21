@@ -4,8 +4,9 @@ import re
 import time
 import json
 from fuzzywuzzy import fuzz
-from sqlalchemy.orm import Session
-from backend.db.db_helper import store_author_details_in_db
+from backend.db.db_helper import *
+from deepdiff import DeepDiff
+from sqlalchemy.orm.exc import NoResultFound
 
 
 # Function to search ORCID by ORCID ID and get author name
@@ -163,8 +164,6 @@ def scrape_author_details(author_name, profile_link):
             "Publications": publications
         }
 
-    store_author_details_in_db(author_details)
-
     return json.dumps(author_details, indent=4)
 
 
@@ -205,7 +204,7 @@ def scrape_author_publications(profile_link):
 
         publications.append({
             'Title': title,
-            'Authors': authors,
+#            'Authors': authors,
             'DOI': doi,
             'Abstract': 'N/A',
             'Publication Date': 'N/A'
@@ -384,6 +383,108 @@ def format_date(date_data):
             return str(year)
     return 'Unknown'
 
+# Function to normalise dates in JSON
+def normalize_dates(details):
+    for employment in details.get('Employment History', []):
+        if isinstance(employment.get('Start Date'), datetime):
+            employment['Start Date'] = employment['Start Date'].strftime("%Y-%m-%d")
+        elif employment.get('Start Date') is None:
+            employment['Start Date'] = "Unknown"
+        elif isinstance(employment.get('Start Date'), str):
+            try:
+                parsed_date = datetime.strptime(employment['Start Date'], "%d/%m/%Y")
+                employment['Start Date'] = parsed_date.strftime("%Y-%m-%d")
+            except ValueError:
+                pass
+
+        if isinstance(employment.get('End Date'), datetime):
+            employment['End Date'] = employment['End Date'].strftime("%Y-%m-%d")
+        elif employment.get('End Date') is None:
+            employment['End Date'] = "Unknown"
+        elif isinstance(employment.get('End Date'), str):
+            try:
+                parsed_date = datetime.strptime(employment['End Date'], "%d/%m/%Y")
+                employment['End Date'] = parsed_date.strftime("%Y-%m-%d")
+            except ValueError:
+                pass
+
+        employment["Role"] = employment.get("Role") or "Unknown"
+        employment["Department"] = employment.get("Department") or "Unknown Department"
+
+    for publication in details.get('Publications', []):
+        if isinstance(publication.get('Publication Date'), datetime):
+            publication['Publication Date'] = publication['Publication Date'].strftime("%Y-%m-%d")
+        elif publication.get('Publication Date') is None:
+            publication['Publication Date'] = "Unknown"
+        elif isinstance(publication.get('Publication Date'), str):
+            try:
+                parsed_date = datetime.strptime(publication['Publication Date'], "%d/%m/%Y")
+                publication['Publication Date'] = parsed_date.strftime("%Y-%m-%d")
+            except ValueError:
+                pass
+
+    # Normalize biography to always be a list
+    if isinstance(details.get('Biography'), str):
+        details['Biography'] = [details['Biography']]
+    elif details.get('Biography') is None:
+        details['Biography'] = ["No biographical information available."]
+
+    return details
+
+# Fucntion to handle logic on when to scrape and etc.
+def update_author_if_needed(author_name, profile_link):
+    scraped_author_details_json = scrape_author_details(author_name, profile_link)
+    scraped_author_details = json.loads(scraped_author_details_json)
+
+    orcid_id = scraped_author_details.get("Orcid ID")
+
+    if not orcid_id:
+        print("ORCID ID not found. Cannot proceed without ORCID ID.")
+        return None
+
+    try:
+        author_details_db = get_author_details_from_db(orcid_id)
+
+        if author_details_db:
+            scraped_author_details = normalize_dates(scraped_author_details)
+            author_details_db = normalize_dates(author_details_db)
+
+            print("\n--- SCRAPED AUTHOR DETAILS ---")
+            print(json.dumps(scraped_author_details, indent=4))
+            print("\n--- DATABASE AUTHOR DETAILS ---")
+            print(json.dumps(author_details_db, indent=4))
+
+            diff = DeepDiff(author_details_db, scraped_author_details, ignore_order=True)
+
+            if not diff:
+                summary = get_researcher_summary(orcid_id)
+                if summary and summary != "Summary not available.":
+                    print("Data is up to date and summary is present. Returning existing summary.")
+                    return json.dumps(summary, indent=4)
+                else:
+                    print("Summary is missing.")
+                    return None
+            else:
+                print(f"Data differences found for ORCID ID {orcid_id}: {diff}")
+                update_author_details_in_db(scraped_author_details)
+                print("Database updated with the latest details.")
+                return None
+
+        else:
+            print(f"No author found with ORCID ID: {orcid_id}. Adding new details to the database.")
+            store_author_details_in_db(scraped_author_details)
+            return None
+
+    except NoResultFound:
+        print(f"No author found with ORCID ID: {orcid_id}. Adding new details to the database.")
+        store_author_details_in_db(scraped_author_details)
+        return None
+
+    except Exception as e:
+        print(f"An error occurred: {e}")
+
+    return None
+
 
 # Example usage of the refactored functions
 input_value = "0000-0002-1684-1539"
@@ -399,7 +500,7 @@ else:
 selected_profile_author = "Adriana  Wilde"
 selected_profile_link = "https://dl.acm.org/profile/99659070982"
 
-author_details_json = scrape_author_details(selected_profile_author, selected_profile_link)
+author_details_json = update_author_if_needed(selected_profile_author, selected_profile_link)
 
 print("\nDetailed Author Information:")
 print(author_details_json)
