@@ -27,8 +27,7 @@ def request(orcid_id):
                 "content": [
                     {
                         "type": "text",
-                        "text": "You are an AI assistant that helps people find information."
-                        # Replace this text with the actual instructions for the LLM
+                        "text": "You are an AI assistant that summarises the life and works of academic researchers from their published papers and their education and employment histories. The summaries are intended to be read by anyone and not require specialist knowledge. The summary must only contain information that is provided in the prompt."
                     }
                 ]
             },
@@ -37,8 +36,7 @@ def request(orcid_id):
                 "content": [
                     {
                         "type": "text",
-                        #"text": "Details of the person in question: " + db_helper.get_author_details_from_db(orcid_id)
-                        "text": "in the mean time, send a test message"
+                        "text": "Details of the person in question: " + str(db_helper.get_author_details_from_db(orcid_id))
                     }
                 ]
             }
@@ -62,7 +60,7 @@ def request(orcid_id):
     print(reply)
     log(reply)
     summary = get_summary_text(reply)
-    #db_helper.update_researcher_summary(orcid_id, summary)
+    db_helper.update_researcher_summary(orcid_id, summary)
 
 def log(response):
     try:
@@ -82,7 +80,6 @@ def get_summary_text(reply):
     except (json.JSONDecodeError, KeyError, IndexError) as e:
         print(f"An error occurred while extracting summary text: {e}")
         return "Error: Unable to extract summary text."
-
-
+    
 
 request("0000-0002-1684-1539")
