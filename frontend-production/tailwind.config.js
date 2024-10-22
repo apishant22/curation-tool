@@ -10,6 +10,7 @@ export default {
         'acm-blue': '#39B5FB',
         'rectBox': '#E2EBF6',
         'acm-gray': '#2B2B2C',
+        'acm-light-gray': '#FBFBFB'
       },
       fontFamily: {
         archivo: ["Archivo", "arial"]
