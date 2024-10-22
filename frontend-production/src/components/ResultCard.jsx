@@ -2,7 +2,7 @@ import React from 'react'
 
 const ResultCard = () => {
   return (
-    <div className='bg-blue-200/75 p-6'>
+    <div className='bg-blue-200/75 p-6 rounded-xl hover:cursor-pointer'>
       {/* fetch result and populate inside the card */}
       <div className=''>
       <h1>Name here</h1>
