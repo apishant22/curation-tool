@@ -7,7 +7,12 @@ export default {
   theme: {
     extend: {
       colors: {
-        'acm-blue': '#39B5FB'
+        'acm-blue': '#39B5FB',
+        'rectBox': '#E2EBF6',
+        'acm-gray': '#2B2B2C',
+      },
+      fontFamily: {
+        archivo: ["Archivo", "arial"]
       },
 
     },

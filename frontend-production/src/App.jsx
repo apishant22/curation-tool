@@ -4,6 +4,10 @@ import SearchResults from "./components/SearchResults";
 import Header from "./components/Header";
 import blueCurve from "./assets/blue.jpg";
 import HeaderContent from "./components/HeaderContent";
+import Content from "./components/Content";
+import Footer from "./components/Footer";
+
+
 
 
 const App = () => {
@@ -11,7 +15,7 @@ const App = () => {
 
   return (
     <div
-      className="flex flex-col min-h-screen overflow-hidden"
+      className="flex flex-col h-screen overflow-y-auto"
       style={{
         // backgroundImage: `url(${blueCurve})`,
         // backgroundSize: "cover",
@@ -27,6 +31,8 @@ const App = () => {
         </div>
       </div> */}
       <HeaderContent/>
+      <Content/>
+      <Footer/>
 
     </div>
   );

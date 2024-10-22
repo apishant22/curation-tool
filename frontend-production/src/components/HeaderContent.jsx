@@ -3,6 +3,7 @@ import acmLogo from '../assets/logo-main.png'
 import SearchBar from './SearchBar'
 import UnderSearchText from '../assets/undertext-search.png'
 
+
 const HeaderContent = () => {
   return (
     <div className='flex flex-col justify-center items-center p-12 bg-gray-100/75 shadow-md'>
