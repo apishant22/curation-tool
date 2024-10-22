@@ -61,7 +61,9 @@ def request(orcid_id):
     reply = json.dumps(response.json())
     print(reply)
     log(reply)
-    #db_helper.update_researcher_summary(orcid_id, reply)
+    summary = get_summary_text(reply)
+    #db_helper.update_researcher_summary(orcid_id, summary)
+
 def log(response):
     try:
         with open("logfile.txt", 'a') as file:
@@ -71,6 +73,15 @@ def log(response):
         print("Response logged successfully.")
     except Exception as e:
         print(f"An error occurred while logging the response: {e}")
+
+def get_summary_text(reply):
+    try:
+        json_reply = json.loads(reply)
+        summary = json_reply["choices"][0]["message"]["content"]
+        return summary
+    except (json.JSONDecodeError, KeyError, IndexError) as e:
+        print(f"An error occurred while extracting summary text: {e}")
+        return "Error: Unable to extract summary text."
 
 
 
