@@ -16,7 +16,6 @@ const SearchResults = ({ results }) => {
   const handleClick = (user) => {
     console.log(user.name);
     navigate('/summary', {state: {user}});
-    
   }
 
   return (

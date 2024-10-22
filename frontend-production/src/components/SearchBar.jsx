@@ -24,8 +24,7 @@ const SearchBar = ({setResults}) => {
   }
   return (
     <>
-      <h1 className="text-center mb-6">ACM-W Curation Tool</h1>
-      <div className="w-[300px] md:w-[400px] flex px-4 py-3 rounded-full border-2 border-blue-50 shadow-sm overflow-hidden min-w-[300px] font-[sans-serif]">
+      <div className="w-[300px] md:w-[400px] flex px-4 py-1 md:py-2 rounded-full border bg-white border-gray-300 shadow-xs overflow-hidden min-w-[300px] font-[sans-serif]">
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 192.904 192.904" width="16px"
           className="fill-gray-600 mr-3 rotate-90">
           <path
