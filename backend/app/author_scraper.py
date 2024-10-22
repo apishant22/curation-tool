@@ -485,7 +485,7 @@ def update_author_if_needed(author_name, profile_link):
 
     return None
 
-
+'''
 # Example usage of the refactored functions
 input_value = "0000-0002-1684-1539"
 input = "Adriana Wilde"
@@ -504,3 +504,4 @@ author_details_json = update_author_if_needed(selected_profile_author, selected_
 
 print("\nDetailed Author Information:")
 print(author_details_json)
+'''

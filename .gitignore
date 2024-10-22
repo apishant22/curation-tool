@@ -6,6 +6,7 @@ yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
+logfile.txt
 
 # Dependency directories
 node_modules/
@@ -40,3 +41,7 @@ Thumbs.db
 ._*
 .Spotlight-V100
 .Trashes
+
+# Python
+.venv/
+__pycache__
