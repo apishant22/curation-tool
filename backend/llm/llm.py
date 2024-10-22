@@ -1,5 +1,6 @@
 import os
 from datetime import datetime
+import json
 
 import requests
 import base64
@@ -57,7 +58,7 @@ def request(orcid_id):
         raise SystemExit(f"Failed to make the request. Error: {e}")
 
     # Handle the response as needed (e.g., print or process)
-    reply = response.json()
+    reply = json.dumps(response.json())
     print(reply)
     log(reply)
     #db_helper.update_researcher_summary(orcid_id, reply)
