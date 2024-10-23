@@ -11,7 +11,7 @@ const Summary = () => {
   const time = 2009;
   const events = 'Lorem ipsum dolor sit amet, consectetur adipisicing elit. Reiciendis iusto quas rem quam? Sit cumque consectetur vel doloribus ab iure quia, rem perspiciatis debitis beatae, maiores impedit? Accusantium, blanditiis expedita.';
   const location = useLocation();
-  const {searchQuery, name} = location.state || {};
+  const {searchQuery, name, result} = location.state || {};
   console.log("searchQuery: " + searchQuery);
   console.log("name: " + name)
 
@@ -22,7 +22,15 @@ const Summary = () => {
     <div className='flex flex-col justify-between h-screen overflow-auto'>
       <Header/>
       <div className='text-center'>
-        {name}
+          {/* Display name if available */}
+          {name && (
+            <h1 className="text-2xl font-bold mb-4">{name}</h1>
+          )}
+          
+          {/* Display result if available */}
+          {result && (
+            <p className="text-gray-700 mb-6">{result}</p>
+          )}
       </div>
       <Footer/>  
     </div>

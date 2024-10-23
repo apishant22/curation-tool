@@ -52,6 +52,7 @@ const Result = () => {
   const handlePagination = (pageNumber) => {
     setCurrentPage(pageNumber);
   }
+
   
   return (
     <div className='flex flex-col h-screen overflow-y-auto'>

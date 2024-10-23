@@ -13,7 +13,7 @@ const ContentCard = ({name, summary, data}) => {
     return text.substring(0, maxLength) + '...';
   }
 
-    const handleClick = (data) => {
+    const handleClick = () => {
       navigate('/summary', {state: {
         name: name
       }})

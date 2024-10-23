@@ -6,7 +6,9 @@ const ResultCard = ({name, employment}) => {
   const navigate = useNavigate();
 
   const handleClick = () => {
-    navigate('/summary');
+    navigate('/summary', {state: {
+      result: name
+    }})
   }
   return (
     <div>
