@@ -4,8 +4,9 @@ import Button from './Button'
 
 const ContentCard = ({name, summary}) => {
 
-  const summaryShorten = (text , maxLength = 150) => {
+  const summaryShorten = (text , maxLength = 200) => {
     if (text.length <= maxLength) return text;
+    return text.substring(0, maxLength) + '...';
   }
   return (
     <div>
@@ -14,8 +15,8 @@ const ContentCard = ({name, summary}) => {
         <div className='p-1 font-archivo text-blue-800'>
           {name}
         </div>
-        <div className='p-1 '>
-          {summary}
+        <div className='p-1 h-20 overflow-hidden text-gray-700/75'>
+          {summaryShorten(summary)}
         </div>
         <div className='flex justify-end p-1'>
           <Button text='Know more about her'></Button>

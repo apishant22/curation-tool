@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import { useLocation } from 'react-router-dom'
 import Header from './Header';
 import SearchBar from './SearchBar';
@@ -6,6 +6,25 @@ import logoMain from '../assets/logo-main.png'
 import ResultCard from './ResultCard';
 import Footer from './Footer';
 import Button from './Button';
+import Pagination from './Pagination';
+
+const response = [
+  {
+    "id": 1,
+    "name": "Adriana Max",
+    "employment": "University of Oxford"
+  },
+  {
+    "id": 2,
+    "name": "Adriana Wilde",
+    "employment": "University of Southampton"
+  },
+  {
+    "id": 3,
+    "name": "Adriana Booth",
+  }
+]
+
 
 
 
@@ -15,6 +34,25 @@ const Result = () => {
   if (!searchQuery) {
     return <div>No user available</div>
   }
+  console.log(searchQuery); // pass to the API, and retrieve the name
+
+  const [posts, setPosts] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [postsPerPage, setPostsPerPage] = useState(5);
+
+  useEffect(() => {
+    const fetchPosts = () => {
+      setPosts(response);
+      setLoading(false);
+    }
+    fetchPosts();
+  }, [])
+
+  const handlePagination = (pageNumber) => {
+    setCurrentPage(pageNumber);
+  }
+  
   return (
     <div className='flex flex-col h-screen overflow-y-auto'>
       <Header/>
@@ -31,13 +69,15 @@ const Result = () => {
           <div className='bg-acm-light-gray'>
             <div className='flex justify-end '>
               {/* this is the pagination functionality, need to figure on how to dthat */}
-              <div>page 1 of n sort by</div>
+              <Pagination length={posts.length} postsPerPage={postsPerPage} handlePagination={handlePagination} currentPage={currentPage}/>
             </div>
             <div className='mt-6 p-4 flex flex-col gap-12'>
               {/* we will call map function here, which corresponds to the result, for now, it is hardcoded, i can test but will do that later */}
-              <ResultCard/>
-              <ResultCard/>
-              <ResultCard/>
+              {
+                response && response.map((res) => {
+                  return <ResultCard name={res.name} employment={res.employment}/>
+                })
+              }
             </div>
             <div className='flex justify-end gap-6 p-4'>
               <Button text={'next'}/>
