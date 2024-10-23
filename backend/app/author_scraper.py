@@ -34,57 +34,38 @@ def search_orcid_by_id(orcid_id):
 # Function to search ACM DL for an author and get search results
 def search_acm_author(author_name):
     formatted_name = author_name.replace(' ', '+')
-    base_url = "https://dl.acm.org/action/doSearch?AllField={}&startPage={}&content=people&target=people-tab&sortBy=relevancy&groupByField=ContribIdSingleValued"
+    search_url = f"https://dl.acm.org/action/doSearch?AllField={formatted_name}&startPage=0&content=people&target=people-tab&sortBy=relevancy&groupByField=ContribIdSingleValued"
 
     headers = {
         'User-Agent': 'Mozilla/5.0',
         'Accept': 'text/html'
     }
 
+    response = requests.get(search_url, headers=headers)
+    if response.status_code != 200:
+        print(f"Failed to retrieve author data for {author_name}")
+        return []
+
+    soup = BeautifulSoup(response.content, 'html.parser')
     author_list = []
-    page_number = 0
 
-    while True:
-        search_url = base_url.format(formatted_name, page_number)
-        print(f"Searching URL: {search_url}")
+    author_items = soup.find_all('li', class_='people__people-list')
 
-        response = requests.get(search_url, headers=headers)
-        if response.status_code != 200:
-            print(f"Failed to retrieve author data for {author_name} on page {page_number}")
-            break
+    for item in author_items:
+        name_tag = item.find('div', class_='name')
+        name = name_tag.text.strip() if name_tag else 'Unknown'
 
-        soup = BeautifulSoup(response.content, 'html.parser')
+        location_tag = item.find('div', class_='location')
+        location = location_tag.text.strip() if location_tag else 'Unknown location'
 
-        print(f"Page title: {soup.title.string if soup.title else 'No title found'}")
+        profile_link_tag = item.find('a', href=True, title="View Profile")
+        profile_link = f"https://dl.acm.org{profile_link_tag['href']}" if profile_link_tag else 'No profile link'
 
-        with open(f"page_{page_number}.html", "w", encoding="utf-8") as file:
-            file.write(response.text)
-
-        author_items = soup.find_all('li', class_='people__people-list')
-
-        if not author_items:
-            print(f"No author items found on page {page_number}.")
-            break
-
-        for item in author_items:
-            name_tag = item.find('div', class_='name')
-            name = name_tag.text.strip() if name_tag else 'Unknown'
-
-            location_tag = item.find('div', class_='location')
-            location = location_tag.text.strip() if location_tag else 'Unknown location'
-
-            profile_link_tag = item.find('a', href=True, title="View Profile")
-            profile_link = f"https://dl.acm.org{profile_link_tag['href']}" if profile_link_tag else 'No profile link'
-
-            author_list.append({
-                'Name': name,
-                'Location': location,
-                'Profile Link': profile_link
-            })
-
-        page_number += 1
-
-    print(f"Total authors found: {len(author_list)}")
+        author_list.append({
+            'Name': name,
+            'Location': location,
+            'Profile Link': profile_link
+        })
 
     return json.dumps(author_list, indent=4)
 
@@ -468,6 +449,11 @@ def update_author_if_needed(author_name, profile_link):
             scraped_author_details = normalize_dates(scraped_author_details)
             author_details_db = normalize_dates(author_details_db)
 
+            print("\n--- SCRAPED AUTHOR DETAILS ---")
+            print(json.dumps(scraped_author_details, indent=4))
+            print("\n--- DATABASE AUTHOR DETAILS ---")
+            print(json.dumps(author_details_db, indent=4))
+
             diff = DeepDiff(author_details_db, scraped_author_details, ignore_order=True)
 
             if not diff:
@@ -499,7 +485,7 @@ def update_author_if_needed(author_name, profile_link):
 
     return None
 
-
+'''
 # Example usage of the refactored functions
 input_value = "0000-0002-1684-1539"
 input = "Adriana Wilde"
@@ -510,7 +496,7 @@ if authors:
     print(authors)
 else:
     print("No authors found.")
-'''
+
 selected_profile_author = "Adriana  Wilde"
 selected_profile_link = "https://dl.acm.org/profile/99659070982"
 
