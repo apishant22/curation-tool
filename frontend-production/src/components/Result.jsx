@@ -75,7 +75,7 @@ const Result = () => {
               {/* we will call map function here, which corresponds to the result, for now, it is hardcoded, i can test but will do that later */}
               {
                 response && response.map((res) => {
-                  return <ResultCard name={res.name} employment={res.employment}/>
+                  return <ResultCard name={res.name} employment={res.employment} data={res}/>
                 })
               }
             </div>
