@@ -17,7 +17,7 @@ const router = createBrowserRouter([
     element: <Summary/>
   },
   {
-    path: '/result',
+    path: '/result/:user/:page',
     element: <Result/>
   }
 ]);

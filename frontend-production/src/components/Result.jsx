@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { useLocation } from 'react-router-dom'
+import { useLocation, useParams } from 'react-router-dom'
 import Header from './Header';
 import SearchBar from './SearchBar';
 import logoMain from '../assets/logo-main.png'
@@ -8,15 +8,13 @@ import Footer from './Footer';
 import Button from './Button';
 
 const Result = () => {
-  const location = useLocation();
-  const {searchQuery} = location.state || {};
-  const API_URL = 'http://127.0.0.1:5000/search/'
+  // const location = useLocation();
+  // const {searchQuery} = location.state || {};
+  const {user} = useParams();
+  const API_URL = 'http://127.0.0.1:3002/search/'
 
 
-  if (!searchQuery) {
-    return <div>No user available</div>
-  }
-  console.log(searchQuery); // pass to the API, and retrieve the name
+  const [counter, setCounter] = useState(0);
 
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -24,14 +22,19 @@ const Result = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [postsPerPage, setPostsPerPage] = useState(5);
 
+  // console.log(`${API_URL}${encodedQuery}${counter}`)
+
   useEffect(() => {
     const fetchPosts = async () => {
       setLoading(true);
       setError(null);
+      
 
       try {
-        const encodedQuery = encodeURIComponent(searchQuery);
-        const response = await fetch(`${API_URL}${encodedQuery}`);
+        const encodedQuery = encodeURIComponent(user);
+        console.log(`${API_URL}${encodedQuery}/${counter}`)
+
+        const response = await fetch(`${API_URL}${encodedQuery}/${counter}`);
 
         if (!response.ok) {
           throw new Error(`HTTP error! Status: ${response.status}`)
@@ -47,7 +50,7 @@ const Result = () => {
       }
     };
     fetchPosts();
-  }, [searchQuery])
+  }, [user, counter])
 
   const handlePagination = (pageNumber) => {
     setCurrentPage(pageNumber);
@@ -64,7 +67,7 @@ const Result = () => {
               <img src={logoMain} alt='acm-logo' className='h-full w-full object-contain'></img>
             </div>
             <div className='flex items-center '>
-              <SearchBar/>
+              <SearchBar counter={counter} setCounter={setCounter}/>
             </div>
           </div>
           <div className='bg-acm-light-gray'>
@@ -89,15 +92,16 @@ const Result = () => {
               }
               {/* we will call map function here, which corresponds to the result, for now, it is hardcoded, i can test but will do that later */}
               {
-                !loading && posts && posts.map((res) => {
-                  return <ResultCard name={res.Name} employment={res.Location} data={res}/>
+                !loading && posts && posts.authors && posts.authors.map((res) => {
+                  return <ResultCard key={res.Profile_Link} name={res.Name} employment={res.Location} data={res}/>
                 })
               }
+
             </div>
-            {/* <div className='flex justify-end gap-6 p-4'>
-              <Button text={'next'}/>
-              <Button text={'previous'}/>
-            </div> */}
+            <div className='flex justify-end gap-6 p-4'>
+              <Button text={'previous'} previous={true} counter={counter} setCounter={setCounter} user={user}/>
+              <Button text={'next'} next={true} counter={counter} setCounter={setCounter} user={user}/>
+            </div>
 
           </div>
         </div>

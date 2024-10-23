@@ -13,9 +13,10 @@ app = Flask(__name__)
 CORS(app)
 
 # this one works!
-@app.route('/search/<name>')
-def search(name):
-    result = scraper.identify_input_type_and_search_author(name)
+@app.route('/search/<name>/<page>')
+def search(name, page):
+    page_number = int(page)
+    result = scraper.identify_input_type_and_search_author(name, page_number)
     return result
 
 @app.route('/query/<author>')
