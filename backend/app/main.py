@@ -1,6 +1,7 @@
 import json
 
 from flask import Flask
+from flask_cors import CORS
 
 import backend.app.author_scraper as scraper
 import backend.db.db_helper as db
@@ -8,6 +9,8 @@ import backend.db.models as model
 import backend.llm.llm as llm
 
 app = Flask(__name__)
+
+CORS(app)
 
 # this one works!
 @app.route('/search/<name>')
@@ -21,7 +24,7 @@ def query(author):
     author = json.loads(author)
 
     # no extra slashes allowed in URLS
-    author['Profile Link'] = f'https://dl.acm.org/profile/{author['Profile Link']}'
+    author['Profile Link'] = f"https://dl.acm.org/profile/{author['Profile Link']}"
     print(author)
 
     # get the orcid id

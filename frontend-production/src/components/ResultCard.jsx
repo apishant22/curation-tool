@@ -12,7 +12,7 @@ const ResultCard = ({name, employment}) => {
   }
   return (
     <div>
-      <button className='bg-blue-200/75 p-6 rounded-xl hover:cursor-pointer w-full' onClick={handleClick}>
+      <button className='bg-blue-200/75 p-3 rounded-xl hover:cursor-pointer w-full' onClick={handleClick}>
       {/* fetch result and populate inside the card */}
       <div className='text-left'>
       <h1>{name}</h1>
