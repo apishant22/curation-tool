@@ -485,7 +485,7 @@ def update_author_if_needed(author_name, profile_link):
             print("\n--- DATABASE AUTHOR DETAILS ---")
             print(json.dumps(author_details_db, indent=4))
 
-            diff = DeepDiff(author_details_db, scraped_author_details, ignore_order=True)
+            diff = DeepDiff(author_details_db, scraped_author_details, ignore_order=True, ignore_string_case=True)
 
             if not diff:
                 summary = get_researcher_summary(orcid_id)
@@ -516,11 +516,11 @@ def update_author_if_needed(author_name, profile_link):
 
     return None
 
-
+'''
 # Example usage of the refactored functions
 input_value = "0000-0002-1684-1539"
-input = "Adriana"
-page_number = 12
+input = "Adriana Wilde"
+page_number = 0
 authors = identify_input_type_and_search_author(input, page_number)
 
 if authors:
@@ -528,7 +528,7 @@ if authors:
     print(authors)
 else:
     print("No authors found.")
-'''
+    
 selected_profile_author = "Adriana  Wilde"
 selected_profile_link = "https://dl.acm.org/profile/99659070982"
 

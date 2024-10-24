@@ -19,37 +19,22 @@ def search(name, page):
 
 @app.route('/query/<name>/<profile_link>')
 def query(name, profile_link):
-    '''Retrieve profile and LLM summary of author from the database, creating them if they do not exist.'''
 
-    # no extra slashes allowed in URLS
     profile_link = f'https://dl.acm.org/profile/{profile_link}'
-    print(name, profile_link)
+    print(f"Author Name: {name}, Profile Link: {profile_link}")
 
-    # get the orcid id
-    # TODO should this be from the database instead of scraping? what to do when there is no orcid?
-    publications = scraper.scrape_author_publications(profile_link)
-    orcid = scraper.find_author_orcid_by_dois(publications, name)
-    print(orcid)
+    update_result = scraper.update_author_if_needed(name, profile_link)
 
-    # does the author exist in the database?
-    existing_researcher = db.get_records(model.Researcher, filters={"orcid": orcid})
-    print(existing_researcher)
+    if update_result is None:
+        return {
+            "message": "Author details updated, but summary not available yet."
+        }, 200
 
-    # if so, retrieve and return their details
-    if existing_researcher:
-        details = db.get_author_details_from_db(orcid)
+    return {
+        "message": "Author summary retrieved successfully.",
+        "summary": update_result
+    }, 200
 
-    # if not, scrape the details
-    else:
-        details = json.loads(scraper.scrape_author_details(name, profile_link))
-
-        # generate and store llm summary
-        llm.request(orcid)
-
-    details['Summary'] = db.get_researcher_summary(orcid)
-
-    print(details)
-    return details
 
 @app.route('/misc_profiles/<number>')
 def misc_profiles(number):
