@@ -1,6 +1,7 @@
 import json
 
 from flask import Flask
+from flask_cors import CORS
 
 import backend.app.author_scraper as scraper
 import backend.db.db_helper as db
@@ -9,15 +10,19 @@ import backend.llm.llm as llm
 
 app = Flask(__name__)
 
+CORS(app)
+
 # this one works!
-@app.route('/search/<name>')
-def search(name):
-    result = scraper.identify_input_type_and_search_author(name)
+@app.route('/search/<name>/<page>')
+def search(name, page):
+    page_number = int(page)
+    result = scraper.identify_input_type_and_search_author(name, page_number)
     return result
 
 @app.route('/query/<name>/<profile_link>')
 def query(name, profile_link):
     '''Retrieve profile and LLM summary of author from the database, creating them if they do not exist.'''
+    author = json.loads(author)
 
     # no extra slashes allowed in URLS
     profile_link = f'https://dl.acm.org/profile/{profile_link}'

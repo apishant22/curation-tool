@@ -3,15 +3,16 @@ import { useState } from 'react'
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 
-const SearchBar = ({setResults}) => {
+const SearchBar = ({setResults, counter, setCounter}) => {
   const [input, setInput] = useState("");
   const navigate = useNavigate();
   // const API_URL = "https://jsonplaceholder.typicode.com/users";
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    setCounter(0);
     if (input.trim()) {
-      navigate('/result', {state: {searchQuery: input}});
+      navigate(`/result/${input}/${counter}`, {state: {searchQuery: input}});
     }
   }
 

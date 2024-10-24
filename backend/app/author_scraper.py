@@ -32,24 +32,50 @@ def search_orcid_by_id(orcid_id):
         return None
 
 # Function to search ACM DL for an author and get search results
-def search_acm_author(author_name):
+def search_acm_author(author_name, page_number):
     formatted_name = author_name.replace(' ', '+')
-    search_url = f"https://dl.acm.org/action/doSearch?AllField={formatted_name}&startPage=0&content=people&target=people-tab&sortBy=relevancy&groupByField=ContribIdSingleValued"
 
     headers = {
         'User-Agent': 'Mozilla/5.0',
         'Accept': 'text/html'
     }
 
-    response = requests.get(search_url, headers=headers)
-    if response.status_code != 200:
-        print(f"Failed to retrieve author data for {author_name}")
-        return []
-
-    soup = BeautifulSoup(response.content, 'html.parser')
     author_list = []
 
+    initial_url = f"https://dl.acm.org/action/doSearch?AllField={formatted_name}&startPage=0&content=people&target=people-tab&sortBy=relevancy&groupByField=ContribIdSingleValued"
+    response = requests.get(initial_url, headers=headers)
+    if response.status_code != 200:
+        print(f"Failed to retrieve author data for {author_name}")
+        return {"authors": [], "no_previous_page": True, "no_next_page": True}
+
+    soup = BeautifulSoup(response.content, 'html.parser')
+    result_count_tag = soup.find('span', class_='result__count')
+    total_authors = int(result_count_tag.text.split()[0]) if result_count_tag else 0
+    authors_per_page = 20
+    max_pages = ((total_authors + authors_per_page - 1) // authors_per_page) - 1
+
+    no_previous_page = page_number <= 0
+    no_next_page = page_number >= (max_pages - 1)
+
+    if page_number < 0:
+        page_number = 0
+    elif page_number >= max_pages:
+        page_number = max_pages - 1
+
+    search_url = f"https://dl.acm.org/action/doSearch?AllField={formatted_name}&startPage={page_number}&content=people&target=people-tab&sortBy=relevancy&groupByField=ContribIdSingleValued"
+    print(f"Searching URL: {search_url}")
+
+    response = requests.get(search_url, headers=headers)
+    if response.status_code != 200:
+        print(f"Failed to retrieve author data for {author_name} on page {page_number}")
+        return {"authors": [], "no_previous_page": no_previous_page, "no_next_page": no_next_page}
+
+    soup = BeautifulSoup(response.content, 'html.parser')
+
     author_items = soup.find_all('li', class_='people__people-list')
+    if not author_items:
+        print(f"No author items found on page {page_number}.")
+        return {"authors": [], "no_previous_page": no_previous_page, "no_next_page": no_next_page}
 
     for item in author_items:
         name_tag = item.find('div', class_='name')
@@ -67,10 +93,15 @@ def search_acm_author(author_name):
             'Profile Link': profile_link
         })
 
-    return json.dumps(author_list, indent=4)
+    print(f"Total authors found on page {page_number}: {len(author_list)}")
+    return {
+        "authors": author_list,
+        "no_previous_page": no_previous_page,
+        "no_next_page": no_next_page
+    }
 
 # Function to identify if the input is an ORCID ID or an author name and search ACM DL
-def identify_input_type_and_search_author(input_value):
+def identify_input_type_and_search_author(input_value, page_number):
     orcid_pattern = re.compile(r"^\d{4}-\d{4}-\d{4}-\d{4}$")
 
     if orcid_pattern.match(input_value):
@@ -79,10 +110,10 @@ def identify_input_type_and_search_author(input_value):
         if not author_name:
             print(f"No author found for ORCID ID: {input_value}")
             return []
-        return search_acm_author(author_name)
+        return search_acm_author(author_name, page_number)
     else:
         print(f"Recognised input as author name: {input_value}")
-        return search_acm_author(input_value)
+        return search_acm_author(input_value, page_number)
 
 # Function to use CrossRef to get ORCID ID from DOI
 def get_orcid_from_doi(doi):
@@ -485,18 +516,19 @@ def update_author_if_needed(author_name, profile_link):
 
     return None
 
-'''
+
 # Example usage of the refactored functions
 input_value = "0000-0002-1684-1539"
-input = "Adriana Wilde"
-authors = identify_input_type_and_search_author(input)
+input = "Adriana"
+page_number = 12
+authors = identify_input_type_and_search_author(input, page_number)
 
 if authors:
     print("\nAuthor Search Results:")
     print(authors)
 else:
     print("No authors found.")
-
+'''
 selected_profile_author = "Adriana  Wilde"
 selected_profile_link = "https://dl.acm.org/profile/99659070982"
 
