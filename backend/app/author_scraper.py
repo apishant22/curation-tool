@@ -491,7 +491,7 @@ def update_author_if_needed(author_name, profile_link):
                 summary = get_researcher_summary(orcid_id)
                 if summary and summary != "Summary not available.":
                     print("Data is up to date and summary is present. Returning existing summary.")
-                    return json.dumps(summary, indent=4)
+                    return summary, author_details_db
                 else:
                     print("Summary is missing.")
                     return None

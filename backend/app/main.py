@@ -23,7 +23,7 @@ def query(name, profile_link):
     profile_link = f'https://dl.acm.org/profile/{profile_link}'
     print(f"Author Name: {name}, Profile Link: {profile_link}")
 
-    update_result = scraper.update_author_if_needed(name, profile_link)
+    update_result, author_details_db = scraper.update_author_if_needed(name, profile_link)
 
     if update_result is None:
         return {
@@ -32,7 +32,8 @@ def query(name, profile_link):
 
     return {
         "message": "Author summary retrieved successfully.",
-        "summary": update_result
+        "summary": update_result,
+        "author_details": author_details_db
     }, 200
 
 
