@@ -93,7 +93,7 @@ const Result = () => {
               {/* we will call map function here, which corresponds to the result, for now, it is hardcoded, i can test but will do that later */}
               {
                 !loading && posts && posts.authors && posts.authors.map((res) => {
-                  return <ResultCard key={res.Profile_Link} name={res.Name} employment={res.Location} data={res}/>
+                  return <ResultCard key={res["Profile Link"]} name={res.Name} employment={res.Location} profileLink={res["Profile Link"]}/>
                 })
               }
 
