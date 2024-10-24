@@ -22,7 +22,6 @@ def search(name, page):
 @app.route('/query/<name>/<profile_link>')
 def query(name, profile_link):
     '''Retrieve profile and LLM summary of author from the database, creating them if they do not exist.'''
-    author = json.loads(author)
 
     # no extra slashes allowed in URLS
     profile_link = f'https://dl.acm.org/profile/{profile_link}'
