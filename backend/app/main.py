@@ -13,11 +13,9 @@ app = Flask(__name__)
 CORS(app)
 
 # this one works!
-@app.route('/search/<name>/<page>')
+@app.route('/search/<name>/<int:page>')
 def search(name, page):
-    page_number = int(page)
-    result = scraper.identify_input_type_and_search_author(name, page_number)
-    return result
+    return scraper.identify_input_type_and_search_author(name, page)
 
 @app.route('/query/<name>/<profile_link>')
 def query(name, profile_link):
@@ -51,4 +49,17 @@ def query(name, profile_link):
     details['Summary'] = db.get_researcher_summary(orcid)
 
     print(details)
-    return json.dumps(details)
+    return details
+
+@app.route('/misc_profiles/<number>')
+def misc_profiles(number):
+    '''Fetch number of profiles from the database'''
+
+    # select 'number' arbitrary orcids
+    orcids = [row[0] for row in db.get_records(model.Researcher.orcid, limit=number)]
+    print(orcids)
+
+    # fetch and return their details
+    result = [db.get_author_details_from_db(orcid) for orcid in orcids]
+    print(result)
+    return result
