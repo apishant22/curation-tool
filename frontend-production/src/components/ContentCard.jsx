@@ -19,9 +19,6 @@ const ContentCard = ({name, summary, data}) => {
       }})
     }
 
-
-  
-
   return (
     <div>
       {/* Will use an API, that will select the top 3 person in the database */}
