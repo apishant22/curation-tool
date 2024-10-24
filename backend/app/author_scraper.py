@@ -517,6 +517,7 @@ def update_author_if_needed(author_name, profile_link):
     return None
 
 
+'''
 # Example usage of the refactored functions
 input_value = "0000-0002-1684-1539"
 input = "Adriana"
@@ -528,7 +529,7 @@ if authors:
     print(authors)
 else:
     print("No authors found.")
-'''
+
 selected_profile_author = "Adriana  Wilde"
 selected_profile_link = "https://dl.acm.org/profile/99659070982"
 

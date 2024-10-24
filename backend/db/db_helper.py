@@ -51,16 +51,22 @@ def add_record(record, session=None):
     finally:
         session.close()
 
-def get_records(model, filters=None, session=None):
+def get_records(model, filters=None, session=None, limit=None):
     if not session:
         session = get_session()
         if not session:
             return []
     try:
         query = session.query(model)
+
         if filters:
             query = query.filter_by(**filters)
+
+        if limit is not None:
+            query = query.limit(limit)
+
         return query.all()
+
     except SQLAlchemyError as e:
         print(f"Error retrieving records: {e}")
         return []
