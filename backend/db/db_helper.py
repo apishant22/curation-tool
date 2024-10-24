@@ -554,4 +554,3 @@ def get_researcher_summary(orcid_id, session=None):
     finally:
         if session is not None:
             session.close()
-
