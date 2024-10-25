@@ -1,6 +1,6 @@
 import json
 
-from flask import Flask
+from flask import Flask, session
 from flask_cors import CORS
 
 import backend.app.author_scraper as scraper
@@ -15,7 +15,11 @@ CORS(app)
 # this one works!
 @app.route('/search/<name>/<int:page>')
 def search(name, page):
+    if 'last_search_name' in session and session['last_search_name'] != name:
+        page = 0
+    session['last_search_name'] = name
     return scraper.identify_input_type_and_search_author(name, page)
+
 
 @app.route('/query/<name>/<profile_link>')
 def query(name, profile_link):
