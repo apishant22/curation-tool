@@ -102,7 +102,7 @@ const Summary = () => {
                       </span>
                     </div>
 
-                    <p className="p-4">{post.summary} Lorem ipsum dolor sit amet consectetur, adipisicing elit. Deleniti neque nulla nobis hic cupiditate incidunt accusamus ullam asperiores aliquam eos laborum qui sunt maiores, autem, vel repudiandae ad ratione non!</p>
+                    <p className="p-4">{post.summary} Lorem ipsum dolor sit amet consectetur, adipisicing elit. Deleniti neque nulla nobis hic cupiditate incidunt accusamus ullam asperiores aliquam eos laborum qui sunt maiores, autem, vel repudiandae ad ratione non! Lorem ipsum dolor sit amet consectetur adipisicing elit. Incidunt, nulla officiis fugit aut amet veritatis asperiores repellendus vel eos at totam saepe, facilis velit eligendi soluta voluptatem tempore corporis ipsum!</p>
                   </div>
                 </div>
               </div>
