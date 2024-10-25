@@ -92,10 +92,12 @@ def test_author_in_database_up_to_date_no_summary(mock_get_researcher_summary, m
     mock_scrape_author_details.return_value = scraped_data
     mock_get_researcher_summary.return_value = "Summary not available."
 
-    result = update_author_if_needed("John Doe", "profile_link")
+    result, author_details_db = update_author_if_needed("John Doe", "profile_link")
 
     assert result is None
+    assert author_details_db == existing_data
     mock_get_researcher_summary.assert_called_once()
+
 
 @patch('backend.app.author_scraper.scrape_author_details')
 @patch('backend.app.author_scraper.get_author_details_from_db')
@@ -114,7 +116,8 @@ def test_author_in_database_up_to_date_with_summary(mock_get_researcher_summary,
     mock_scrape_author_details.return_value = scraped_data
     mock_get_researcher_summary.return_value = "Test summary."
 
-    result = update_author_if_needed("John Doe", "profile_link")
+    result, author_details_db = update_author_if_needed("John Doe", "profile_link")
 
-    assert result == json.dumps("Test summary.", indent=4)
+    assert result == "Test summary."
+    assert author_details_db == existing_data
     mock_get_researcher_summary.assert_called_once()
