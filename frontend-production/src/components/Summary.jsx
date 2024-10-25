@@ -13,7 +13,7 @@ import heroIcon from "../assets/hero-background.jpg";
 const Summary = () => {
   // fetch paper of that author here
   // const location = useLocation();
-  // const {name, result} = location.state || {};
+  const { name, result } = location.state || {};
   // console.log("searchQuery: " + searchQuery);
   // console.log("name: " + name);
   // console.log("profileNumber: " + profileNumber);
@@ -77,15 +77,15 @@ const Summary = () => {
           <div className="w-[70%] flex flex-col">
             <div className="p-4">
               <div className="p-4 text-center font-bold text-2xl font-archivo border-y-2 border-gray-200 mx-auto max-w-md mb-6 tracking-wide">
-                Adriana Wilde
+                {post.author_details.Name}
               </div>
               <DetailsCard
-                bioTitle={"Biography"}
-                bioContent={lorem}
-                eduTitle={"Education"}
-                eduContent={lorem}
-                empTitle={"Employment"}
-                empContent={lorem}
+                bioTitle="Biography"
+                bioContent={post.author_details?.Biography || []} // Ensure it's an array
+                eduTitle="Education History"
+                eduContent={post.author_details?.["Education History"] || []} // Ensure it's an array
+                empTitle="Employment History"
+                empContent={post.author_details?.["Employment History"] || []} // Ensure it's an array
               />
             </div>
             <div className="p-6 ">
@@ -99,16 +99,7 @@ const Summary = () => {
                     </span>
                   </div>
 
-                  <p className="p-4">
-                    Lorem ipsum dolor sit amet consectetur adipisicing elit. Rem
-                    fuga reprehenderit doloribus natus rerum minus odio, commodi
-                    autem sunt maxime harum quibusdam, ullam excepturi iure
-                    aliquid laboriosam enim eius iusto. Lorem ipsum dolor sit
-                    amet consectetur adipisicing elit. Distinctio libero harum,
-                    unde qui perspiciatis minus suscipit obcaecati consequuntur
-                    commodi, fuga voluptatum dignissimos vero vitae? Ducimus
-                    amet nesciunt nisi magnam cumque.
-                  </p>
+                  <p className="p-4">{post.summary}</p>
                 </div>
               </div>
             </div>
