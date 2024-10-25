@@ -385,9 +385,11 @@ def process_education(orcid_id):
 
 # Function to process biographical data using ORCID API
 biography_cache = {}
+
 def process_biography(orcid_id):
     if orcid_id in biography_cache:
         return biography_cache[orcid_id]
+
     url = f"https://pub.orcid.org/v3.0/{orcid_id}/biography"
     headers = {'Accept': 'application/json'}
 
@@ -401,15 +403,17 @@ def process_biography(orcid_id):
 
     except requests.exceptions.HTTPError as e:
         if response.status_code == 404:
-            print(f"Failed to retrieve biography for ORCID ID: {orcid_id}")
-            biography_cache[orcid_id] = "NOT_FOUND"
-            return None
+            print(f"Biography not found for ORCID ID: {orcid_id}")
+            biography_cache[orcid_id] = "No biographical information available."
+            return "No biographical information available."
+
         print(f"HTTP error for ORCID ID: {orcid_id}")
-        return None
+        return "No biographical information available."
 
     except requests.exceptions.RequestException as e:
-        print(f"Failed to retrieve biography for ORCID ID: {orcid_id}")
-        return None
+        print(f"Network error for ORCID ID: {orcid_id}")
+        return "No biographical information available."
+
 
 
 # Function to format date from ORCID data
@@ -480,27 +484,27 @@ def normalize_dates(details):
 
 # Fucntion to handle logic on when to scrape and etc.
 def update_author_if_needed(author_name, profile_link):
-    scraped_author_details_json = scrape_author_details(author_name, profile_link)
-    scraped_author_details = json.loads(scraped_author_details_json)
-
-    orcid_id = scraped_author_details.get("Orcid ID")
-
-    if not orcid_id:
-        print("ORCID ID not found. Cannot proceed without ORCID ID.")
-        return None
-
     try:
+        scraped_author_details_json = scrape_author_details(author_name, profile_link)
+        scraped_author_details = json.loads(scraped_author_details_json)
+
+        orcid_id = scraped_author_details.get("Orcid ID")
+        if not orcid_id:
+            print("ORCID ID not found. Cannot proceed without ORCID ID.")
+            return None, None
+
         author_details_db = get_author_details_from_db(orcid_id)
 
         if author_details_db:
             scraped_author_details = normalize_dates(scraped_author_details)
             author_details_db = normalize_dates(author_details_db)
 
+            '''
             print("\n--- SCRAPED AUTHOR DETAILS ---")
             print(json.dumps(scraped_author_details, indent=4))
             print("\n--- DATABASE AUTHOR DETAILS ---")
             print(json.dumps(author_details_db, indent=4))
-
+            '''
             diff = DeepDiff(author_details_db, scraped_author_details, ignore_order=True, ignore_string_case=True)
 
             if not diff:
@@ -510,22 +514,26 @@ def update_author_if_needed(author_name, profile_link):
                     return summary, author_details_db
                 else:
                     print("Summary is missing.")
-                    return None
+                    return None, author_details_db
             else:
                 print(f"Data differences found for ORCID ID {orcid_id}: {diff}")
                 update_author_details_in_db(scraped_author_details)
                 print("Database updated with the latest details.")
-                return None
+                return None, author_details_db
 
         else:
             print(f"No author found with ORCID ID: {orcid_id}. Adding new details to the database.")
             store_author_details_in_db(scraped_author_details)
-            return None
+            return None, scraped_author_details
 
     except NoResultFound:
         print(f"No author found with ORCID ID: {orcid_id}. Adding new details to the database.")
         store_author_details_in_db(scraped_author_details)
-        return None
+        return None, scraped_author_details
+
+    except Exception as e:
+        print(f"An error occurred: {e}")
+        return None, None
 
     except Exception as e:
         print(f"An error occurred: {e}")

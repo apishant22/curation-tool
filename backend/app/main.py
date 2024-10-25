@@ -20,7 +20,6 @@ def search(name, page):
 
 @app.route('/query/<name>/<profile_link>')
 def query(name, profile_link):
-
     profile_link = f'https://dl.acm.org/profile/{profile_link}'
     print(f"Author Name: {name}, Profile Link: {profile_link}")
 
@@ -28,7 +27,8 @@ def query(name, profile_link):
 
     if update_result is None:
         return {
-            "message": "Author details updated, but summary not available yet."
+            "message": "Author details updated, but summary not available yet.",
+            "author_details": author_details_db
         }, 200
 
     return {
