@@ -6,7 +6,6 @@ import { useNavigate } from "react-router-dom";
 const SearchBar = ({ setResults, counter, setCounter }) => {
   const [input, setInput] = useState("");
   const navigate = useNavigate();
-  // const API_URL = "https://jsonplaceholder.typicode.com/users";
 
   const handleSubmit = (e) => {
     e.preventDefault();
