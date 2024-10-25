@@ -1,6 +1,6 @@
 import json
 
-from flask import Flask, session
+from flask import Flask
 from flask_cors import CORS
 
 import backend.app.author_scraper as scraper
