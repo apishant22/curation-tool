@@ -11,7 +11,7 @@ import Pagination from "./Pagination";
 const Result = () => {
   const { user } = useParams();
   const API_URL = "/search";
-  const [counter, setCounter] = useState(0);
+  const [counter, setCounter] = useState(1);
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -25,7 +25,9 @@ const Result = () => {
         const encodedQuery = encodeURIComponent(user);
         console.log(`${API_URL}/${encodedQuery}/${counter}`);
 
-        const response = await fetch(`${API_URL}/${encodedQuery}/${counter}`);
+        const response = await fetch(
+          `${API_URL}/${encodedQuery}/${counter - 1}`
+        );
 
         if (!response.ok) {
           throw new Error(`HTTP error! Status: ${response.status}`);
@@ -109,7 +111,7 @@ const Result = () => {
                   );
                 })}
             </div>
-            <Pagination counter={counter} setCounter={setCounter} user={user}/>
+            <Pagination counter={counter} setCounter={setCounter} user={user} />
           </div>
         </div>
       </div>

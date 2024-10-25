@@ -1,19 +1,17 @@
 import React from "react";
 import { useState } from "react";
-import axios from "axios";
 import { useNavigate } from "react-router-dom";
 
 const SearchBar = ({ setResults, counter, setCounter }) => {
   const [input, setInput] = useState("");
   const navigate = useNavigate();
 
+
   const handleSubmit = (e) => {
     e.preventDefault();
     setCounter(0);
     if (input.trim()) {
-      navigate(`/result/${input}/${counter}`, {
-        state: { searchQuery: input },
-      });
+      navigate(`/result/${input}/1`);
     }
   };
 
@@ -23,22 +21,6 @@ const SearchBar = ({ setResults, counter, setCounter }) => {
     }
   };
 
-  // const userData = (value) => {
-  //   axios(API_URL)
-  //     .then(res => {
-  //       const result = res.data.filter(user => {
-  //         return value && user && user.name && user.name.toLowerCase().includes(value);
-  //       })
-  //       setResults(result);
-  //       console.log(result);
-  //     })
-  //     .catch(err => console.log(err));
-  // }
-
-  // const handleChange = (value) => {
-  //   setInput(value);
-  //   userData(value);
-  // }
   const handleChange = (value) => {
     console.log(value);
     setInput(value);

@@ -4,19 +4,19 @@ import { useNavigate } from "react-router-dom";
 const Pagination = ({ counter, setCounter, totalPages = 5, user }) => {
   // Convert counter to display page (0 -> 1, 1 -> 2, etc.)
   const navigate = useNavigate();
-  const currentPage = counter + 1;
+  const currentPage = counter;
 
   const handlePageClick = (pageNumber) => {
-    const newCounter = pageNumber - 1;
+    const newCounter = pageNumber;
     setCounter(newCounter);
     navigate(`/result/${user}/${newCounter}`);
   };
 
   const handlePrevClick = () => {
     setCounter((prevCounter) => {
-      if (prevCounter <= 0) {
-        navigate(`/result/${user}/0`);
-        return 0;
+      if (prevCounter <= 1) {
+        navigate(`/result/${user}/1`);
+        return 1;
       }
       const newCounter = prevCounter - 1;
       navigate(`/result/${user}/${newCounter}`);
@@ -36,10 +36,10 @@ const Pagination = ({ counter, setCounter, totalPages = 5, user }) => {
     <div className="flex justify-center items-center gap-4 p-4">
       <button
         onClick={handlePrevClick}
-        disabled={counter === 0}
+        disabled={counter === 1}
         className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors
           ${
-            counter === 0
+            counter === 1
               ? "bg-gray-100 text-gray-400 cursor-not-allowed"
               : "bg-blue-50 text-blue-600 hover:bg-blue-100"
           }`}
@@ -71,10 +71,10 @@ const Pagination = ({ counter, setCounter, totalPages = 5, user }) => {
 
       <button
         onClick={handleNextClick}
-        disabled={counter === totalPages - 1}
+        disabled={counter === totalPages}
         className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors
           ${
-            counter === totalPages - 1
+            counter === totalPages
               ? "bg-gray-100 text-gray-400 cursor-not-allowed"
               : "bg-blue-50 text-blue-600 hover:bg-blue-100"
           }`}
