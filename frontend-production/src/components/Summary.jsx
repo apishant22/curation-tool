@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useLocation, useParams } from "react-router-dom";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
 import Event from "./Event";
 import Buttons from "./Button";
 import Footer from "./Footer";
@@ -17,6 +17,7 @@ const Summary = () => {
   // fetch paper of that author here
   // const location = useLocation();
   const { name, result } = location.state || {};
+  const navigate = useNavigate();
   // console.log("searchQuery: " + searchQuery);
   // console.log("name: " + name);
   // console.log("profileNumber: " + profileNumber);
@@ -28,6 +29,10 @@ const Summary = () => {
   const [post, setPost] = useState("");
 
   const API_URL = "/query";
+
+  const handleClick = () => {
+    navigate(`/result/${user}/1`)
+  }
 
   useEffect(() => {
     const fetchAuthor = async () => {
@@ -75,6 +80,8 @@ const Summary = () => {
         }}
       >
         {loading && <LoadingPanel loading={loading} />}
+        {post.author_details === null && <div className="bg-white max-w-[1024px] flex-grow flex flex-col items-center justify-center gap-2"><h1>Author does not have Orcid ID.. need to go back to the results page unfortunately.</h1>
+        <button className="p-2 border border-black" onClick={handleClick}></button></div>}
 
         {!loading && post.author_details && (
           <div className="flex flex-grow max-w-[1024px] bg-white shadow-2xl">
