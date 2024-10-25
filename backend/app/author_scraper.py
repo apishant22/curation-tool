@@ -50,7 +50,7 @@ def search_acm_author(author_name, page_number):
 
     soup = BeautifulSoup(response.content, 'html.parser')
     result_count_tag = soup.find('span', class_='result__count')
-    total_authors = int(result_count_tag.text.split()[0]) if result_count_tag else 0
+    total_authors = int(result_count_tag.text.replace(',', '').split()[0]) if result_count_tag else 0
     authors_per_page = 20
     max_pages = ((total_authors + authors_per_page - 1) // authors_per_page) - 1
 
