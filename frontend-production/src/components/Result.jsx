@@ -6,22 +6,15 @@ import logoMain from "../assets/logo-main.png";
 import ResultCard from "./ResultCard";
 import Footer from "./Footer";
 import Button from "./Button";
+import Pagination from "./Pagination";
 
 const Result = () => {
-  // const location = useLocation();
-  // const {searchQuery} = location.state || {};
   const { user } = useParams();
-  const API_URL = "http://127.0.0.1:3003/search/";
-
+  const API_URL = "http://127.0.0.1:3003/search";
   const [counter, setCounter] = useState(0);
-
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [postsPerPage, setPostsPerPage] = useState(5);
-
-  // console.log(`${API_URL}${encodedQuery}${counter}`)
 
   useEffect(() => {
     const fetchPosts = async () => {
@@ -30,9 +23,9 @@ const Result = () => {
 
       try {
         const encodedQuery = encodeURIComponent(user);
-        console.log(`${API_URL}${encodedQuery}/${counter}`);
+        console.log(`${API_URL}/${encodedQuery}/${counter}`);
 
-        const response = await fetch(`${API_URL}${encodedQuery}/${counter}`);
+        const response = await fetch(`${API_URL}/${encodedQuery}/${counter}`);
 
         if (!response.ok) {
           throw new Error(`HTTP error! Status: ${response.status}`);
@@ -49,10 +42,6 @@ const Result = () => {
     };
     fetchPosts();
   }, [user, counter]);
-
-  const handlePagination = (pageNumber) => {
-    setCurrentPage(pageNumber);
-  };
 
   return (
     <div className="flex flex-col h-screen overflow-y-auto">
@@ -71,14 +60,16 @@ const Result = () => {
               <SearchBar counter={counter} setCounter={setCounter} />
             </div>
           </div>
-          <div className="bg-acm-light-gray">
-            <div className="text-center">Results</div>
+          <div className="bg-gray-50 shadow-md rounded-sm">
+            <div className="bg-gradient-to-r from-blue-500 to-blue-700 rounded-sm text-center font-bold text-xl py-3 border-b border-gray-200 text-white">
+              Results
+            </div>
             <div className="flex justify-end ">
               {/* this is the pagination functionality, need to figure on how to dthat */}
               {/* <Pagination length={posts.length} postsPerPage={postsPerPage} handlePagination={handlePagination} currentPage={currentPage}/> */}
             </div>
             <div
-              className={`mt-6 p-4 flex flex-col gap-8 overflow-auto h-[36rem] ${
+              className={`p-4 flex flex-col gap-3 overflow-auto h-[36rem] ${
                 loading ? "justify-center items-center" : ""
               }`}
             >
@@ -118,22 +109,7 @@ const Result = () => {
                   );
                 })}
             </div>
-            <div className="flex justify-end gap-6 p-4">
-              <Button
-                text={"previous"}
-                previous={true}
-                counter={counter}
-                setCounter={setCounter}
-                user={user}
-              />
-              <Button
-                text={"next"}
-                next={true}
-                counter={counter}
-                setCounter={setCounter}
-                user={user}
-              />
-            </div>
+            <Pagination counter={counter} setCounter={setCounter} user={user}/>
           </div>
         </div>
       </div>

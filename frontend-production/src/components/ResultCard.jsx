@@ -1,5 +1,6 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
+import { ChevronRight, Briefcase } from "lucide-react";
 
 const ResultCard = ({ name, employment, profileLink }) => {
   const navigate = useNavigate();
@@ -16,19 +17,24 @@ const ResultCard = ({ name, employment, profileLink }) => {
   };
   // console.log("Profile Link:" + profileLink);
   return (
-    <div>
+    <div className="w-full">
       <button
-        className="bg-blue-200/75 p-3 rounded-xl hover:cursor-pointer w-full"
         onClick={handleClick}
+        className="w-full bg-white hover:bg-gray-50 rounded-xl shadow-sm border border-gray-200 p-4 transition-all duration-200 group flex items-center justify-between gap-4"
       >
-        {/* fetch result and populate inside the card */}
-        <div className="text-left">
-          <h1>{name}</h1>
-          {employment && <p>{employment}</p>}
+        <div className="flex-1 text-left">
+          <h3 className="font-semibold text-gray-900 text-lg mb-1">
+            {name}
+          </h3>
+          {employment && (
+            <div className="flex items-center gap-2 text-gray-600">
+              <Briefcase className="w-4 h-4" />
+              <p className="text-sm">{employment}</p>
+            </div>
+          )}
         </div>
-        <div>
-          <p></p>
-        </div>
+        
+        <ChevronRight className="w-5 h-5 text-gray-400 group-hover:text-gray-600 group-hover:translate-x-0.5 transition-all" />
       </button>
     </div>
   );
