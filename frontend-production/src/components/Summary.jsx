@@ -81,7 +81,7 @@ const Summary = () => {
             {/* Combined flex-grow with flex */}
             <div className="w-[70%] flex flex-col">
               <div className="p-4">
-                <AuthorHeader name={post.author_details.Name}/>
+                <AuthorHeader name={post.author_details.Name} />
 
                 <DetailsCard
                   bioTitle="Biography"
@@ -102,7 +102,17 @@ const Summary = () => {
                       </span>
                     </div>
 
-                    <p className="p-4">{post.summary} Lorem ipsum dolor sit amet consectetur, adipisicing elit. Deleniti neque nulla nobis hic cupiditate incidunt accusamus ullam asperiores aliquam eos laborum qui sunt maiores, autem, vel repudiandae ad ratione non! Lorem ipsum dolor sit amet consectetur adipisicing elit. Incidunt, nulla officiis fugit aut amet veritatis asperiores repellendus vel eos at totam saepe, facilis velit eligendi soluta voluptatem tempore corporis ipsum!</p>
+                    <p className="p-4">
+                      {post.summary} Lorem ipsum dolor sit amet consectetur,
+                      adipisicing elit. Deleniti neque nulla nobis hic
+                      cupiditate incidunt accusamus ullam asperiores aliquam eos
+                      laborum qui sunt maiores, autem, vel repudiandae ad
+                      ratione non! Lorem ipsum dolor sit amet consectetur
+                      adipisicing elit. Incidunt, nulla officiis fugit aut amet
+                      veritatis asperiores repellendus vel eos at totam saepe,
+                      facilis velit eligendi soluta voluptatem tempore corporis
+                      ipsum!
+                    </p>
                   </div>
                 </div>
               </div>
@@ -113,7 +123,7 @@ const Summary = () => {
               </div>
             </div>
             <div className="flex-grow">
-              <div className="flex p-3 flex-col gap-4 mt-6 max-w-[300px]">
+              <div className="flex p-3 flex-col gap-4 mt-6 max-w-[300px] max-h-screen overflow-auto">
                 <PublicationCard
                   publications={post.author_details.Publications}
                 />

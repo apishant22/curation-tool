@@ -6,6 +6,8 @@ const PublicationCard = ({ publications }) => {
     return <p className="text-gray-500">No publications available.</p>;
   }
 
+  const handleClick = (doi) => {};
+
   return (
     <div className="flex flex-col gap-4 p-3 mt-6">
       <Timeline>
@@ -17,7 +19,13 @@ const PublicationCard = ({ publications }) => {
               <Timeline.Title className="text-sm hover:cursor-pointer hover:text-gray-400">
                 {pub.Title}
               </Timeline.Title>
-              <p className="text-xs font-normal text-gray-500">DOI: {pub.DOI}</p>
+              <a
+                href={`https://dl.acm.org/doi/${pub.DOI}`}
+                target="_blank"
+                className="text-xs font-normal text-gray-500 hover:cursor-pointer hover:text-black"
+              >
+                DOI: {pub.DOI}
+              </a>
             </Timeline.Content>
           </Timeline.Item>
         ))}
