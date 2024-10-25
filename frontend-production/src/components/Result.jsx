@@ -10,7 +10,7 @@ import Pagination from "./Pagination";
 
 const Result = () => {
   const { user } = useParams();
-  const API_URL = "http://127.0.0.1:3003/search";
+  const API_URL = "/search";
   const [counter, setCounter] = useState(0);
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(false);

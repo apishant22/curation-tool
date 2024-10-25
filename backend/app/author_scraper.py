@@ -383,17 +383,33 @@ def process_education(orcid_id):
 
     return education_history
 
-# Function to process biographical information using ORCID API
+# Function to process biographical data using ORCID API
+biography_cache = {}
 def process_biography(orcid_id):
-    biography_data = get_orcid_biography(orcid_id)
-    biography = []
-    if biography_data and 'content' in biography_data:
-        biography_info = biography_data.get('content', 'No biography available.')
-        biography.append(biography_info)
-    else:
-        biography_info = "No biographical information available."
-        biography.append(biography_info)
-    return biography
+    if orcid_id in biography_cache:
+        return biography_cache[orcid_id]
+    url = f"https://pub.orcid.org/v3.0/{orcid_id}/biography"
+    headers = {'Accept': 'application/json'}
+
+    try:
+        response = requests.get(url, headers=headers)
+        response.raise_for_status()
+
+        biography_data = response.json()
+        biography_cache[orcid_id] = biography_data
+        return biography_data
+
+    except requests.exceptions.HTTPError as e:
+        if response.status_code == 404:
+            print(f"Failed to retrieve biography for ORCID ID: {orcid_id}")
+            biography_cache[orcid_id] = "NOT_FOUND"
+            return None
+        print(f"HTTP error for ORCID ID: {orcid_id}")
+        return None
+
+    except requests.exceptions.RequestException as e:
+        print(f"Failed to retrieve biography for ORCID ID: {orcid_id}")
+        return None
 
 
 # Function to format date from ORCID data

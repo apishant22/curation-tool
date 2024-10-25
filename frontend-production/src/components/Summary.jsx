@@ -24,7 +24,7 @@ const Summary = () => {
   const [error, setError] = useState(null);
   const [post, setPost] = useState("");
 
-  const API_URL = "http://127.0.0.1:3003/query";
+  const API_URL = "/query";
 
   useEffect(() => {
     const fetchAuthor = async () => {
