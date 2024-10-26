@@ -15,6 +15,7 @@ const Result = () => {
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const encodedQuery = encodeURIComponent(user);
 
   useEffect(() => {
     const fetchPosts = async () => {
@@ -22,20 +23,25 @@ const Result = () => {
       setError(null);
 
       try {
-        const encodedQuery = encodeURIComponent(user);
-        console.log(`${API_URL}/${encodedQuery}/${counter}`);
-
-        const response = await fetch(
-          `${API_URL}/${encodedQuery}/${counter - 1}`
-        );
-
-        if (!response.ok) {
-          throw new Error(`HTTP error! Status: ${response.status}`);
+        if (counter > 0) {
+          const response = await fetch(
+            `${API_URL}/${encodedQuery}/${counter - 1}`
+          );
+          if (!response.ok) {
+            throw new Error(`HTTP error! Status: ${response.status}`);
+          }
+          const data = await response.json();
+          console.log(data);
+          setPosts(data);
+        } else {
+          const response = await fetch(`${API_URL}/${encodedQuery}/0`);
+          if (!response.ok) {
+            throw new Error(`HTTP error! Status: ${response.status}`);
+          }
+          const data = await response.json();
+          console.log(data);
+          setPosts(data);
         }
-
-        const data = await response.json();
-        console.log(data);
-        setPosts(data);
       } catch (err) {
         setError(err.message);
       } finally {
