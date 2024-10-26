@@ -33,6 +33,7 @@ def search_orcid_by_id(orcid_id):
 
 # Function to search ACM DL for an author and get search results
 def search_acm_author(author_name, page_number):
+    max_pages = get_max_pages(author_name)
     formatted_name = author_name.replace(' ', '+')
 
     headers = {
@@ -41,22 +42,10 @@ def search_acm_author(author_name, page_number):
     }
 
     author_list = []
-
-    initial_url = f"https://dl.acm.org/action/doSearch?AllField={formatted_name}&startPage=0&content=people&target=people-tab&sortBy=relevancy&groupByField=ContribIdSingleValued"
-    response = requests.get(initial_url, headers=headers)
-    if response.status_code != 200:
-        print(f"Failed to retrieve author data for {author_name}")
-        return {"authors": [], "no_previous_page": True, "no_next_page": True}
-
-    soup = BeautifulSoup(response.content, 'html.parser')
-    result_count_tag = soup.find('span', class_='result__count')
-    total_authors = int(result_count_tag.text.replace(',', '').split()[0]) if result_count_tag else 0
-    authors_per_page = 20
-    max_pages = ((total_authors + authors_per_page - 1) // authors_per_page) - 1
-
     no_previous_page = page_number <= 0
     no_next_page = page_number >= (max_pages - 1)
 
+    # Adjust page number within bounds
     if page_number < 0:
         page_number = 0
     elif page_number >= max_pages:
@@ -143,6 +132,29 @@ def get_orcid_from_doi(doi):
         print(f"Error while retrieving ORCID from DOI: {e}")
 
     return []
+
+def get_max_pages(author_name):
+    formatted_name = author_name.replace(' ', '+')
+    headers = {
+        'User-Agent': 'Mozilla/5.0',
+        'Accept': 'text/html'
+    }
+    initial_url = f"https://dl.acm.org/action/doSearch?AllField={formatted_name}&startPage=0&content=people&target=people-tab&sortBy=relevancy&groupByField=ContribIdSingleValued"
+    response = requests.get(initial_url, headers=headers)
+
+    if response.status_code != 200:
+        print(f"Failed to retrieve author data for {author_name}")
+        return 0
+
+    soup = BeautifulSoup(response.content, 'html.parser')
+    result_count_tag = soup.find('span', class_='result__count')
+
+    total_authors = int(result_count_tag.text.replace(',', '').split()[0]) if result_count_tag else 0
+    authors_per_page = 20
+
+    max_pages = (total_authors + authors_per_page - 1) // authors_per_page
+    print(f"Total authors found: {total_authors}, Max pages: {max_pages}")
+    return max_pages
 
 # Function to find the ORCID ID associated with a given author by analysing all DOIs
 def find_author_orcid_by_dois(publications, target_author_name):
@@ -555,7 +567,7 @@ if authors:
     print(authors)
 else:
     print("No authors found.")
-    
+ 
 selected_profile_author = "Adriana  Wilde"
 selected_profile_link = "https://dl.acm.org/profile/99659070982"
 
