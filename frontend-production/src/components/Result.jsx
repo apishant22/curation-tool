@@ -15,7 +15,7 @@ const Result = () => {
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const [cache, setCache] = useState({});  // Add cache state
+  const [cache, setCache] = useState({}); // Add cache state
   const encodedQuery = encodeURIComponent(user);
 
   useEffect(() => {
@@ -32,15 +32,29 @@ const Result = () => {
       }
 
       try {
-        const response = await fetch(`${API_URL}/${encodedQuery}/${counter - 1}`);
-        if (!response.ok) {
-          throw new Error(`HTTP error! Status: ${response.status}`);
-        }
-        const data = await response.json();
-        console.log(data);
+        if (counter > 0) {
+          const response = await fetch(
+            `${API_URL}/${encodedQuery}/${counter - 1}`
+          );
+          if (!response.ok) {
+            throw new Error(`HTTP error! Status: ${response.status}`);
+          }
+          const data = await response.json();
+          console.log(data);
 
-        setPosts(data);
-        setCache((prevCache) => ({ ...prevCache, [cacheKey]: data }));
+          setPosts(data);
+          setCache((prevCache) => ({ ...prevCache, [cacheKey]: data }));
+        } else {
+          const response = await fetch(`${API_URL}/${encodedQuery}/0`);
+          if (!response.ok) {
+            throw new Error(`HTTP error! Status: ${response.status}`);
+          }
+          const data = await response.json();
+          console.log(data);
+
+          setPosts(data);
+          setCache((prevCache) => ({ ...prevCache, [cacheKey]: data }));
+        }
       } catch (err) {
         setError(err.message);
       } finally {
@@ -117,7 +131,12 @@ const Result = () => {
                   );
                 })}
             </div>
-            <Pagination counter={counter} setCounter={setCounter} user={user} pages={posts.max_pages} />
+            <Pagination
+              counter={counter}
+              setCounter={setCounter}
+              user={user}
+              pages={posts.max_pages}
+            />
           </div>
         </div>
       </div>
