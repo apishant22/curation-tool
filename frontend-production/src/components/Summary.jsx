@@ -31,8 +31,8 @@ const Summary = () => {
   const API_URL = "/query";
 
   const handleClick = () => {
-    navigate(`/result/${user}/1`)
-  }
+    navigate(`/result/${user}/1`);
+  };
 
   useEffect(() => {
     const fetchAuthor = async () => {
@@ -80,8 +80,17 @@ const Summary = () => {
         }}
       >
         {loading && <LoadingPanel loading={loading} />}
-        {post.author_details === null && <div className="bg-white max-w-[1024px] flex-grow flex flex-col items-center justify-center gap-2"><h1>Author does not have Orcid ID or DB error need to go back to the results page unfortunately.</h1>
-        <button className="p-2 border border-black" onClick={handleClick}>Back</button></div>}
+        {post.author_details === null && (
+          <div className="bg-white max-w-[1024px] flex-grow flex flex-col items-center justify-center gap-2">
+            <h1>
+              Author does not have Orcid ID or DB error need to go back to the
+              results page unfortunately.
+            </h1>
+            <button className="p-2 border border-black" onClick={handleClick}>
+              Back
+            </button>
+          </div>
+        )}
 
         {!loading && post.author_details && (
           <div className="flex flex-grow max-w-[1024px] bg-white shadow-2xl">
@@ -109,17 +118,7 @@ const Summary = () => {
                       </span>
                     </div>
 
-                    <p className="p-4">
-                      {post.summary} Lorem ipsum dolor sit amet consectetur,
-                      adipisicing elit. Deleniti neque nulla nobis hic
-                      cupiditate incidunt accusamus ullam asperiores aliquam eos
-                      laborum qui sunt maiores, autem, vel repudiandae ad
-                      ratione non! Lorem ipsum dolor sit amet consectetur
-                      adipisicing elit. Incidunt, nulla officiis fugit aut amet
-                      veritatis asperiores repellendus vel eos at totam saepe,
-                      facilis velit eligendi soluta voluptatem tempore corporis
-                      ipsum!
-                    </p>
+                    <p className="p-4">{post.summary}</p>
                   </div>
                 </div>
               </div>
