@@ -45,7 +45,6 @@ def search_acm_author(author_name, page_number):
     no_previous_page = page_number <= 0
     no_next_page = page_number >= (max_pages - 1)
 
-    # Adjust page number within bounds
     if page_number < 0:
         page_number = 0
     elif page_number >= max_pages:

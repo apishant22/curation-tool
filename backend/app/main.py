@@ -6,22 +6,24 @@ from flask_cors import CORS
 import backend.app.author_scraper as scraper
 import backend.db.db_helper as db
 import backend.db.models as model
-import backend.llm.llm as llm
+from flask import jsonify
 
 app = Flask(__name__)
 
 CORS(app)
 
-# this one works!
-from flask import jsonify
-
-@app.route('/search/<name>/<int:page>')
+max_pages_cache = {}
 def search(name, page):
-    max_pages = scraper.get_max_pages(name)
+    if name in max_pages_cache:
+        max_pages = max_pages_cache[name]
+    else:
+        max_pages = scraper.get_max_pages(name)
+        max_pages_cache[name] = max_pages
+
     search_results = scraper.identify_input_type_and_search_author(name, page)
     search_results['max_pages'] = max_pages
-    return jsonify(search_results)
 
+    return jsonify(search_results)
 
 @app.route('/query/<name>/<profile_link>')
 def query(name, profile_link):
