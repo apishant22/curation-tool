@@ -1,6 +1,12 @@
 import React from "react";
 import { Accordion } from "flowbite-react";
-import { Building2, GraduationCap, BookOpen, Calendar, MapPin } from "lucide-react";
+import {
+  Building2,
+  GraduationCap,
+  BookOpen,
+  Calendar,
+  MapPin,
+} from "lucide-react";
 
 const DetailsCard = ({
   bioTitle,
@@ -42,16 +48,37 @@ const DetailsCard = ({
           {eduContent && eduContent.length > 0 ? (
             <div className="space-y-4">
               {eduContent.map((education, index) => (
-                <div 
-                  key={index} 
-                  className="p-3 bg-gray-50 rounded-lg border border-gray-100"
+                <div
+                  key={index}
+                  className="p-4 bg-gray-50 rounded-lg border border-gray-100 space-y-3"
                 >
-                  <p className="text-gray-700">{education}</p>
+                  <div className="flex items-start justify-between">
+                    <div>
+                      <h4 className="font-medium text-gray-900">
+                        {education.Institution}
+                      </h4>
+                      <p className="text-blue-600">{education.Role}</p>
+                      {education.Department && (
+                        <p className="text-gray-600 text-sm">
+                          {education.Department}
+                        </p>
+                      )}
+                    </div>
+                    <div className="flex items-center gap-1 text-sm text-gray-500">
+                      <Calendar className="w-4 h-4" />
+                      <span>
+                        {education["Start Date"] || "N/A"} -{" "}
+                        {education["End Date"] || "Present"}
+                      </span>
+                    </div>
+                  </div>
                 </div>
               ))}
             </div>
           ) : (
-            <p className="text-gray-500 italic">No education history available.</p>
+            <p className="text-gray-500 italic">
+              No education history available.
+            </p>
           )}
         </Accordion.Content>
       </Accordion.Panel>
@@ -68,22 +95,27 @@ const DetailsCard = ({
           {empContent && empContent.length > 0 ? (
             <div className="space-y-6">
               {empContent.map((job, index) => (
-                <div 
+                <div
                   key={index}
                   className="p-4 bg-gray-50 rounded-lg border border-gray-100 space-y-3"
                 >
                   <div className="flex items-start justify-between">
                     <div>
-                      <h4 className="font-medium text-gray-900">{job.Organization}</h4>
+                      <h4 className="font-medium text-gray-900">
+                        {job.Organization}
+                      </h4>
                       <p className="text-blue-600">{job.Role}</p>
                       {job.Department && (
-                        <p className="text-gray-600 text-sm">{job.Department}</p>
+                        <p className="text-gray-600 text-sm">
+                          {job.Department}
+                        </p>
                       )}
                     </div>
                     <div className="flex items-center gap-1 text-sm text-gray-500">
                       <Calendar className="w-4 h-4" />
                       <span>
-                        {job["Start Date"] || 'N/A'} - {job["End Date"] || 'Present'}
+                        {job["Start Date"] || "N/A"} -{" "}
+                        {job["End Date"] || "Present"}
                       </span>
                     </div>
                   </div>
@@ -91,7 +123,9 @@ const DetailsCard = ({
               ))}
             </div>
           ) : (
-            <p className="text-gray-500 italic">No employment history available.</p>
+            <p className="text-gray-500 italic">
+              No employment history available.
+            </p>
           )}
         </Accordion.Content>
       </Accordion.Panel>
