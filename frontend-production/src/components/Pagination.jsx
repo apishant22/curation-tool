@@ -47,7 +47,7 @@ const Pagination = ({ counter, setCounter, totalPages = 5, user }) => {
         Previous
       </button>
 
-      <div className="flex gap-2">
+      <div className="flex gap-2 overflow-auto">
         {[...Array(totalPages)].map((_, idx) => {
           const pageNumber = idx + 1;
           const isCurrentPage = pageNumber === currentPage;
@@ -56,7 +56,7 @@ const Pagination = ({ counter, setCounter, totalPages = 5, user }) => {
             <button
               key={idx}
               onClick={() => handlePageClick(pageNumber)}
-              className={`w-10 h-10 flex items-center justify-center rounded-lg transition-colors
+              className={`w-10 h-10 flex items-center justify-center rounded-lg transition-colors flex-shrink-0
                 ${
                   isCurrentPage
                     ? "bg-blue-600 text-white font-medium"
