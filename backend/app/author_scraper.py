@@ -32,8 +32,7 @@ def search_orcid_by_id(orcid_id):
         return None
 
 # Function to search ACM DL for an author and get search results
-def search_acm_author(author_name, page_number):
-    max_pages = get_max_pages(author_name)
+def search_acm_author(author_name, page_number, max_pages):
     formatted_name = author_name.replace(' ', '+')
 
     headers = {
@@ -89,7 +88,7 @@ def search_acm_author(author_name, page_number):
     }
 
 # Function to identify if the input is an ORCID ID or an author name and search ACM DL
-def identify_input_type_and_search_author(input_value, page_number):
+def identify_input_type_and_search_author(input_value, page_number, max_pages):
     orcid_pattern = re.compile(r"^\d{4}-\d{4}-\d{4}-\d{4}$")
 
     if page_number < 0:
@@ -101,10 +100,10 @@ def identify_input_type_and_search_author(input_value, page_number):
         if not author_name:
             print(f"No author found for ORCID ID: {input_value}")
             return []
-        return search_acm_author(author_name, page_number)
+        return search_acm_author(author_name, page_number, max_pages)
     else:
         print(f"Recognised input as author name: {input_value}")
-        return search_acm_author(input_value, page_number)
+        return search_acm_author(input_value, page_number, max_pages)
 
 # Function to use CrossRef to get ORCID ID from DOI
 def get_orcid_from_doi(doi):
