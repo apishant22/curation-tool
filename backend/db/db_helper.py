@@ -4,8 +4,6 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, scoped_session
 from sqlalchemy.exc import SQLAlchemyError
 from dotenv import load_dotenv
-
-from backend.azure_config import get_database_url
 from backend.db.models import Researcher, Paper, Paper_Authors, Organisation, Dept, Researcher_Employment, Researcher_Edu
 from sqlalchemy.exc import IntegrityError, InvalidRequestError
 from sqlalchemy.sql import text
@@ -14,8 +12,18 @@ base_dir = os.path.dirname(os.path.abspath(__file__))
 env_path = os.path.join(base_dir, '..', 'db', 'azure.env')
 load_dotenv(env_path)
 
+server = os.getenv('DB_SERVER')
+database = os.getenv('DB_DATABASE')
+username = os.getenv('DB_USER')
+password = os.getenv('DB_PASSWORD')
+
+connection_string = (
+    f"mssql+pyodbc://{username}:{password}@{server}/{database}"
+    "?driver=ODBC+Driver+17+for+SQL+Server&Encrypt=yes&TrustServerCertificate=no"
+)
+
 engine = create_engine(
-    get_database_url(),
+    connection_string,
     echo=False,
     pool_pre_ping=True,
     pool_recycle=3600,

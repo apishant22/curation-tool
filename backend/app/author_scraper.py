@@ -104,6 +104,9 @@ def search_acm_author(author_name, page_number):
 def identify_input_type_and_search_author(input_value, page_number):
     orcid_pattern = re.compile(r"^\d{4}-\d{4}-\d{4}-\d{4}$")
 
+    if page_number < 0:
+        page_number = 0
+
     if orcid_pattern.match(input_value):
         print(f"Recognised input as ORCID ID: {input_value}")
         author_name = search_orcid_by_id(input_value)
