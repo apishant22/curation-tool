@@ -15,6 +15,7 @@ const Result = () => {
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [cache, setCache] = useState({});  // Add cache state
   const encodedQuery = encodeURIComponent(user);
 
   useEffect(() => {
@@ -22,34 +23,33 @@ const Result = () => {
       setLoading(true);
       setError(null);
 
+      const cacheKey = `${encodedQuery}-${counter - 1}`;
+
+      if (cache[cacheKey]) {
+        setPosts(cache[cacheKey]);
+        setLoading(false);
+        return;
+      }
+
       try {
-        if (counter > 0) {
-          const response = await fetch(
-            `${API_URL}/${encodedQuery}/${counter - 1}`
-          );
-          if (!response.ok) {
-            throw new Error(`HTTP error! Status: ${response.status}`);
-          }
-          const data = await response.json();
-          console.log(data);
-          setPosts(data);
-        } else {
-          const response = await fetch(`${API_URL}/${encodedQuery}/0`);
-          if (!response.ok) {
-            throw new Error(`HTTP error! Status: ${response.status}`);
-          }
-          const data = await response.json();
-          console.log(data);
-          setPosts(data);
+        const response = await fetch(`${API_URL}/${encodedQuery}/${counter - 1}`);
+        if (!response.ok) {
+          throw new Error(`HTTP error! Status: ${response.status}`);
         }
+        const data = await response.json();
+        console.log(data);
+
+        setPosts(data);
+        setCache((prevCache) => ({ ...prevCache, [cacheKey]: data }));
       } catch (err) {
         setError(err.message);
       } finally {
         setLoading(false);
       }
     };
+
     fetchPosts();
-  }, [user, counter]);
+  }, [user, counter, cache, encodedQuery]);
 
   return (
     <div className="flex flex-col h-screen overflow-y-auto">
