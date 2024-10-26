@@ -80,8 +80,8 @@ const Summary = () => {
         }}
       >
         {loading && <LoadingPanel loading={loading} />}
-        {post.author_details === null && <div className="bg-white max-w-[1024px] flex-grow flex flex-col items-center justify-center gap-2"><h1>Author does not have Orcid ID.. need to go back to the results page unfortunately.</h1>
-        <button className="p-2 border border-black" onClick={handleClick}></button></div>}
+        {post.author_details === null && <div className="bg-white max-w-[1024px] flex-grow flex flex-col items-center justify-center gap-2"><h1>Author does not have Orcid ID or DB error need to go back to the results page unfortunately.</h1>
+        <button className="p-2 border border-black" onClick={handleClick}>Back</button></div>}
 
         {!loading && post.author_details && (
           <div className="flex flex-grow max-w-[1024px] bg-white shadow-2xl">
