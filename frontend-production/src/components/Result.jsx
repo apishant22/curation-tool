@@ -117,7 +117,7 @@ const Result = () => {
                   );
                 })}
             </div>
-            <Pagination counter={counter} setCounter={setCounter} user={user} />
+            <Pagination counter={counter} setCounter={setCounter} user={user} pages={posts.max_pages} />
           </div>
         </div>
       </div>

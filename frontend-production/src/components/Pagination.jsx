@@ -1,7 +1,7 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
 
-const Pagination = ({ counter, setCounter, totalPages = 5, user }) => {
+const Pagination = ({ counter, setCounter, pages, user }) => {
   // Convert counter to display page (0 -> 1, 1 -> 2, etc.)
   const navigate = useNavigate();
   const currentPage = counter;
@@ -48,7 +48,7 @@ const Pagination = ({ counter, setCounter, totalPages = 5, user }) => {
       </button>
 
       <div className="flex gap-2 overflow-auto">
-        {[...Array(totalPages)].map((_, idx) => {
+        {[...Array(pages)].map((_, idx) => {
           const pageNumber = idx + 1;
           const isCurrentPage = pageNumber === currentPage;
 
@@ -71,10 +71,10 @@ const Pagination = ({ counter, setCounter, totalPages = 5, user }) => {
 
       <button
         onClick={handleNextClick}
-        disabled={counter === totalPages}
+        disabled={counter === pages}
         className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors
           ${
-            counter === totalPages
+            counter === pages
               ? "bg-gray-100 text-gray-400 cursor-not-allowed"
               : "bg-blue-50 text-blue-600 hover:bg-blue-100"
           }`}
