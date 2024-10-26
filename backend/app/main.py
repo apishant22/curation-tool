@@ -13,14 +13,25 @@ app = Flask(__name__)
 CORS(app)
 
 max_pages_cache = {}
-def search(name, page):
-    if name in max_pages_cache:
-        max_pages = max_pages_cache[name]
-    else:
-        max_pages = scraper.get_max_pages(name)
-        max_pages_cache[name] = max_pages
+last_searched_name = None
 
-    search_results = scraper.identify_input_type_and_search_author(name, page)
+@app.route('/search/<name>/<page>')
+def search(name, page):
+    global last_searched_name
+
+    normalized_name = name.lower()
+
+    if normalized_name != last_searched_name:
+        print(f"Cache miss or new name. Running scraper.get_max_pages for: {name}")
+        max_pages = scraper.get_max_pages(name)
+        max_pages_cache[normalized_name] = max_pages
+        last_searched_name = normalized_name
+    else:
+        print(f"Cache hit for: {name}")
+        max_pages = max_pages_cache.get(normalized_name)
+
+    page = int(page)
+    search_results = scraper.identify_input_type_and_search_author(name, page, max_pages)
     search_results['max_pages'] = max_pages
 
     return jsonify(search_results)
