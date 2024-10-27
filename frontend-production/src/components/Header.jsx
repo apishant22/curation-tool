@@ -1,24 +1,28 @@
-import React from 'react'
-import acmLogo from "../assets/acm-logo.png"
-import { useNavigate } from 'react-router-dom'
-
-
-
+import React from "react";
+import acmLogo from "../assets/acm_logo.png";
+import { useNavigate } from "react-router-dom";
 
 const Header = () => {
-
   const navigate = useNavigate();
 
   const handleClick = () => {
-    navigate('/');
-  }
+    navigate("/");
+  };
 
   return (
-    <button onClick={handleClick} className='bg-acm-blue w-full shadow-md flex justify-between p-4'>
-      {/* <div className='w-28 flex justify-center'><img src={acmLogo} className='h-full w-auto'/></div> */}
-      Logo here
+    <button
+      onClick={handleClick}
+      className="bg-acm-blue w-full shadow-2xl flex justify-between "
+    >
+      <div className="w-40 flex items-center justify-center flex-shrink-0 ml-5">
+        <img
+          className="object-contain max-h-full max-w-full"
+          src={acmLogo}
+          alt="acm-logo"
+        ></img>
+      </div>
     </button>
-  )
-}
+  );
+};
 
-export default Header
+export default Header;
