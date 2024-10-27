@@ -12,7 +12,7 @@ const Header = () => {
   return (
     <button
       onClick={handleClick}
-      className="bg-acm-blue w-full shadow-2xl flex justify-between "
+      className="bg-acm-blue w-full shadow-xl flex justify-between "
     >
       <div className="w-40 flex items-center justify-center flex-shrink-0 ml-5">
         <img
