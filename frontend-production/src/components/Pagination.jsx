@@ -1,45 +1,53 @@
-import React from "react";
-import { useNavigate } from "react-router-dom";
+import React, { useState, useEffect } from "react";
 
-const Pagination = ({ counter, setCounter, pages, user }) => {
-  // Convert counter to display page (0 -> 1, 1 -> 2, etc.)
-  const navigate = useNavigate();
-  const currentPage = counter;
+const Pagination = () => {
+  const [currentPage, setCurrentPage] = useState(1);
+  const [visibleRange, setVisibleRange] = useState([]);
+  const totalPages = 10;
+  const windowSize = 5;
 
-  const handlePageClick = (pageNumber) => {
-    const newCounter = pageNumber;
-    setCounter(newCounter);
-    navigate(`/result/${user}/${newCounter}`);
+  useEffect(() => {
+    calculateVisibleRange();
+  }, [currentPage]);
+
+  const calculateVisibleRange = () => {
+    let start = Math.max(1, currentPage - Math.floor(windowSize / 2));
+    let end = start + windowSize - 1;
+
+    if (end > totalPages) {
+      end = totalPages;
+      start = Math.max(1, end - windowSize + 1);
+    }
+
+    setVisibleRange(
+      Array.from({ length: end - start + 1 }, (_, i) => start + i)
+    );
   };
 
   const handlePrevClick = () => {
-    setCounter((prevCounter) => {
-      if (prevCounter <= 1) {
-        navigate(`/result/${user}/1`);
-        return 1;
-      }
-      const newCounter = prevCounter - 1;
-      navigate(`/result/${user}/${newCounter}`);
-      return newCounter;
-    });
+    if (currentPage > 1) {
+      setCurrentPage(currentPage - 1);
+    }
   };
 
   const handleNextClick = () => {
-    setCounter((prevCounter) => {
-      const newCounter = prevCounter + 1;
-      navigate(`/result/${user}/${newCounter}`);
-      return newCounter;
-    });
+    if (currentPage < totalPages) {
+      setCurrentPage(currentPage + 1);
+    }
+  };
+
+  const handlePageClick = (page) => {
+    setCurrentPage(page);
   };
 
   return (
-    <div className="flex justify-center items-center gap-4 p-4">
+    <div className="flex justify-center items-center gap-4 p-4 w-full max-w-[28rem]">
       <button
         onClick={handlePrevClick}
-        disabled={counter === 1}
-        className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors
+        disabled={currentPage === 1}
+        className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors duration-200
           ${
-            counter === 1
+            currentPage === 1
               ? "bg-gray-100 text-gray-400 cursor-not-allowed"
               : "bg-blue-50 text-blue-600 hover:bg-blue-100"
           }`}
@@ -47,34 +55,34 @@ const Pagination = ({ counter, setCounter, pages, user }) => {
         Previous
       </button>
 
-      <div className="flex gap-2 overflow-auto">
-        {[...Array(pages)].map((_, idx) => {
-          const pageNumber = idx + 1;
-          const isCurrentPage = pageNumber === currentPage;
-
-          return (
+      <div className="flex gap-2 relative h-10 overflow-hidden">
+        <div className="flex gap-2 transition-transform duration-200 ease-in-out">
+          {visibleRange.map((pageNumber) => (
             <button
-              key={idx}
+              key={pageNumber}
               onClick={() => handlePageClick(pageNumber)}
-              className={`w-10 h-10 flex items-center justify-center rounded-lg transition-colors flex-shrink-0
+              className={`w-10 h-10 flex items-center justify-center rounded-lg transition-all duration-200
                 ${
-                  isCurrentPage
-                    ? "bg-blue-600 text-white font-medium"
+                  pageNumber === currentPage
+                    ? "bg-blue-600 text-white font-medium scale-105"
                     : "text-gray-600 hover:bg-gray-100"
-                }`}
+                }
+              `}
             >
-              {pageNumber}
+              <span className="transform transition-all duration-300">
+                {pageNumber}
+              </span>
             </button>
-          );
-        })}
+          ))}
+        </div>
       </div>
 
       <button
         onClick={handleNextClick}
-        disabled={counter === pages}
-        className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors
+        disabled={currentPage === totalPages}
+        className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors duration-200
           ${
-            counter === pages
+            currentPage === totalPages
               ? "bg-gray-100 text-gray-400 cursor-not-allowed"
               : "bg-blue-50 text-blue-600 hover:bg-blue-100"
           }`}

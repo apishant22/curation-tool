@@ -66,10 +66,10 @@ const Result = () => {
   }, [user, counter, cache, encodedQuery]);
 
   return (
-    <div className="flex flex-col h-screen overflow-y-auto">
+    <div className="flex flex-col h-full ">
       <Header />
       <div className="flex flex-col items-center justify-center flex-grow mt-6">
-        <div className="w-[780px] h-[1024px] lg:w-[1024px] flex flex-col gap-10">
+        <div className="w-[780px] lg:w-[1024px] flex flex-col gap-10">
           <div className="flex justify-between">
             <div className="w-28">
               <img
@@ -91,7 +91,7 @@ const Result = () => {
               {/* <Pagination length={posts.length} postsPerPage={postsPerPage} handlePagination={handlePagination} currentPage={currentPage}/> */}
             </div>
             <div
-              className={`p-4 flex flex-col gap-3 overflow-auto h-[36rem] ${
+              className={`p-4 flex flex-col gap-3 ${
                 loading ? "justify-center items-center" : ""
               }`}
             >
@@ -131,12 +131,15 @@ const Result = () => {
                   );
                 })}
             </div>
+            <div className="flex justify-center mb-3">
             <Pagination
               counter={counter}
               setCounter={setCounter}
               user={user}
               pages={posts.max_pages}
             />
+            </div>
+
           </div>
         </div>
       </div>
