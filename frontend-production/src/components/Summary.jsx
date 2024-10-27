@@ -72,12 +72,12 @@ const Summary = () => {
       {/* Main content */}
       <div
         className={`flex w-full justify-center min-h-screen`}
-        style={{
-          backgroundImage: `url(${heroIcon})`,
-          backgroundSize: "cover",
-          backgroundPosition: "center",
-          backgroundRepeat: "repeat",
-        }}
+        // style={{
+        //   backgroundImage: `url(${heroIcon})`,
+        //   backgroundSize: "cover",
+        //   backgroundPosition: "center",
+        //   backgroundRepeat: "repeat",
+        // }}
       >
         {loading && <LoadingPanel loading={loading} />}
         {post.author_details === null && (
@@ -122,7 +122,7 @@ const Summary = () => {
                   </div>
                 </div>
               </div>
-              <div className="flex gap-4 justify-center p-4">
+              <div className="flex gap-4 justify-center p-2 mb-6">
                 <Buttons text={"Accept"} />
                 <Buttons text={"Regenerate"} />
                 <Buttons text={"Back"} />
