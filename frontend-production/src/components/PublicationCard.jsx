@@ -17,7 +17,10 @@ const PublicationCard = ({ publications }) => {
             <Timeline.Content>
               <Timeline.Time>{pub["Publication Date"]}</Timeline.Time>
               <Timeline.Title className="text-sm hover:cursor-pointer hover:text-gray-400">
-                {pub.Title}
+                <a href={`https://dl.acm.org/doi/${pub.DOI}`} target="_blank">
+                  {" "}
+                  {pub.Title}
+                </a>
               </Timeline.Title>
               <a
                 href={`https://dl.acm.org/doi/${pub.DOI}`}
