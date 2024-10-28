@@ -18,7 +18,7 @@ const DetailsCard = ({
 }) => {
   // Format biography content
   const formatBio = (bio) => {
-    return bio && bio.length > 0 ? bio[0] : "No biography available.";
+    return bio && bio.length > 0 ? bio : "No biography available.";
   };
 
   return (
@@ -98,8 +98,7 @@ const DetailsCard = ({
                   (job) =>
                     job.Role !== "Unknown" &&
                     job.Department !== "Unknown Department" &&
-                    job.Organization !== "Unknown" &&
-                    job["Start Date"] !== "Unknown"
+                    job.Organization !== "Unknown"
                 )
                 .sort(
                   (a, b) =>
