@@ -12,7 +12,6 @@ app = Flask(__name__)
 
 CORS(app)
 
-# this one works!
 @app.route('/search/<name>/<int:page>')
 def search(name, page):
     return scraper.identify_input_type_and_search_author(name, page)
@@ -51,7 +50,7 @@ def query(name, profile_link):
     print(details)
     return details
 
-@app.route('/misc_profiles/<number>')
+@app.route('/misc_profiles/<int:number>')
 def misc_profiles(number):
     '''Fetch number of profiles from the database'''
 
