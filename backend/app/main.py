@@ -7,7 +7,7 @@ import re
 import backend.app.author_scraper as scraper
 import backend.db.db_helper as db
 import backend.db.models as model
-from flask import jsonify
+import backend.llm.llm as llm
 
 app = Flask(__name__)
 
@@ -65,8 +65,7 @@ def query(name, profile_link):
         "author_details": author_details_db
     }, 200
 
-
-@app.route('/misc_profiles/<number>')
+@app.route('/misc_profiles/<int:number>')
 def misc_profiles(number):
     '''Fetch number of profiles from the database'''
     # select 'number' arbitrary orcids
