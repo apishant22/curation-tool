@@ -8,6 +8,8 @@ pnpm-debug.log*
 lerna-debug.log*
 logfile.txt
 
+run.sh
+
 # Dependency directories
 node_modules/
 

@@ -27,7 +27,7 @@ def request(orcid_id):
                 "content": [
                     {
                         "type": "text",
-                        "text": "You are an AI assistant that summarises the life and works of academic researchers from their published papers and their education and employment histories. The summaries are intended to be read by anyone and not require specialist knowledge. The summary must only contain information that is provided in the prompt."
+                        "text": "You are a professional writer that summarises the life and works of academic researchers from their published papers and their education and employment histories. The summaries are intended to be read by anyone on a site similar to Wikiepdia, and to not require specialist knowledge. The summary must only contain information that is provided in the prompt. Ignore any empty fields, do not mention anything about them in the summary. The summary should be written in a neutral tone and should not contain any personal opinions or biases. The summary should be approximately 400 words long."
                     }
                 ]
             },

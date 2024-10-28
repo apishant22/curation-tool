@@ -14,13 +14,10 @@ const ContentCard = ({name, summary, data}) => {
   }
 
     const handleClick = () => {
-      navigate('/summary', {state: {
+      navigate(`/summary/${name}/${'123456789'}`, {state: {
         name: name
       }})
     }
-
-
-  
 
   return (
     <div>

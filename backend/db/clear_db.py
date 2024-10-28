@@ -18,7 +18,13 @@ connection_string = (
     "?driver=ODBC+Driver+17+for+SQL+Server&Encrypt=yes&TrustServerCertificate=no"
 )
 
-engine = create_engine(connection_string, echo=False)
+engine = create_engine(
+    connection_string,
+    echo=False,
+    pool_pre_ping=True,
+    pool_recycle=3600,
+    connect_args={"timeout": 60}
+)
 Session = sessionmaker(bind=engine)
 
 def clear_all_tables():

@@ -13,7 +13,7 @@ const router = createBrowserRouter([
     element: <App/>
   },
   {
-    path: "/summary",
+    path: "/summary/:user/:profileLink",
     element: <Summary/>
   },
   {

@@ -32,7 +32,7 @@ def search_orcid_by_id(orcid_id):
         return None
 
 # Function to search ACM DL for an author and get search results
-def search_acm_author(author_name, page_number):
+def search_acm_author(author_name, page_number, max_pages):
     formatted_name = author_name.replace(' ', '+')
 
     headers = {
@@ -41,19 +41,6 @@ def search_acm_author(author_name, page_number):
     }
 
     author_list = []
-
-    initial_url = f"https://dl.acm.org/action/doSearch?AllField={formatted_name}&startPage=0&content=people&target=people-tab&sortBy=relevancy&groupByField=ContribIdSingleValued"
-    response = requests.get(initial_url, headers=headers)
-    if response.status_code != 200:
-        print(f"Failed to retrieve author data for {author_name}")
-        return {"authors": [], "no_previous_page": True, "no_next_page": True}
-
-    soup = BeautifulSoup(response.content, 'html.parser')
-    result_count_tag = soup.find('span', class_='result__count')
-    total_authors = int(result_count_tag.text.split()[0]) if result_count_tag else 0
-    authors_per_page = 20
-    max_pages = ((total_authors + authors_per_page - 1) // authors_per_page) - 1
-
     no_previous_page = page_number <= 0
     no_next_page = page_number >= (max_pages - 1)
 
@@ -101,8 +88,11 @@ def search_acm_author(author_name, page_number):
     }
 
 # Function to identify if the input is an ORCID ID or an author name and search ACM DL
-def identify_input_type_and_search_author(input_value, page_number):
+def identify_input_type_and_search_author(input_value, page_number, max_pages):
     orcid_pattern = re.compile(r"^\d{4}-\d{4}-\d{4}-\d{4}$")
+
+    if page_number < 0:
+        page_number = 0
 
     if orcid_pattern.match(input_value):
         print(f"Recognised input as ORCID ID: {input_value}")
@@ -110,10 +100,10 @@ def identify_input_type_and_search_author(input_value, page_number):
         if not author_name:
             print(f"No author found for ORCID ID: {input_value}")
             return []
-        return search_acm_author(author_name, page_number)
+        return search_acm_author(author_name, page_number, max_pages)
     else:
         print(f"Recognised input as author name: {input_value}")
-        return search_acm_author(input_value, page_number)
+        return search_acm_author(input_value, page_number, max_pages)
 
 # Function to use CrossRef to get ORCID ID from DOI
 def get_orcid_from_doi(doi):
@@ -140,6 +130,29 @@ def get_orcid_from_doi(doi):
         print(f"Error while retrieving ORCID from DOI: {e}")
 
     return []
+
+def get_max_pages(author_name):
+    formatted_name = author_name.replace(' ', '+')
+    headers = {
+        'User-Agent': 'Mozilla/5.0',
+        'Accept': 'text/html'
+    }
+    initial_url = f"https://dl.acm.org/action/doSearch?AllField={formatted_name}&startPage=0&content=people&target=people-tab&sortBy=relevancy&groupByField=ContribIdSingleValued"
+    response = requests.get(initial_url, headers=headers)
+
+    if response.status_code != 200:
+        print(f"Failed to retrieve author data for {author_name}")
+        return 0
+
+    soup = BeautifulSoup(response.content, 'html.parser')
+    result_count_tag = soup.find('span', class_='result__count')
+
+    total_authors = int(result_count_tag.text.replace(',', '').split()[0]) if result_count_tag else 0
+    authors_per_page = 20
+
+    max_pages = (total_authors + authors_per_page - 1) // authors_per_page
+    print(f"Total authors found: {total_authors}, Max pages: {max_pages}")
+    return max_pages
 
 # Function to find the ORCID ID associated with a given author by analysing all DOIs
 def find_author_orcid_by_dois(publications, target_author_name):
@@ -383,17 +396,37 @@ def process_education(orcid_id):
 
     return education_history
 
-# Function to process biographical information using ORCID API
+# Function to process biographical data using ORCID API
+biography_cache = {}
+
 def process_biography(orcid_id):
-    biography_data = get_orcid_biography(orcid_id)
-    biography = []
-    if biography_data and 'content' in biography_data:
-        biography_info = biography_data.get('content', 'No biography available.')
-        biography.append(biography_info)
-    else:
-        biography_info = "No biographical information available."
-        biography.append(biography_info)
-    return biography
+    if orcid_id in biography_cache:
+        return biography_cache[orcid_id]
+
+    url = f"https://pub.orcid.org/v3.0/{orcid_id}/biography"
+    headers = {'Accept': 'application/json'}
+
+    try:
+        response = requests.get(url, headers=headers)
+        response.raise_for_status()
+
+        biography_data = response.json()
+        biography_cache[orcid_id] = biography_data
+        return biography_data
+
+    except requests.exceptions.HTTPError as e:
+        if response.status_code == 404:
+            print(f"Biography not found for ORCID ID: {orcid_id}")
+            biography_cache[orcid_id] = "No biographical information available."
+            return "No biographical information available."
+
+        print(f"HTTP error for ORCID ID: {orcid_id}")
+        return "No biographical information available."
+
+    except requests.exceptions.RequestException as e:
+        print(f"Network error for ORCID ID: {orcid_id}")
+        return "No biographical information available."
+
 
 
 # Function to format date from ORCID data
@@ -464,64 +497,67 @@ def normalize_dates(details):
 
 # Fucntion to handle logic on when to scrape and etc.
 def update_author_if_needed(author_name, profile_link):
-    scraped_author_details_json = scrape_author_details(author_name, profile_link)
-    scraped_author_details = json.loads(scraped_author_details_json)
-
-    orcid_id = scraped_author_details.get("Orcid ID")
-
-    if not orcid_id:
-        print("ORCID ID not found. Cannot proceed without ORCID ID.")
-        return None
-
     try:
+        scraped_author_details_json = scrape_author_details(author_name, profile_link)
+        scraped_author_details = json.loads(scraped_author_details_json)
+
+        orcid_id = scraped_author_details.get("Orcid ID")
+        if not orcid_id:
+            print("ORCID ID not found. Cannot proceed without ORCID ID.")
+            return None, None
+
         author_details_db = get_author_details_from_db(orcid_id)
 
         if author_details_db:
             scraped_author_details = normalize_dates(scraped_author_details)
             author_details_db = normalize_dates(author_details_db)
 
+            '''
             print("\n--- SCRAPED AUTHOR DETAILS ---")
             print(json.dumps(scraped_author_details, indent=4))
             print("\n--- DATABASE AUTHOR DETAILS ---")
             print(json.dumps(author_details_db, indent=4))
-
-            diff = DeepDiff(author_details_db, scraped_author_details, ignore_order=True)
+            '''
+            diff = DeepDiff(author_details_db, scraped_author_details, ignore_order=True, ignore_string_case=True)
 
             if not diff:
                 summary = get_researcher_summary(orcid_id)
                 if summary and summary != "Summary not available.":
                     print("Data is up to date and summary is present. Returning existing summary.")
-                    return json.dumps(summary, indent=4)
+                    return summary, author_details_db
                 else:
                     print("Summary is missing.")
-                    return None
+                    return None, author_details_db
             else:
                 print(f"Data differences found for ORCID ID {orcid_id}: {diff}")
                 update_author_details_in_db(scraped_author_details)
                 print("Database updated with the latest details.")
-                return None
+                return None, author_details_db
 
         else:
             print(f"No author found with ORCID ID: {orcid_id}. Adding new details to the database.")
             store_author_details_in_db(scraped_author_details)
-            return None
+            return None, scraped_author_details
 
     except NoResultFound:
         print(f"No author found with ORCID ID: {orcid_id}. Adding new details to the database.")
         store_author_details_in_db(scraped_author_details)
-        return None
+        return None, scraped_author_details
+
+    except Exception as e:
+        print(f"An error occurred: {e}")
+        return None, None
 
     except Exception as e:
         print(f"An error occurred: {e}")
 
     return None
 
-
 '''
 # Example usage of the refactored functions
 input_value = "0000-0002-1684-1539"
-input = "Adriana"
-page_number = 12
+input = "Adriana Wilde"
+page_number = 0
 authors = identify_input_type_and_search_author(input, page_number)
 
 if authors:
@@ -529,7 +565,7 @@ if authors:
     print(authors)
 else:
     print("No authors found.")
-
+ 
 selected_profile_author = "Adriana  Wilde"
 selected_profile_link = "https://dl.acm.org/profile/99659070982"
 

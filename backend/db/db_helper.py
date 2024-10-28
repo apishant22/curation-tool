@@ -22,8 +22,14 @@ connection_string = (
     "?driver=ODBC+Driver+17+for+SQL+Server&Encrypt=yes&TrustServerCertificate=no"
 )
 
-# Database connection setup
-engine = create_engine(connection_string, echo=False)
+engine = create_engine(
+    connection_string,
+    echo=False,
+    pool_pre_ping=True,
+    pool_recycle=3600,
+    connect_args={"timeout": 60}
+)
+
 Session = scoped_session(sessionmaker(bind=engine))
 
 # Helper functions for database interactions
@@ -554,4 +560,3 @@ def get_researcher_summary(orcid_id, session=None):
     finally:
         if session is not None:
             session.close()
-
