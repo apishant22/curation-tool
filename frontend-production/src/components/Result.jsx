@@ -91,15 +91,15 @@ const Result = () => {
               {/* <Pagination length={posts.length} postsPerPage={postsPerPage} handlePagination={handlePagination} currentPage={currentPage}/> */}
             </div>
             <div
-              className={`p-4 flex flex-col gap-3 ${
+              className={`p-4 flex flex-col gap-3 min-h-[400px] ${
                 loading ? "justify-center items-center" : ""
               }`}
             >
               {loading && (
                 <div role="status">
                   <svg
-                    aria-hidden="true"
-                    class="w-8 h-8 text-gray-200 animate-spin dark:text-gray-600 fill-blue-600"
+                    ariaHidden="true"
+                    className="w-8 h-8 text-gray-200 animate-spin dark:text-gray-600 fill-blue-600"
                     viewBox="0 0 100 101"
                     fill="none"
                     xmlns="http://www.w3.org/2000/svg"
