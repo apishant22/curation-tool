@@ -1,13 +1,13 @@
+import math
 import requests
 from bs4 import BeautifulSoup
 import re
 import time
 import json
-from fuzzywuzzy import fuzz
+from fuzzywuzzy import fuzz, process
 from backend.db.db_helper import *
 from deepdiff import DeepDiff
 from sqlalchemy.orm.exc import NoResultFound
-
 
 # Function to search ORCID by ORCID ID and get author name
 def search_orcid_by_id(orcid_id):
@@ -31,23 +31,51 @@ def search_orcid_by_id(orcid_id):
         print(f"Error parsing ORCID response: {e}")
         return None
 
+def search_orcid_for_authors(authors):
+    authors_with_orcid = []
+    for author in authors:
+        orcid_id = search_orcid_by_name(author['Name'])
+        if orcid_id:
+            author['Orcid ID'] = orcid_id
+            authors_with_orcid.append(author)
+
+    return authors_with_orcid
+
+def search_orcid_by_name(name):
+    base_url = "https://pub.orcid.org/v3.0/search"
+    headers = {
+        "Accept": "application/json"
+    }
+    params = {
+        "q": f"given-names:{name.split()[0]} AND family-name:{name.split()[-1]}"
+    }
+
+    try:
+        response = requests.get(base_url, headers=headers, params=params)
+        response.raise_for_status()
+    except requests.exceptions.RequestException as e:
+        print(f"Failed to search ORCID for {name}: {e}")
+        return None
+
+    try:
+        data = response.json()
+        if data is not None and "result" in data and isinstance(data["result"], list) and len(data["result"]) > 0:
+            orcid_id = data["result"][0]["orcid-identifier"]["path"]
+            return orcid_id
+        else:
+            print(f"No results found in ORCID for {name}")
+            return None
+    except (ValueError, KeyError, TypeError) as e:
+        print(f"Error parsing ORCID search response for {name}: {e}")
+        return None
+
 # Function to search ACM DL for an author and get search results
 def search_acm_author(author_name, page_number, max_pages):
     formatted_name = author_name.replace(' ', '+')
-
     headers = {
         'User-Agent': 'Mozilla/5.0',
         'Accept': 'text/html'
     }
-
-    author_list = []
-    no_previous_page = page_number <= 0
-    no_next_page = page_number >= (max_pages - 1)
-
-    if page_number < 0:
-        page_number = 0
-    elif page_number >= max_pages:
-        page_number = max_pages - 1
 
     search_url = f"https://dl.acm.org/action/doSearch?AllField={formatted_name}&startPage={page_number}&content=people&target=people-tab&sortBy=relevancy&groupByField=ContribIdSingleValued"
     print(f"Searching URL: {search_url}")
@@ -55,22 +83,17 @@ def search_acm_author(author_name, page_number, max_pages):
     response = requests.get(search_url, headers=headers)
     if response.status_code != 200:
         print(f"Failed to retrieve author data for {author_name} on page {page_number}")
-        return {"authors": [], "no_previous_page": no_previous_page, "no_next_page": no_next_page}
+        return {"authors": [], "no_previous_page": page_number == 0, "no_next_page": page_number >= (max_pages - 1)}
 
     soup = BeautifulSoup(response.content, 'html.parser')
-
     author_items = soup.find_all('li', class_='people__people-list')
-    if not author_items:
-        print(f"No author items found on page {page_number}.")
-        return {"authors": [], "no_previous_page": no_previous_page, "no_next_page": no_next_page}
+    author_list = []
 
     for item in author_items:
         name_tag = item.find('div', class_='name')
         name = name_tag.text.strip() if name_tag else 'Unknown'
-
         location_tag = item.find('div', class_='location')
         location = location_tag.text.strip() if location_tag else 'Unknown location'
-
         profile_link_tag = item.find('a', href=True, title="View Profile")
         profile_link = f"https://dl.acm.org{profile_link_tag['href']}" if profile_link_tag else 'No profile link'
 
@@ -83,12 +106,12 @@ def search_acm_author(author_name, page_number, max_pages):
     print(f"Total authors found on page {page_number}: {len(author_list)}")
     return {
         "authors": author_list,
-        "no_previous_page": no_previous_page,
-        "no_next_page": no_next_page
+        "no_previous_page": page_number == 0,
+        "no_next_page": page_number >= (max_pages - 1)
     }
 
 # Function to identify if the input is an ORCID ID or an author name and search ACM DL
-def identify_input_type_and_search_author(input_value, page_number, max_pages):
+def identify_input_type_and_search_author(input_value, page_number, max_pages=None):
     orcid_pattern = re.compile(r"^\d{4}-\d{4}-\d{4}-\d{4}$")
 
     if page_number < 0:
@@ -99,13 +122,54 @@ def identify_input_type_and_search_author(input_value, page_number, max_pages):
         author_name = search_orcid_by_id(input_value)
         if not author_name:
             print(f"No author found for ORCID ID: {input_value}")
-            return []
-        return search_acm_author(author_name, page_number, max_pages)
+            return {"authors": [], "no_previous_page": True, "no_next_page": True}
+
+        acm_results = search_acm_author(author_name, 0, 1)
+        matching_authors = [
+            author for author in acm_results["authors"]
+            if search_orcid_by_name(author["Name"]) == input_value
+        ]
+
+        return {
+            "authors": matching_authors,
+            "no_previous_page": True,
+            "no_next_page": True
+        }
+
     else:
         print(f"Recognised input as author name: {input_value}")
-        return search_acm_author(input_value, page_number, max_pages)
+        if max_pages is None:
+            max_pages = get_estimated_max_pages(input_value)
 
-# Function to use CrossRef to get ORCID ID from DOI
+        acm_results = search_acm_author(input_value, page_number, max_pages)
+        filtered_authors = [
+            {**author, "Orcid ID": search_orcid_by_name(author["Name"])}
+            for author in acm_results["authors"]
+            if search_orcid_by_name(author["Name"])
+        ]
+
+        no_previous_page = page_number == 0
+        no_next_page = page_number >= (max_pages - 1)
+
+        return {
+            "authors": filtered_authors,
+            "no_previous_page": no_previous_page,
+            "no_next_page": no_next_page
+        }
+
+def find_closest_author_match(authors, target_name):
+    if not authors:
+        return None
+
+    author_names = [author['Name'] for author in authors]
+    closest_match_name, match_score = process.extractOne(target_name, author_names)
+
+    if match_score >= 80:
+        for author in authors:
+            if author["Name"] == closest_match_name:
+                return author
+    return None
+
 def get_orcid_from_doi(doi):
     crossref_url = f"https://api.crossref.org/works/{doi}"
 
@@ -131,28 +195,46 @@ def get_orcid_from_doi(doi):
 
     return []
 
-def get_max_pages(author_name):
-    formatted_name = author_name.replace(' ', '+')
+import math
+
+def get_estimated_max_pages(input_value):
+    orcid_pattern = re.compile(r"^\d{4}-\d{4}-\d{4}-\d{4}$")
+    is_orcid = bool(orcid_pattern.match(input_value))
+    formatted_name = input_value.replace(' ', '+')
     headers = {
         'User-Agent': 'Mozilla/5.0',
         'Accept': 'text/html'
     }
+
     initial_url = f"https://dl.acm.org/action/doSearch?AllField={formatted_name}&startPage=0&content=people&target=people-tab&sortBy=relevancy&groupByField=ContribIdSingleValued"
     response = requests.get(initial_url, headers=headers)
 
     if response.status_code != 200:
-        print(f"Failed to retrieve author data for {author_name}")
+        print(f"Failed to retrieve author data for {input_value}")
         return 0
 
     soup = BeautifulSoup(response.content, 'html.parser')
     result_count_tag = soup.find('span', class_='result__count')
-
     total_authors = int(result_count_tag.text.replace(',', '').split()[0]) if result_count_tag else 0
-    authors_per_page = 20
 
-    max_pages = (total_authors + authors_per_page - 1) // authors_per_page
-    print(f"Total authors found: {total_authors}, Max pages: {max_pages}")
+    author_items = soup.find_all('li', class_='people__people-list')
+    orcid_count = 0
+    for item in author_items:
+        author_name = item.find('div', class_='name').text.strip() if item.find('div', 'name') else 'Unknown'
+        if search_orcid_by_name(author_name):
+            orcid_count += 1
+
+    sample_size = len(author_items)
+    orcid_ratio = orcid_count / sample_size if sample_size > 0 else 0
+    estimated_orcid_authors = int(total_authors * orcid_ratio)
+
+    page_size = 20
+    max_pages = math.ceil(estimated_orcid_authors / page_size)
+    print(f"Estimated ORCID Authors: {estimated_orcid_authors}, Max Pages: {max_pages}")
+
     return max_pages
+
+
 
 # Function to find the ORCID ID associated with a given author by analysing all DOIs
 def find_author_orcid_by_dois(publications, target_author_name):
@@ -558,14 +640,14 @@ def update_author_if_needed(author_name, profile_link):
 input_value = "0000-0002-1684-1539"
 input = "Adriana Wilde"
 page_number = 0
-authors = identify_input_type_and_search_author(input, page_number)
+authors = identify_input_type_and_search_author(input_value, page_number, 1)
 
 if authors:
     print("\nAuthor Search Results:")
     print(authors)
 else:
     print("No authors found.")
- 
+
 selected_profile_author = "Adriana  Wilde"
 selected_profile_link = "https://dl.acm.org/profile/99659070982"
 

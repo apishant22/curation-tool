@@ -3,6 +3,7 @@ import json
 from flask import Flask
 from flask_cors import CORS
 
+import re
 import backend.app.author_scraper as scraper
 import backend.db.db_helper as db
 import backend.db.models as model
@@ -13,28 +14,37 @@ app = Flask(__name__)
 CORS(app)
 
 max_pages_cache = {}
+author_name_cache = {}
 last_searched_name = None
 
 @app.route('/search/<name>/<page>')
 def search(name, page):
     global last_searched_name
+    orcid_pattern = re.compile(r"^\d{4}-\d{4}-\d{4}-\d{4}$")
 
-    normalized_name = name.lower()
+    is_orcid = bool(orcid_pattern.match(name))
 
-    if normalized_name != last_searched_name:
-        print(f"Cache miss or new name. Running scraper.get_max_pages for: {name}")
-        max_pages = scraper.get_max_pages(name)
-        max_pages_cache[normalized_name] = max_pages
-        last_searched_name = normalized_name
+    if is_orcid:
+        print(f"Detected ORCID ID: {name}. Fetching associated author name.")
+        max_pages = 1
+        page = int(page)
+        search_results = scraper.identify_input_type_and_search_author(name, page, max_pages)
     else:
-        print(f"Cache hit for: {name}")
-        max_pages = max_pages_cache.get(normalized_name)
+        normalized_name = name.lower()
+        if normalized_name != last_searched_name:
+            print(f"Cache miss or new name. Running scraper.get_estimated_max_pages for: {name}")
+            max_pages = scraper.get_estimated_max_pages(name)
+            max_pages_cache[normalized_name] = max_pages
+            last_searched_name = normalized_name
+        else:
+            print(f"Cache hit for: {name}")
+            max_pages = max_pages_cache.get(normalized_name, 0)
 
-    page = int(page)
-    search_results = scraper.identify_input_type_and_search_author(name, page, max_pages)
-    search_results['max_pages'] = max_pages
+        page = int(page)
+        search_results = scraper.identify_input_type_and_search_author(name, page, max_pages)
 
     return jsonify(search_results)
+
 
 @app.route('/query/<name>/<profile_link>')
 def query(name, profile_link):
