@@ -4,6 +4,9 @@ import { useNavigate } from 'react-router-dom';
 const Button = ({text, onClick, next, previous, counter, setCounter, user}) => {
   const navigate = useNavigate();
 
+  // call API regenerate, we need backend to create API that regenerate and store the summary
+  
+
   const handleNextClick = () => {
     setCounter(prevCounter => {     
       const newCounter = prevCounter + 1;
