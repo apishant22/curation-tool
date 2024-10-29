@@ -12,6 +12,7 @@ import heroIcon from "../assets/hero-background.jpg";
 import ProgressBar from "./ProgressBar";
 import LoadingPanel from "./LoadingPanel";
 import AuthorHeader from "./AuthorHeader";
+import ErrorPage from "./ErrorPage";
 
 const Summary = () => {
   // fetch paper of that author here
@@ -31,7 +32,9 @@ const Summary = () => {
   const API_URL = "/query";
 
   const handleClick = () => {
-    navigate(`/result/${user}/1`);
+    navigate(`/result/${user}/1`, {
+      state: { fromErrorPage: true },
+    });
   };
 
   useEffect(() => {
@@ -79,18 +82,7 @@ const Summary = () => {
         //   backgroundRepeat: "repeat",
         // }}
       >
-        {loading && <LoadingPanel loading={loading} />}
-        {post.author_details === null && (
-          <div className="bg-white max-w-[1024px] flex-grow flex flex-col items-center justify-center gap-2">
-            <h1>
-              Author does not have Orcid ID or DB error need to go back to the
-              results page unfortunately.
-            </h1>
-            <button className="p-2 border border-black" onClick={handleClick}>
-              Back
-            </button>
-          </div>
-        )}
+        <ErrorPage loading={loading} post={post} handleClick={handleClick} />
 
         {!loading && post.author_details && (
           <div className="flex flex-grow max-w-[1024px] bg-white shadow-2xl">
