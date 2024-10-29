@@ -17,6 +17,7 @@ class Paper(Base):
     title = Column(String, nullable=True)
     publication_date = Column(Date, nullable=True)
     abstract = Column(String, nullable=True)
+    citations = Column(Integer, nullable=True)
 
 class Paper_Authors(Base):
     __tablename__ = 'Paper_Authors'
