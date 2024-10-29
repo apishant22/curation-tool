@@ -96,18 +96,22 @@ def search_acm_author(author_name, page_number, max_pages):
         profile_link_tag = item.find('a', href=True, title="View Profile")
         profile_link = f"https://dl.acm.org{profile_link_tag['href']}" if profile_link_tag else 'No profile link'
 
-        author_list.append({
-            'Name': name,
-            'Location': location,
-            'Profile Link': profile_link
-        })
+        orcid_id = search_orcid_by_name(name)
+        if orcid_id:
+            author_list.append({
+                'Name': name,
+                'Location': location,
+                'Profile Link': profile_link,
+                'Orcid ID': orcid_id
+            })
 
-    print(f"Total authors found on page {page_number}: {len(author_list)}")
+    print(f"Total authors with ORCID ID found on page {page_number}: {len(author_list)}")
     return {
         "authors": author_list,
         "no_previous_page": page_number == 0,
         "no_next_page": page_number >= (max_pages - 1)
     }
+
 
 # Function to identify if the input is an ORCID ID or an author name and search ACM DL
 def identify_input_type_and_search_author(input_value, page_number, max_pages=None):
@@ -461,10 +465,16 @@ def process_employment(orcid_id):
                 employment_history.append(employment_info)
 
     if not employment_history:
-        employment_info = "No employment history available."
-        employment_history.append(employment_info)
+        employment_history.append({
+            "Organization": "No employment history available.",
+            "Role": "N/A",
+            "Department": "N/A",
+            "Start Date": "N/A",
+            "End Date": "N/A"
+        })
 
     return employment_history
+
 
 # Function to process education history using ORCID API
 def process_education(orcid_id):
@@ -482,10 +492,6 @@ def process_education(orcid_id):
                 role_title = education.get('role-title', 'Unknown role title')
                 department_name = education.get('department-name', 'Unknown department')
 
-                institution = institution.encode('utf-8').decode('utf-8')
-                role_title = role_title.encode('utf-8').decode('utf-8')
-                department_name = department_name.encode('utf-8').decode('utf-8')
-
                 start_date = education.get('start-date')
                 start_date_str = format_date(start_date)
 
@@ -502,8 +508,13 @@ def process_education(orcid_id):
                 education_history.append(education_info)
 
     if not education_history:
-        education_info = "No education history available."
-        education_history.append(education_info)
+        education_history.append({
+            "Institution": "No education history available.",
+            "Role": "N/A",
+            "Department": "N/A",
+            "Start Date": "N/A",
+            "End Date": "N/A"
+        })
 
     return education_history
 
@@ -521,22 +532,23 @@ def process_biography(orcid_id):
         response = requests.get(url, headers=headers)
         response.raise_for_status()
 
-        biography_data = response.json()
-        biography_cache[orcid_id] = biography_data
-        return biography_data
+        biography_data = response.json().get('content', "No biographical information available.")
+        biography_cache[orcid_id] = {"Biography": biography_data}
+        return biography_cache[orcid_id]
 
     except requests.exceptions.HTTPError as e:
         if response.status_code == 404:
             print(f"Biography not found for ORCID ID: {orcid_id}")
-            biography_cache[orcid_id] = "No biographical information available."
-            return "No biographical information available."
+            biography_cache[orcid_id] = {"Biography": "No biographical information available."}
+            return biography_cache[orcid_id]
 
         print(f"HTTP error for ORCID ID: {orcid_id}")
-        return "No biographical information available."
+        return {"Biography": "No biographical information available."}
 
     except requests.exceptions.RequestException as e:
         print(f"Network error for ORCID ID: {orcid_id}")
-        return "No biographical information available."
+        return {"Biography": "No biographical information available."}
+
 
 
 
@@ -683,14 +695,15 @@ def update_author_if_needed(author_name, profile_link):
 # Example usage of the refactored functions
 input_value = "0000-0002-1684-1539"
 input = "Adriana Wilde"
+i = "Huiqiang Jia"
 page_number = 0
-authors = identify_input_type_and_search_author(input_value, page_number, 1)
+authors = identify_input_type_and_search_author(i, page_number, 1)
 
 if authors:
     print("\nAuthor Search Results:")
     print(authors)
 else:
-    print("No authors found.")ç
+    print("No authors found.")
 
 selected_profile_author = "Adriana Wilde"
 selected_profile_link = "https://dl.acm.org/profile/99659070982"
