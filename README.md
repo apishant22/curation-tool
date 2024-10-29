@@ -7,14 +7,16 @@
 ```
 cd backend
 python3 -m venv .venv (create virtual environment in the directory)
-.venv\Scripts\activate (run the virtual environment)
+source .venv/Scripts/activate (MAC)
+.venv\Scripts\activate (WINDOWS)
 ```
-3. Once your virtual environment is running, install the necessary Python modules in the requirements.txt file by running the command below.
+1. Once your virtual environment is running, install the necessary Python modules in the requirements.txt file by running the command below, please make sure you are in the backend folder!
 ```
-which python (checking if you are in the virtual environment or not)
-pip install -r requirements.txt (please make sure you are in the backend folder)
+which python
+pip install --upgrade pip
+pip install -r requirements.txt
 ```
-4. Then, go back to the root folder and run the command below to start the flask backend server.
+1. Then, go back to the root folder and run the command below to start the flask backend server.
 ```
 flask --app backend.app.main run -h localhost -p 3002
 ```
