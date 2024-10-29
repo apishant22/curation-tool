@@ -1,6 +1,6 @@
 from sqlalchemy import Column, String, Integer, ForeignKey, Date
 from sqlalchemy.orm import relationship
-from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import declarative_base
 
 Base = declarative_base()
 
@@ -52,8 +52,10 @@ class Researcher_Edu(Base):
     role = Column(String, nullable=True)
 
 # Relationships
-Researcher.employments = relationship('Researcher_Employment', backref='researcher')
-Researcher.education = relationship('Researcher_Edu', backref='researcher')
-Organisation.departments = relationship('Dept', backref='organisation')
-Dept.employments = relationship('Researcher_Employment', backref='department')
-Dept.education = relationship('Researcher_Edu', backref='department')
+Researcher.employments = relationship('Researcher_Employment', backref='researcher', cascade="all, delete-orphan")
+Researcher.education = relationship('Researcher_Edu', backref='researcher', cascade="all, delete-orphan")
+Researcher.papers = relationship('Paper_Authors', backref='researcher', cascade="all, delete-orphan")
+Paper.authors = relationship('Paper_Authors', backref='paper', cascade="all, delete-orphan")
+Organisation.departments = relationship('Dept', backref='organisation', cascade="all, delete-orphan")
+Dept.employments = relationship('Researcher_Employment', backref='department', cascade="all, delete-orphan")
+Dept.education = relationship('Researcher_Edu', backref='department', cascade="all, delete-orphan")

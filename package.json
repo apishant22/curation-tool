@@ -1,6 +1,7 @@
 {
   "dependencies": {
-    "flowbite-react": "^0.10.2"
+    "flowbite-react": "^0.10.2",
+    "react-markdown": "^9.0.1"
   },
   "devDependencies": {
     "concurrently": "^9.0.1",

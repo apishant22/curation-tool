@@ -98,7 +98,11 @@ def test_get_author_details_from_db(setup_database, session):
                 'Title': 'Robotics Revolution',
                 'DOI': '10.1234/robotics2023',
                 'Abstract': 'A groundbreaking paper on Robotics.',
-                'Publication Date': '2023-05-01'
+                'Publication Date': '2023-05-01',
+                'Citation Count': 8,
+                'Co-Authors': [
+                    {'Name': 'Jane Smith', 'Orcid ID': '0000-0001-2345-9876'}
+                ]
             }
         ]
     }
@@ -127,8 +131,11 @@ def test_get_author_details_from_db(setup_database, session):
     publications = retrieved_details['Publications']
     assert len(publications) == 1
     assert publications[0]['Title'] == 'Robotics Revolution'
-
     assert publications[0]['DOI'].strip() == '10.1234/robotics2023'
+    assert publications[0]['Citation Count'] == 8
+    assert len(publications[0]['Co-Authors']) == 1
+    assert publications[0]['Co-Authors'][0]['Name'] == 'Jane Smith'
+    assert publications[0]['Co-Authors'][0]['Orcid ID'] == '0000-0001-2345-9876'
 
 def test_update_researcher_summary(setup_database, session):
     researcher = Researcher(orcid='0000-0001-2345-6789', name='John Doe', bio='Researcher in AI', summary='Expert in machine learning')
@@ -186,7 +193,12 @@ def test_update_author_details_in_db(setup_database, session):
                 'Title': 'AI Revolution',
                 'DOI': '10.1234/airevolution2023',
                 'Abstract': 'A groundbreaking paper on AI.',
-                'Publication Date': '2023-05-01'
+                'Publication Date': '2023-05-01',
+                'Citation Count': 10,
+                'Co-Authors': [
+                    {'Name': 'Jane Smith', 'Orcid ID': '0000-0001-2345-9876'},
+                    {'Name': 'Alice Johnson', 'Orcid ID': '0000-0002-3456-7890'}
+                ]
             }
         ]
     }
@@ -220,13 +232,22 @@ def test_update_author_details_in_db(setup_database, session):
                 'Title': 'AI Revolution',
                 'DOI': '10.1234/airevolution2023',
                 'Abstract': 'An updated groundbreaking paper on AI.',
-                'Publication Date': '2023-05-01'
+                'Publication Date': '2023-05-01',
+                'Citation Count': 12,
+                'Co-Authors': [
+                    {'Name': 'Jane Smith', 'Orcid ID': '0000-0001-2345-9876'},
+                    {'Name': 'Alice Johnson', 'Orcid ID': '0000-0002-3456-7890'}
+                ]
             },
             {
                 'Title': 'Robotics Advancements',
                 'DOI': '10.1234/robotics2024',
                 'Abstract': 'A new paper on robotics.',
-                'Publication Date': '2024-03-01'
+                'Publication Date': '2024-03-01',
+                'Citation Count': 5,
+                'Co-Authors': [
+                    {'Name': 'Tom Lee', 'Orcid ID': '0000-0003-4567-8901'}
+                ]
             }
         ]
     }
@@ -255,9 +276,20 @@ def test_update_author_details_in_db(setup_database, session):
 
     publications = retrieved_details['Publications']
     assert len(publications) == 2
-    assert publications[0]['Title'] == 'AI Revolution'
-    assert publications[0]['Abstract'] == 'An updated groundbreaking paper on AI.'
-    assert publications[1]['Title'] == 'Robotics Advancements'
+
+    publication1 = publications[0]
+    assert publication1['Title'] == 'AI Revolution'
+    assert publication1['Abstract'] == 'An updated groundbreaking paper on AI.'
+    assert publication1['Citation Count'] == 12
+    assert len(publication1['Co-Authors']) == 2
+    assert publication1['Co-Authors'][0]['Name'] == 'Jane Smith'
+
+    publication2 = publications[1]
+    assert publication2['Title'] == 'Robotics Advancements'
+    assert publication2['Abstract'] == 'A new paper on robotics.'
+    assert publication2['Citation Count'] == 5
+    assert len(publication2['Co-Authors']) == 1
+    assert publication2['Co-Authors'][0]['Name'] == 'Tom Lee'
 
 def test_delete_author_details_from_db(setup_database, session):
     author_details_initial = {
@@ -293,9 +325,7 @@ def test_delete_author_details_from_db(setup_database, session):
     }
 
     store_author_details_in_db(author_details_initial)
-
     delete_author_details_from_db('0000-0001-2345-6789')
-
     retrieved_details = get_author_details_from_db('0000-0001-2345-6789')
 
     assert retrieved_details is None
