@@ -31,7 +31,7 @@ const Content = () => {
   ]
 
   return (
-    <div className='flex flex-col gap-16 items-center justify-center py-16'>
+    <div className='flex flex-grow flex-col gap-16 items-center justify-center'>
       {/* <ContentCard name={name} summary={summary}></ContentCard>
       <ContentCard name={name} summary={summary}></ContentCard>
       <ContentCard name={name} summary={summary}></ContentCard> */}
