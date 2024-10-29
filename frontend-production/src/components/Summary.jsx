@@ -117,7 +117,9 @@ const Summary = () => {
                         AI-Generated Summary
                       </span>
                     </div>
-
+                    {!post.summary && (
+                      <div className="text-center">No summary</div>
+                    )}
                     <p className="p-4">{post.summary}</p>
                   </div>
                 </div>
