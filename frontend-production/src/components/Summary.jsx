@@ -13,6 +13,40 @@ import ProgressBar from "./ProgressBar";
 import LoadingPanel from "./LoadingPanel";
 import AuthorHeader from "./AuthorHeader";
 import ErrorPage from "./ErrorPage";
+import ReactMarkdown from "react-markdown";
+
+const MarkdownContent = ({ content }) => {
+  const components = {
+    h1: ({ children }) => (
+      <h1 className="text-2xl font-bold mb-4 text-gray-800">{children}</h1>
+    ),
+    h2: ({ children }) => (
+      <h2 className="text-xl font-semibold mt-6 mb-3 text-gray-700">
+        {children}
+      </h2>
+    ),
+    h3: ({ children }) => (
+      <h3 className="text-lg font-semibold mt-4 mb-2 text-gray-600">
+        {children}
+      </h3>
+    ),
+    p: ({ children }) => (
+      <p className="mb-3 text-gray-600 leading-relaxed">{children}</p>
+    ),
+    a: ({ href, children }) => (
+      <a
+        href={href}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="text-blue-600 hover:text-blue-800 underline"
+      >
+        {children}
+      </a>
+    ),
+  };
+
+  return <ReactMarkdown components={components}>{content}</ReactMarkdown>;
+};
 
 const Summary = () => {
   // fetch paper of that author here
@@ -112,7 +146,7 @@ const Summary = () => {
                     {!post.summary && (
                       <div className="text-center">No summary</div>
                     )}
-                    <p className="p-4">{post.summary}</p>
+                    <MarkdownContent content={post.summary} />
                   </div>
                 </div>
               </div>
