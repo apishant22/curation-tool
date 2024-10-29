@@ -10,15 +10,35 @@ import Pagination from "./Pagination";
 
 const Result = () => {
   const { user } = useParams();
+  const location = useLocation();
   const API_URL = "/search";
   const [counter, setCounter] = useState(1);
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [cache, setCache] = useState({}); // Add cache state
+
+  useEffect(() => {
+    const storedCache = sessionStorage.getItem("postsCache");
+    if (storedCache) {
+      setCache(JSON.parse(storedCache));
+    }
+  }, []);
+
+  useEffect(() => {
+    sessionStorage.setItem("postsCache", JSON.stringify(cache));
+  }, [cache]);
+
   const encodedQuery = encodeURIComponent(user);
 
   useEffect(() => {
+    if (location.state?.fromErrorPage) {
+      const cacheKey = `${encodedQuery}-${counter - 1}`;
+      if (cache[cacheKey]) {
+        setPosts(cache[cacheKey]);
+        return;
+      }
+    }
     const fetchPosts = async () => {
       setLoading(true);
       setError(null);
@@ -32,29 +52,19 @@ const Result = () => {
       }
 
       try {
-        if (counter > 0) {
-          const response = await fetch(
-            `${API_URL}/${encodedQuery}/${counter - 1}`
-          );
-          if (!response.ok) {
-            throw new Error(`HTTP error! Status: ${response.status}`);
-          }
-          const data = await response.json();
-          console.log(data);
-
-          setPosts(data);
-          setCache((prevCache) => ({ ...prevCache, [cacheKey]: data }));
-        } else {
-          const response = await fetch(`${API_URL}/${encodedQuery}/0`);
-          if (!response.ok) {
-            throw new Error(`HTTP error! Status: ${response.status}`);
-          }
-          const data = await response.json();
-          console.log(data);
-
-          setPosts(data);
-          setCache((prevCache) => ({ ...prevCache, [cacheKey]: data }));
+        const pageIndex = counter > 0 ? counter - 1 : 0;
+        const response = await fetch(`${API_URL}/${encodedQuery}/${pageIndex}`);
+        if (!response.ok) {
+          throw new Error(`HTTP Error! Status: ${response.status}`);
         }
+
+        const data = await response.json();
+        console.log(data);
+        setPosts(data);
+        setCache((prevCache) => ({
+          ...prevCache,
+          [cacheKey]: data,
+        }));
       } catch (err) {
         setError(err.message);
       } finally {
@@ -62,8 +72,14 @@ const Result = () => {
       }
     };
 
-    fetchPosts();
-  }, [user, counter, cache, encodedQuery]);
+    // Fetch if no cached data
+    const cacheKey = `${encodedQuery}-${counter - 1}`;
+    if (!cache[cacheKey]) {
+      fetchPosts();
+    } else {
+      setPosts(cache[cacheKey]);
+    }
+  }, [counter, encodedQuery, location.state]);
 
   return (
     <div className="flex flex-col h-full ">
@@ -132,14 +148,13 @@ const Result = () => {
                 })}
             </div>
             <div className="flex justify-center mb-3">
-            <Pagination
-              counter={counter}
-              setCounter={setCounter}
-              user={user}
-              pages={posts.max_pages}
-            />
+              <Pagination
+                counter={counter}
+                setCounter={setCounter}
+                user={user}
+                pages={posts.max_pages}
+              />
             </div>
-
           </div>
         </div>
       </div>
