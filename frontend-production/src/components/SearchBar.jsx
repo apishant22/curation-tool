@@ -6,7 +6,6 @@ const SearchBar = ({ setResults, counter, setCounter }) => {
   const [input, setInput] = useState("");
   const navigate = useNavigate();
 
-
   const handleSubmit = (e) => {
     e.preventDefault();
     setCounter(0);
