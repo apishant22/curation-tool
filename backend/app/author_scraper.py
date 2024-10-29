@@ -1,8 +1,7 @@
-import math
 import requests
 from bs4 import BeautifulSoup
 import re
-import time
+import math
 import json
 from fuzzywuzzy import fuzz, process
 from backend.db.db_helper import *
@@ -122,7 +121,12 @@ def identify_input_type_and_search_author(input_value, page_number, max_pages=No
         author_name = search_orcid_by_id(input_value)
         if not author_name:
             print(f"No author found for ORCID ID: {input_value}")
-            return {"authors": [], "no_previous_page": True, "no_next_page": True}
+            return {
+                "authors": [],
+                "no_previous_page": True,
+                "no_next_page": True,
+                "max_pages": 1
+            }
 
         acm_results = search_acm_author(author_name, 0, 1)
         matching_authors = [
@@ -133,7 +137,8 @@ def identify_input_type_and_search_author(input_value, page_number, max_pages=No
         return {
             "authors": matching_authors,
             "no_previous_page": True,
-            "no_next_page": True
+            "no_next_page": True,
+            "max_pages": 1
         }
 
     else:
@@ -154,7 +159,8 @@ def identify_input_type_and_search_author(input_value, page_number, max_pages=No
         return {
             "authors": filtered_authors,
             "no_previous_page": no_previous_page,
-            "no_next_page": no_next_page
+            "no_next_page": no_next_page,
+            "max_pages": max_pages
         }
 
 def find_closest_author_match(authors, target_name):
@@ -194,8 +200,6 @@ def get_orcid_from_doi(doi):
         print(f"Error while retrieving ORCID from DOI: {e}")
 
     return []
-
-import math
 
 def get_estimated_max_pages(input_value):
     orcid_pattern = re.compile(r"^\d{4}-\d{4}-\d{4}-\d{4}$")
@@ -261,7 +265,7 @@ def find_author_orcid_by_dois(publications, target_author_name):
 
 # Function to scrape detailed information of an author from ACM profile link
 def scrape_author_details(author_name, profile_link):
-    publications = scrape_author_publications(profile_link)
+    publications = scrape_author_publications(profile_link, author_name)
 
     orcid_id = find_author_orcid_by_dois(publications, author_name)
     print(orcid_id)
@@ -271,11 +275,22 @@ def scrape_author_details(author_name, profile_link):
     else:
         orcid_id = orcid_id.replace("http://orcid.org/", "")
 
+    author_details = {
+        "Name": author_name,
+        "Orcid ID": orcid_id,
+        "Biography": [],
+        "Employment History": [],
+        "Education History": [],
+        "Publications": publications
+    }
+
     for pub in publications:
         if pub['DOI'] != 'No DOI':
-            abstract, publication_date = get_metadata_from_doi(pub['DOI'])
+            abstract, publication_date, citation_count, co_authors = get_metadata_from_doi(pub['DOI'], author_name)
             pub['Abstract'] = abstract if abstract else "No abstract available."
             pub['Publication Date'] = publication_date if publication_date else "Unknown publication date"
+            pub['Citation Count'] = citation_count
+            pub['Co-Authors'] = co_authors
 
         employment_history = process_employment(orcid_id)
         education_history = process_education(orcid_id)
@@ -294,13 +309,9 @@ def scrape_author_details(author_name, profile_link):
 
 
 # Function to scrape author's publications
-def scrape_author_publications(profile_link):
+def scrape_author_publications(profile_link, author):
     publications_url = f"{profile_link}/publications?Role=author&startPage=0&pageSize=50"
-
-    headers = {
-        'User-Agent': 'Mozilla/5.0',
-        'Accept': 'text/html'
-    }
+    headers = {'User-Agent': 'Mozilla/5.0', 'Accept': 'text/html'}
 
     response = requests.get(publications_url, headers=headers)
     if response.status_code != 200:
@@ -308,59 +319,73 @@ def scrape_author_publications(profile_link):
         return []
 
     soup = BeautifulSoup(response.content, 'html.parser')
-    publications = []
-
     publication_items = soup.find_all('li', class_='search__item')
 
+    publications = []
     for item in publication_items:
         title_tag = item.find('h5', class_='issue-item__title')
         title = title_tag.text.strip() if title_tag else 'Unknown title'
 
-        author_tags = item.select('ul.rlist--inline.loa a[title]')
-        authors = ', '.join([tag.text.strip() for tag in author_tags])
-
         doi_tag = item.find('div', class_='issue-item__detail').find_all('a', href=True)
-        doi = None
-        for link in doi_tag:
-            if "https://doi.org/" in link['href']:
-                doi = link['href'].replace("https://doi.org/", "")
-                break
+        doi = next((link['href'].replace("https://doi.org/", "") for link in doi_tag if "https://doi.org/" in link['href']), 'No DOI')
 
-        doi = doi if doi else 'No DOI'
+        if doi != 'No DOI':
+            abstract, publication_date, citation_count, co_authors = get_metadata_from_doi(doi, author)
+        else:
+            abstract, publication_date, citation_count, co_authors = 'N/A', 'Unknown', 0, []
 
         publications.append({
             'Title': title,
-#            'Authors': authors,
             'DOI': doi,
-            'Abstract': 'N/A',
-            'Publication Date': 'N/A'
+            'Abstract': abstract,
+            'Publication Date': publication_date,
+            'Citation Count': citation_count,
+            'Co-Authors': co_authors  # Store co-authors for later insertion
         })
 
     return publications
 
 # Retrieve metadata of oublications using Semantic Scholar API
-def get_metadata_from_doi(doi):
-    semantic_scholar_url = f"https://api.semanticscholar.org/graph/v1/paper/{doi}?fields=title,abstract,authors,publicationDate"
+def get_co_authors_from_doi(doi, target_author_name):
+    authors = get_orcid_from_doi(doi)
+    co_authors = []
 
-    retry_attempts = 3
-    for attempt in range(retry_attempts):
-        try:
-            response = requests.get(semantic_scholar_url, timeout=10)
-            if response.status_code == 200:
-                data = response.json()
-                abstract = data.get('abstract', 'No abstract available.')
-                publication_date = data.get('publicationDate', 'Unknown publication date')
-                return abstract, publication_date
-            else:
-                print(f"Attempt {attempt + 1}: Failed to retrieve data for DOI: {doi}, Status Code: {response.status_code}")
-                print(f"Response Content: {response.text}")
-                time.sleep(2)
+    for author in authors:
+        if author["Name"].strip().lower() == target_author_name.strip().lower():
+            continue
 
-        except Exception as e:
-            print(f"Attempt {attempt + 1}: An error occurred while retrieving metadata from DOI: {e}")
-            time.sleep(2)
+        if not author.get("Orcid ID"):
+            author["Orcid ID"] = search_orcid_by_name(author["Name"])
 
-    return None, None
+        if author["Orcid ID"]:
+            author["Orcid ID"] = author["Orcid ID"].replace("http://orcid.org/", "").replace("https://orcid.org/", "")
+            co_authors.append(author)
+
+    return co_authors
+
+
+def get_metadata_from_doi(doi, target_author_name):
+    semantic_scholar_url = f"https://api.semanticscholar.org/graph/v1/paper/{doi}?fields=title,abstract,authors,publicationDate,citationCount"
+
+    try:
+        response = requests.get(semantic_scholar_url, timeout=10)
+        if response.status_code == 200:
+            data = response.json()
+            abstract = data.get('abstract', 'No abstract available.')
+            publication_date = data.get('publicationDate', 'Unknown publication date')
+            citation_count = data.get('citationCount', 0)
+
+            co_authors_with_orcid = get_co_authors_from_doi(doi, target_author_name)
+            return abstract, publication_date, citation_count, co_authors_with_orcid
+
+        else:
+            print(f"Failed to retrieve data for DOI: {doi}")
+    except Exception as e:
+        print(f"Error retrieving metadata from DOI: {e}")
+
+    return "No abstract available.", "Unknown", 0, []
+
+
 
 # Retrieve detailed info using ORCID API
 def get_orcid_employment(orcid_id):
@@ -456,6 +481,10 @@ def process_education(orcid_id):
                 institution = education.get('organization', {}).get('name', 'Unknown institution')
                 role_title = education.get('role-title', 'Unknown role title')
                 department_name = education.get('department-name', 'Unknown department')
+
+                institution = institution.encode('utf-8').decode('utf-8')
+                role_title = role_title.encode('utf-8').decode('utf-8')
+                department_name = department_name.encode('utf-8').decode('utf-8')
 
                 start_date = education.get('start-date')
                 start_date_str = format_date(start_date)
@@ -569,7 +598,6 @@ def normalize_dates(details):
             except ValueError:
                 pass
 
-    # Normalize biography to always be a list
     if isinstance(details.get('Biography'), str):
         details['Biography'] = [details['Biography']]
     elif details.get('Biography') is None:
@@ -578,28 +606,50 @@ def normalize_dates(details):
     return details
 
 # Fucntion to handle logic on when to scrape and etc.
+
 def update_author_if_needed(author_name, profile_link):
     try:
         scraped_author_details_json = scrape_author_details(author_name, profile_link)
-        scraped_author_details = json.loads(scraped_author_details_json)
+
+        if not scraped_author_details_json:
+            print("No author details found in scrape_author_details.")
+            return None, None
+
+        if not isinstance(scraped_author_details_json, str):
+            print("Unexpected data format for scraped author details.")
+            return None, None
+
+        try:
+            scraped_author_details = json.loads(scraped_author_details_json)
+        except json.JSONDecodeError:
+            print("Failed to parse JSON from scraped author details.")
+            return None, None
+
+        if not isinstance(scraped_author_details, dict):
+            print("Parsed author details are not in dictionary format.")
+            return None, None
 
         orcid_id = scraped_author_details.get("Orcid ID")
         if not orcid_id:
-            print("ORCID ID not found. Cannot proceed without ORCID ID.")
+            print("ORCID ID not found in scraped author details. Cannot proceed without ORCID ID.")
             return None, None
 
         author_details_db = get_author_details_from_db(orcid_id)
 
-        if author_details_db:
-            scraped_author_details = normalize_dates(scraped_author_details)
-            author_details_db = normalize_dates(author_details_db)
+        if author_details_db is not None and not isinstance(author_details_db, dict):
+            print("Database returned author details in an unexpected format.")
+            return None, None
 
-            '''
-            print("\n--- SCRAPED AUTHOR DETAILS ---")
-            print(json.dumps(scraped_author_details, indent=4))
-            print("\n--- DATABASE AUTHOR DETAILS ---")
+        scraped_author_details = normalize_dates(scraped_author_details)
+        author_details_db = normalize_dates(author_details_db) if author_details_db else {}
+
+        print("\n--- Scraped Author Details (Before Processing) ---")
+        print(json.dumps(scraped_author_details, indent=4))
+
+        if author_details_db:
+            print("\n--- Existing Database Author Details ---")
             print(json.dumps(author_details_db, indent=4))
-            '''
+
             diff = DeepDiff(author_details_db, scraped_author_details, ignore_order=True, ignore_string_case=True)
 
             if not diff:
@@ -611,29 +661,23 @@ def update_author_if_needed(author_name, profile_link):
                     print("Summary is missing.")
                     return None, author_details_db
             else:
-                print(f"Data differences found for ORCID ID {orcid_id}: {diff}")
+                print(f"\n--- Data differences found for ORCID ID {orcid_id} ---")
+                print(diff)
+
                 update_author_details_in_db(scraped_author_details)
                 print("Database updated with the latest details.")
-                return None, author_details_db
+                return None, scraped_author_details
 
         else:
             print(f"No author found with ORCID ID: {orcid_id}. Adding new details to the database.")
             store_author_details_in_db(scraped_author_details)
             return None, scraped_author_details
 
-    except NoResultFound:
-        print(f"No author found with ORCID ID: {orcid_id}. Adding new details to the database.")
-        store_author_details_in_db(scraped_author_details)
-        return None, scraped_author_details
-
     except Exception as e:
         print(f"An error occurred: {e}")
         return None, None
 
-    except Exception as e:
-        print(f"An error occurred: {e}")
 
-    return None
 
 '''
 # Example usage of the refactored functions
@@ -646,9 +690,9 @@ if authors:
     print("\nAuthor Search Results:")
     print(authors)
 else:
-    print("No authors found.")
+    print("No authors found.")ç
 
-selected_profile_author = "Adriana  Wilde"
+selected_profile_author = "Adriana Wilde"
 selected_profile_link = "https://dl.acm.org/profile/99659070982"
 
 author_details_json = update_author_if_needed(selected_profile_author, selected_profile_link)
