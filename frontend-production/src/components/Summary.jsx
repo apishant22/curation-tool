@@ -146,7 +146,9 @@ const Summary = () => {
                       </span>
                     </div>
                     {!post.summary && (
-                      <div className="text-center min-h-[32rem]">No summary</div>
+                      <div className="text-center min-h-[32rem]">
+                        No summary
+                      </div>
                     )}
                     <MarkdownContent content={post.summary} />
                   </div>
@@ -157,7 +159,9 @@ const Summary = () => {
                 <Buttons text={"Regenerate"} />
                 <Buttons text={"Back"} />
               </div>
-              <Modal/>
+              <div className="w-full flex justify-center">
+                <Modal />
+              </div>
             </div>
             <div className="flex-grow">
               <div className="flex p-3 flex-col gap-4 mt-6 max-w-[300px] max-h-screen overflow-auto">
