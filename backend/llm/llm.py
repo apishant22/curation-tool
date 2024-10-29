@@ -6,7 +6,6 @@ import requests
 import base64
 from backend.db import db_helper
 
-
 def request(orcid_id):
     reply = ""
 
@@ -27,7 +26,8 @@ def request(orcid_id):
                 "content": [
                     {
                         "type": "text",
-                        "text": "You are a professional writer that summarises the life and works of academic researchers from their published papers and their education and employment histories. The summaries are intended to be read by anyone on a site similar to Wikiepdia, and to not require specialist knowledge. The summary must only contain information that is provided in the prompt. Ignore any empty fields, do not mention anything about them in the summary. The summary should be written in a neutral tone and should not contain any personal opinions or biases. The summary should be approximately 400 words long."
+                        #"text": "You are a professional writer that summarises the life and works of academic researchers from their published papers and their education and employment histories. The summaries are intended to be read by anyone on a site similar to Wikiepdia, and to not require specialist knowledge. The summary must only contain information that is provided in the prompt. Ignore any empty fields, do not mention anything about them in the summary. The summary should be written in a neutral tone and should not contain any personal opinions or biases. The summary should be approximately 400 words long."
+                        "text": load_prompt()
                     }
                 ]
             },
@@ -81,5 +81,15 @@ def get_summary_text(reply):
         print(f"An error occurred while extracting summary text: {e}")
         return "Error: Unable to extract summary text."
     
+def load_prompt():
+    prompt_path = os.path.join(os.path.dirname(__file__), "prompt.txt")
+    try:
+        with open(prompt_path, "r") as file:
+            prompt = file.read()
+        return prompt
+    except FileNotFoundError:
+        print(f"Error: The file 'prompt.txt' was not found at {prompt_path}")
+        return "Default prompt text or handle the error appropriately."
+
 
 # request("0000-0002-1684-1539")
