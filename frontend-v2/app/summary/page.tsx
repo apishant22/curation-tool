@@ -173,7 +173,9 @@ function Page() {
                     </span>
                   </div>
                   {!data.summary && (
-                    <div className="text-center min-h-[32rem]">No summary</div>
+                    <div className="flex justify-center items-center min-h-80">
+                      <p>No summary available.</p>
+                    </div>
                   )}
                   <MarkdownContent content={data.summary} />
                 </div>
