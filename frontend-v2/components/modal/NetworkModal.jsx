@@ -35,7 +35,7 @@ const NetworkModal = () => {
   });
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const handleNodeHover = (node: any) => {
+  const handleNodeHover = (node) => {
     const canvas = document.querySelector("canvas");
     if (canvas) {
       canvas.style.cursor = node ? "pointer" : "default";
@@ -45,12 +45,13 @@ const NetworkModal = () => {
   useEffect(() => {
     const fg = forceGraphRef.current;
     if (fg) {
-      fg.d3Force("link").distance(200); // Adjust link distance here
+      fg.d3Force("link").distance(200);
+      fg.zoomToFit(400, 50);
     }
   }, []);
 
   const bodyContent = (
-    <div style={{ width: "600px", height: "600px" }}>
+    <div style={{ width: "100%", height: "650px" }}>
       <ForceGraph2D
         graphData={graphData}
         nodeAutoColorBy="id"
@@ -58,18 +59,18 @@ const NetworkModal = () => {
         linkDirectionalArrowRelPos={20}
         nodeCanvasObject={(node, ctx) => {
           ctx.beginPath();
-          ctx.arc(node.x!, node.y!, 5, 0, 2 * Math.PI, false);
+          ctx.arc(node.x, node.y, 5, 0, 2 * Math.PI, false);
           ctx.fillStyle = node.color || "blue";
           ctx.fill();
           ctx.font = "5px Arial";
           ctx.fillStyle = "black";
           ctx.textAlign = "center";
-          ctx.fillText(node.name, node.x!, node.y! - 10);
+          ctx.fillText(node.name, node.x, node.y - 10);
         }}
         nodePointerAreaPaint={(node, color, ctx) => {
           ctx.fillStyle = color;
           ctx.beginPath();
-          ctx.arc(node.x!, node.y!, 10, 0, 2 * Math.PI, false);
+          ctx.arc(node.x, node.y, 10, 0, 2 * Math.PI, false);
           ctx.fill();
         }}
         onNodeHover={handleNodeHover}
