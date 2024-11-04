@@ -28,7 +28,7 @@ const Search = () => {
         throw new Error(`HTTP error! Status: ${response.status}`);
       }
       const data = await response.json();
-      localStorage.setItem(
+      sessionStorage.setItem(
         `searchResults_${searchTerm}_${page}`,
         JSON.stringify(data)
       );
@@ -49,7 +49,7 @@ const Search = () => {
 
     try {
       const searchResults = await fetchSearchResults(input, counter);
-      localStorage.setItem(`searchResults`, JSON.stringify(searchResults));
+      sessionStorage.setItem(`searchResults`, JSON.stringify(searchResults));
       const searchParams = new URLSearchParams({
         query: input,
         page: counter.toString(),

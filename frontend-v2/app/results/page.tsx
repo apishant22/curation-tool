@@ -35,8 +35,8 @@ function ResultsPage() {
       }
       const data = await response.json();
 
-      // Cache the fetched data in localStorage
-      localStorage.setItem(
+      // Cache the fetched data in sessionStorage
+      sessionStorage.setItem(
         `searchResults_${searchTerm}_${page}`,
         JSON.stringify(data)
       );
@@ -55,7 +55,7 @@ function ResultsPage() {
     const page = parseInt(searchParams.get("page") || "0", 10);
 
     // Check for cached results
-    const cachedData = localStorage.getItem(
+    const cachedData = sessionStorage.getItem(
       `searchResults_${searchTerm}_${page}`
     );
     if (cachedData) {

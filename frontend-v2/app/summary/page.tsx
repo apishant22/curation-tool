@@ -75,7 +75,10 @@ function Page() {
         throw new Error(`HTTP error! Status: ${response.status}`);
       }
       const data = await response.json();
-      localStorage.setItem(`author_${name}_${profileId}`, JSON.stringify(data));
+      sessionStorage.setItem(
+        `author_${name}_${profileId}`,
+        JSON.stringify(data)
+      );
 
       return data;
     } catch (error) {
@@ -91,7 +94,7 @@ function Page() {
     const profileId = parseInt(searchParams.get("profileId") || "0", 10);
 
     // Check for cached results
-    const cachedData = localStorage.getItem(`author_${name}_${profileId}`);
+    const cachedData = sessionStorage.getItem(`author_${name}_${profileId}`);
     if (cachedData) {
       setData(JSON.parse(cachedData));
       setLoading(false);
@@ -118,7 +121,7 @@ function Page() {
     return (
       <div className="pt-48 flex justify-center">
         <Container>
-          <Loading loading={loading} />
+          <Loading />
         </Container>
       </div>
     );
@@ -148,7 +151,7 @@ function Page() {
     <div className="pt-24">
       <Container>
         <div className="flex flex-grow bg-white shadow-2xl">
-          <div className="w-[70%] flex flex-col">
+          <div className="w-[70%] p-4 flex flex-col">
             <div className="p-4">
               <AuthorHeader name={data.author_details.Name} />
               <DetailsCard
@@ -184,15 +187,17 @@ function Page() {
             <div className="flex gap-4 justify-center p-2 mb-6">
               <Button label={"Accept"} onClick={() => {}} />
               <Button label={"Regenerate"} onClick={() => {}} />
-              <Button label={"Back"} onClick={() => {}} />
-            </div>
-          </div>
-          <div className="flex-grow">
-            <div className="flex p-3 flex-col gap-4 mt-6 flex-grow overflow-auto">
-              <PublicationCard
-                publications={data.author_details.Publications}
+              <Button
+                label={"Back"}
+                onClick={() => {
+                  router.back();
+                }}
               />
             </div>
+          </div>
+
+          <div className="flex max-w-[600px] p-3 flex-col gap-4 mt-6 overflow-auto">
+            <PublicationCard publications={data.author_details.Publications} />
           </div>
         </div>
       </Container>
