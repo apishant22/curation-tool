@@ -7,6 +7,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import useNetworkModal from "@/app/hooks/useNetworkModal";
 
 interface CoAuthor {
   Name: string;
@@ -65,9 +66,16 @@ const PublicationCard: React.FC<PublicationCardProps> = ({ publications }) => {
     }
   });
 
+  const networkModal = useNetworkModal();
+
   return (
-    <div className="flex flex-col gap-4">
-      <div className="flex items-center gap-4 p-4">
+    <div className="flex flex-col">
+      <div
+        className="mx-auto flex items-center justify-center text-sm border-[1px] p-2 rounded-lg text-center max-w-[160px] cursor-pointer bg-green-500 transition duration-200 hover:scale-110"
+        onClick={networkModal.onOpen}>
+        <p className="text-white">Network of Authors</p>
+      </div>
+      <div className="flex justify-center gap-4 p-4">
         <Select
           value={sortBy}
           onValueChange={(value) => setSortBy(value as "date" | "citations")}>
