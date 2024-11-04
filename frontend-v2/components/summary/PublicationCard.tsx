@@ -132,9 +132,7 @@ const PublicationCard: React.FC<PublicationCardProps> = ({ publications }) => {
                     </p>
                     <ul className="list-disc list-inside text-xs text-gray-600">
                       {pub["Co-Authors"].map((coAuthor, idx) => (
-                        <li key={idx}>
-                          {coAuthor.Name} ({coAuthor["Orcid ID"]})
-                        </li>
+                        <li key={idx}>{coAuthor.Name}</li>
                       ))}
                     </ul>
                   </div>
