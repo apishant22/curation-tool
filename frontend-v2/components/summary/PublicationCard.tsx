@@ -1,13 +1,18 @@
+import React, { useState } from "react";
 import { Timeline } from "flowbite-react";
-import React from "react";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
-// Interface for each co-author
 interface CoAuthor {
   Name: string;
   "Orcid ID": string;
 }
 
-// Interface for each publication item
 interface Publication {
   Abstract: string;
   "Citation Count": number;
@@ -17,63 +22,125 @@ interface Publication {
   Title: string;
 }
 
-// Props interface for PublicationCard component
 interface PublicationCardProps {
-  publications: Publication[]; // Define as an array of Publication
+  publications: Publication[];
 }
 
 const PublicationCard: React.FC<PublicationCardProps> = ({ publications }) => {
+  const [sortBy, setSortBy] = useState<"date" | "citations">("date");
+  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
+
+  const sortedPublications = [...publications].sort((a, b) => {
+    if (sortBy === "date") {
+      // Handle cases where dates are unknown or invalid
+      const dateA =
+        a["Publication Date"] && a["Publication Date"] !== "Unknown"
+          ? new Date(a["Publication Date"]).getTime()
+          : sortOrder === "desc"
+          ? -Infinity
+          : Infinity;
+
+      const dateB =
+        b["Publication Date"] && b["Publication Date"] !== "Unknown"
+          ? new Date(b["Publication Date"]).getTime()
+          : sortOrder === "desc"
+          ? -Infinity
+          : Infinity;
+
+      // If both dates are valid, compare them
+      if (!isNaN(dateA) && !isNaN(dateB)) {
+        return sortOrder === "desc" ? dateB - dateA : dateA - dateB;
+      }
+
+      // If one date is invalid, push it to the end
+      if (isNaN(dateA)) return sortOrder === "desc" ? -1 : 1;
+      if (isNaN(dateB)) return sortOrder === "desc" ? 1 : -1;
+
+      return 0;
+    } else {
+      // Citation count sorting remains the same
+      return sortOrder === "desc"
+        ? b["Citation Count"] - a["Citation Count"]
+        : a["Citation Count"] - b["Citation Count"];
+    }
+  });
+
   return (
-    <div className="flex flex-col gap-10 p-4 mt-6">
-      <Timeline>
-        {publications.map((pub, index) => (
-          <Timeline.Item key={index}>
-            <Timeline.Point />
-            <Timeline.Content>
-              {/* Publication Date */}
-              <Timeline.Time>
-                {pub["Publication Date"] || "No time available"}
-              </Timeline.Time>
+    <div className="flex flex-col gap-4">
+      <div className="flex items-center gap-4 p-4">
+        <Select
+          value={sortBy}
+          onValueChange={(value) => setSortBy(value as "date" | "citations")}>
+          <SelectTrigger className="w-[180px]">
+            <SelectValue placeholder="Sort by..." />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="date">Publication Date</SelectItem>
+            <SelectItem value="citations">Citation Count</SelectItem>
+          </SelectContent>
+        </Select>
 
-              {/* Publication Title with DOI Link */}
-              <Timeline.Title className="text-sm hover:cursor-pointer hover:text-gray-400">
-                <a
-                  href={`https://dl.acm.org/doi/${pub.DOI}`}
-                  target="_blank"
-                  rel="noopener noreferrer">
-                  {pub.Title || "Untitled Publication"}
-                </a>
-              </Timeline.Title>
+        <Select
+          value={sortOrder}
+          onValueChange={(value) => setSortOrder(value as "asc" | "desc")}>
+          <SelectTrigger className="w-[180px]">
+            <SelectValue placeholder="Order..." />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="desc">Descending</SelectItem>
+            <SelectItem value="asc">Ascending</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
 
-              {/* DOI Link */}
-              {pub.DOI && (
-                <a
-                  href={`https://dl.acm.org/doi/${pub.DOI}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-xs font-normal text-gray-500 hover:cursor-pointer hover:text-black">
-                  DOI: {pub.DOI}
-                </a>
-              )}
+      <div className="p-4">
+        <Timeline>
+          {sortedPublications.map((pub, index) => (
+            <Timeline.Item key={index}>
+              <Timeline.Point />
+              <Timeline.Content>
+                <Timeline.Time>
+                  {pub["Publication Date"] || "No time available"}
+                </Timeline.Time>
 
-              {/* Citation Count */}
-              <p className="text-xs text-gray-500 mt-1">
-                Citation Count: {pub["Citation Count"]}
-              </p>
+                <Timeline.Title className="text-sm hover:cursor-pointer hover:text-gray-400">
+                  <a
+                    href={`https://dl.acm.org/doi/${pub.DOI}`}
+                    target="_blank"
+                    rel="noopener noreferrer">
+                    {pub.Title || "Untitled Publication"}
+                  </a>
+                </Timeline.Title>
 
-              {/* Co-Authors */}
-              <p className="text-sm font-medium text-gray-700 mt-3">Authors:</p>
-              <ul className="list-disc list-inside text-xs text-gray-600">
-                {pub["Co-Authors"].map((coAuthor, idx) => (
-                  <li key={idx}>
-                    {coAuthor.Name} ({coAuthor["Orcid ID"]})
-                  </li>
-                ))}
-              </ul>
-            </Timeline.Content>
-          </Timeline.Item>
-        ))}
-      </Timeline>
+                {pub.DOI && (
+                  <a
+                    href={`https://dl.acm.org/doi/${pub.DOI}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-xs font-normal text-gray-500 hover:cursor-pointer hover:text-black">
+                    DOI: {pub.DOI}
+                  </a>
+                )}
+
+                <p className="text-xs text-gray-500 mt-1">
+                  Citation Count: {pub["Citation Count"]}
+                </p>
+
+                <p className="text-sm font-medium text-gray-700 mt-3">
+                  Authors:
+                </p>
+                <ul className="list-disc list-inside text-xs text-gray-600">
+                  {pub["Co-Authors"].map((coAuthor, idx) => (
+                    <li key={idx}>
+                      {coAuthor.Name} ({coAuthor["Orcid ID"]})
+                    </li>
+                  ))}
+                </ul>
+              </Timeline.Content>
+            </Timeline.Item>
+          ))}
+        </Timeline>
+      </div>
     </div>
   );
 };
