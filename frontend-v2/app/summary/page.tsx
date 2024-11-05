@@ -6,6 +6,8 @@ import DetailsCard from "@/components/summary/DetailsCard";
 import Loading from "@/components/summary/Loading";
 import MarkdownContent from "@/components/summary/MarkdownContent";
 import PublicationCard from "@/components/summary/PublicationCard";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { AlertCircle } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import React, { useEffect, useState } from "react";
 
@@ -137,11 +139,47 @@ function Page() {
     );
   }
 
-  if (!data) {
+  if (!data || data.author_details == null) {
+    const cachedData = sessionStorage.getItem(`currentPageUrl`);
+
     return (
       <div className="pt-48 flex justify-center">
         <Container>
-          <p className="text-red-500">No data available.</p>
+          <div className="min-h-[50vh] flex items-center justify-center p-4">
+            <div className="max-w-md w-full">
+              <Alert variant="destructive" className="mb-4">
+                <AlertCircle className="h-4 w-4" />
+                <AlertTitle className="ml-2">Error</AlertTitle>
+                <AlertDescription className="mt-2">
+                  We couldn&apos;t load the required data. This might be due to
+                  a network issue or the content might be unavailable.
+                  <p className="font-bold text-red-800">
+                    Sometimes the database need a little bit of nudge before it
+                    can start working..
+                  </p>
+                </AlertDescription>
+              </Alert>
+
+              <div className="flex flex-col gap-4">
+                <Button
+                  onClick={() => {
+                    // Check if cachedData exists
+                    if (cachedData) {
+                      router.push(cachedData); // Push to cached URL
+                    } else {
+                      console.warn("No cached URL found in sessionStorage");
+                    }
+                  }}
+                  label={"Go back to results page"}
+                  outline
+                />
+
+                <p className="text-sm text-gray-500 text-center">
+                  If the problem persists, please try again later.
+                </p>
+              </div>
+            </div>
+          </div>
         </Container>
       </div>
     );

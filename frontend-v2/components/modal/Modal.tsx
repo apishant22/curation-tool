@@ -66,7 +66,7 @@ const Modal: React.FC<ModalProps> = ({
                 <div className="text-lg font-semibold">{title}</div>
               </div>
               {/* BODY */}
-              <div className="relative flex-auto flex justify-center items-center p-6">
+              <div className="relative flex-auto flex justify-center overflow-auto items-center p-6">
                 <div>{body}</div>
               </div>
               {/* FOOTER */}

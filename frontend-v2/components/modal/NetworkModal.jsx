@@ -5,7 +5,7 @@ import React, { useEffect, useRef, useState } from "react";
 import Modal from "./Modal";
 import dynamic from "next/dynamic";
 
-const ForceGraph2D = dynamic(
+const ForceGraph3D = dynamic(
   () => import("react-force-graph").then((mod) => mod.ForceGraph2D),
   {
     ssr: false,
@@ -18,11 +18,11 @@ const NetworkModal = () => {
   const forceGraphRef = useRef();
   const [graphData] = useState({
     nodes: [
-      { id: "adriana", name: "Adriana Dapena" },
-      { id: "paula", name: "Paula M. Castro" },
-      { id: "maria", name: "Maria J. Souto-Salorio" },
-      { id: "ana", name: "Ana D. Tarrio-Tobar" },
-      { id: "francisco", name: "Francisco J. Vazquez-Araujo" },
+      { id: "adriana", name: "Adriana Dapena", group: 1 },
+      { id: "paula", name: "Paula M. Castro", group: 2 },
+      { id: "maria", name: "Maria J. Souto-Salorio", group: 3 },
+      { id: "ana", name: "Ana D. Tarrio-Tobar", group: 3 },
+      { id: "francisco", name: "Francisco J. Vazquez-Araujo", group: 2 },
       // Add additional nodes for each unique collaborator or paper title.
     ],
     links: [
@@ -46,17 +46,20 @@ const NetworkModal = () => {
     const fg = forceGraphRef.current;
     if (fg) {
       fg.d3Force("link").distance(200);
-      fg.zoomToFit(400, 50);
+      fg.zoomToFit(400, 100);
     }
   }, []);
 
   const bodyContent = (
-    <div style={{ width: "100%", height: "650px" }}>
-      <ForceGraph2D
+    <div className="relative w-full h-full flex justify-center items-center">
+      <ForceGraph3D
         graphData={graphData}
-        nodeAutoColorBy="id"
-        linkDirectionalArrowLength={2}
-        linkDirectionalArrowRelPos={20}
+        width={600}
+        height={600}
+        nodeLabel="id"
+        nodeAutoColorBy="group"
+        linkDirectionalParticles="value"
+        linkDirectionalParticleSpeed={(d) => d.value * 0.0001}
         nodeCanvasObject={(node, ctx) => {
           ctx.beginPath();
           ctx.arc(node.x, node.y, 5, 0, 2 * Math.PI, false);
@@ -67,12 +70,12 @@ const NetworkModal = () => {
           ctx.textAlign = "center";
           ctx.fillText(node.name, node.x, node.y - 10);
         }}
-        nodePointerAreaPaint={(node, color, ctx) => {
-          ctx.fillStyle = color;
-          ctx.beginPath();
-          ctx.arc(node.x, node.y, 10, 0, 2 * Math.PI, false);
-          ctx.fill();
-        }}
+        // nodePointerAreaPaint={(node, color, ctx) => {
+        //   ctx.fillStyle = color;
+        //   ctx.beginPath();
+        //   ctx.arc(node.x, node.y, 10, 0, 2 * Math.PI, false);
+        //   ctx.fill();
+        // }}
         onNodeHover={handleNodeHover}
       />
     </div>

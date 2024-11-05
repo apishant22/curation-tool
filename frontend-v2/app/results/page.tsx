@@ -1,6 +1,6 @@
 "use client";
 import React, { useEffect, useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import PaginationControls from "@/components/results/PaginationControls";
 import { MdOutlineWork } from "react-icons/md";
 
@@ -20,6 +20,7 @@ interface SearchResponse {
 
 function ResultsPage() {
   const searchParams = useSearchParams();
+  const pathname = usePathname();
   const router = useRouter();
   const [searchData, setSearchData] = useState<SearchResponse | null>(null);
   const [loading, setLoading] = useState(true);
@@ -51,8 +52,17 @@ function ResultsPage() {
   };
 
   useEffect(() => {
+    // Combine pathname and search params without the origin
+    const currentUrl = `${pathname}?${searchParams.toString()}`;
+
+    // Store the relative URL in sessionStorage
+    sessionStorage.setItem("currentPagePath", currentUrl);
+  }, [pathname, searchParams]);
+
+  useEffect(() => {
     const searchTerm = searchParams.get("query") || "";
     const page = parseInt(searchParams.get("page") || "0", 10);
+    // Store URL in cached session storage
 
     // Check for cached results
     const cachedData = sessionStorage.getItem(
