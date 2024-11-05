@@ -6,7 +6,6 @@ import json
 from fuzzywuzzy import fuzz, process
 from backend.db.db_helper import *
 from deepdiff import DeepDiff
-from sqlalchemy.orm.exc import NoResultFound
 
 # Function to search ORCID by ORCID ID and get author name
 def search_orcid_by_id(orcid_id):
@@ -549,12 +548,9 @@ def process_biography(orcid_id):
         print(f"Network error for ORCID ID: {orcid_id}")
         return {"Biography": "No biographical information available."}
 
-
-
-
 # Function to format date from ORCID data
 def format_date(date_data):
-    if not date_data:
+    if not isinstance(date_data, dict):
         return 'Unknown'
 
     year = date_data.get('year', {}).get('value')
@@ -570,65 +566,49 @@ def format_date(date_data):
             return str(year)
     return 'Unknown'
 
-# Function to normalise dates in JSON
-def normalize_dates(details):
-    for employment in details.get('Employment History', []):
-        if isinstance(employment.get('Start Date'), datetime):
-            employment['Start Date'] = employment['Start Date'].strftime("%Y-%m-%d")
-        elif employment.get('Start Date') is None:
-            employment['Start Date'] = "Unknown"
-        elif isinstance(employment.get('Start Date'), str):
-            try:
-                parsed_date = datetime.strptime(employment['Start Date'], "%d/%m/%Y")
-                employment['Start Date'] = parsed_date.strftime("%Y-%m-%d")
-            except ValueError:
-                pass
+def normalize_date_format(date_str):
+    try:
+        if '/' in date_str:
+            date_obj = datetime.strptime(date_str, "%d/%m/%Y")
+        elif '-' in date_str:
+            date_obj = datetime.strptime(date_str, "%Y-%m-%d")
+        else:
+            return 'Unknown'
+        return date_obj.strftime("%Y-%m-%d")
+    except ValueError:
+        return 'Unknown'
 
-        if isinstance(employment.get('End Date'), datetime):
-            employment['End Date'] = employment['End Date'].strftime("%Y-%m-%d")
-        elif employment.get('End Date') is None:
-            employment['End Date'] = "Unknown"
-        elif isinstance(employment.get('End Date'), str):
-            try:
-                parsed_date = datetime.strptime(employment['End Date'], "%d/%m/%Y")
-                employment['End Date'] = parsed_date.strftime("%Y-%m-%d")
-            except ValueError:
-                pass
 
+def normalize_placeholders(data):
+    if isinstance(data.get('Biography'), dict):
+        data['Biography'] = [data['Biography'].get('Biography', "No biographical information available.")]
+    elif isinstance(data.get('Biography'), str):
+        data['Biography'] = [data['Biography']]
+    elif data.get('Biography') is None:
+        data['Biography'] = ["No biographical information available."]
+
+    for employment in data.get('Employment History', []):
         employment["Role"] = employment.get("Role") or "Unknown"
         employment["Department"] = employment.get("Department") or "Unknown Department"
+        employment["Start Date"] = normalize_date_format(employment.get("Start Date", "Unknown"))
+        employment["End Date"] = normalize_date_format(employment.get("End Date", "Unknown"))
 
-    for publication in details.get('Publications', []):
-        if isinstance(publication.get('Publication Date'), datetime):
-            publication['Publication Date'] = publication['Publication Date'].strftime("%Y-%m-%d")
-        elif publication.get('Publication Date') is None:
-            publication['Publication Date'] = "Unknown"
-        elif isinstance(publication.get('Publication Date'), str):
-            try:
-                parsed_date = datetime.strptime(publication['Publication Date'], "%d/%m/%Y")
-                publication['Publication Date'] = parsed_date.strftime("%Y-%m-%d")
-            except ValueError:
-                pass
+    for education in data.get('Education History', []):
+        education["Institution"] = education.get("Institution") or "Unknown Institution"
+        education["Role"] = education.get("Role") or "N/A"
+        education["Department"] = education.get("Department") or "N/A"
+        education["Start Date"] = normalize_date_format(education.get("Start Date", "Unknown"))
+        education["End Date"] = normalize_date_format(education.get("End Date", "Unknown"))
 
-    if isinstance(details.get('Biography'), str):
-        details['Biography'] = [details['Biography']]
-    elif details.get('Biography') is None:
-        details['Biography'] = ["No biographical information available."]
-
-    return details
+    return data
 
 # Fucntion to handle logic on when to scrape and etc.
-
 def update_author_if_needed(author_name, profile_link):
     try:
         scraped_author_details_json = scrape_author_details(author_name, profile_link)
 
         if not scraped_author_details_json:
             print("No author details found in scrape_author_details.")
-            return None, None
-
-        if not isinstance(scraped_author_details_json, str):
-            print("Unexpected data format for scraped author details.")
             return None, None
 
         try:
@@ -641,6 +621,8 @@ def update_author_if_needed(author_name, profile_link):
             print("Parsed author details are not in dictionary format.")
             return None, None
 
+        scraped_author_details = normalize_placeholders(scraped_author_details)
+
         orcid_id = scraped_author_details.get("Orcid ID")
         if not orcid_id:
             print("ORCID ID not found in scraped author details. Cannot proceed without ORCID ID.")
@@ -648,41 +630,29 @@ def update_author_if_needed(author_name, profile_link):
 
         author_details_db = get_author_details_from_db(orcid_id)
 
-        if author_details_db is not None and not isinstance(author_details_db, dict):
-            print("Database returned author details in an unexpected format.")
-            return None, None
-
-        scraped_author_details = normalize_dates(scraped_author_details)
-        author_details_db = normalize_dates(author_details_db) if author_details_db else {}
-
-        print("\n--- Scraped Author Details (Before Processing) ---")
-        print(json.dumps(scraped_author_details, indent=4))
-
-        if author_details_db:
-            print("\n--- Existing Database Author Details ---")
-            print(json.dumps(author_details_db, indent=4))
-
-            diff = DeepDiff(author_details_db, scraped_author_details, ignore_order=True, ignore_string_case=True)
-
-            if not diff:
-                summary = get_researcher_summary(orcid_id)
-                if summary and summary != "Summary not available.":
-                    print("Data is up to date and summary is present. Returning existing summary.")
-                    return summary, author_details_db
-                else:
-                    print("Summary is missing.")
-                    return None, author_details_db
-            else:
-                print(f"\n--- Data differences found for ORCID ID {orcid_id} ---")
-                print(diff)
-
-                update_author_details_in_db(scraped_author_details)
-                print("Database updated with the latest details.")
-                return None, scraped_author_details
-
-        else:
+        if author_details_db is None:
             print(f"No author found with ORCID ID: {orcid_id}. Adding new details to the database.")
             store_author_details_in_db(scraped_author_details)
+            return None, scraped_author_details
+
+        author_details_db = normalize_placeholders(author_details_db)
+
+        diff = DeepDiff(author_details_db, scraped_author_details, ignore_order=True, ignore_string_case=True)
+
+        if not diff:
+            summary = get_researcher_summary(orcid_id)
+            if summary and summary != "Summary not available.":
+                print("Data is up to date and summary is present. Returning existing summary.")
+                return summary, author_details_db
+            else:
+                print("Summary is missing.")
+                return None, author_details_db
+        else:
+            print(f"\n--- Data differences found for ORCID ID {orcid_id} ---")
+            print(diff)
+
+            update_author_details_in_db(scraped_author_details)
+            print("Database updated with the latest details.")
             return None, scraped_author_details
 
     except Exception as e:
@@ -704,7 +674,7 @@ if authors:
     print(authors)
 else:
     print("No authors found.")
-
+'''
 selected_profile_author = "Adriana Wilde"
 selected_profile_link = "https://dl.acm.org/profile/99659070982"
 
@@ -712,4 +682,3 @@ author_details_json = update_author_if_needed(selected_profile_author, selected_
 
 print("\nDetailed Author Information:")
 print(author_details_json)
-'''
