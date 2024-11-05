@@ -247,6 +247,7 @@ def get_estimated_max_pages(input_value):
 def find_author_orcid_by_dois(publications, target_author_name):
     closest_match = None
     highest_similarity = 0
+    similarity_threshold = 85
 
     for publication in publications:
         doi = publication['DOI']
@@ -257,14 +258,11 @@ def find_author_orcid_by_dois(publications, target_author_name):
         for author in authors:
             if author['Orcid ID']:
                 similarity = fuzz.ratio(author['Name'].lower(), target_author_name.lower())
-                if similarity > highest_similarity:
+                if similarity > highest_similarity and similarity >= similarity_threshold:
                     highest_similarity = similarity
                     closest_match = author['Orcid ID']
 
-    if closest_match:
-        return closest_match
-
-    return None
+    return closest_match
 
 # Function to scrape detailed information of an author from ACM profile link
 def scrape_author_details(author_name, profile_link):
@@ -566,6 +564,25 @@ def format_date(date_data):
             return str(year)
     return 'Unknown'
 
+# Function to format date from ORCID data
+def format_date(date_data):
+    if not isinstance(date_data, dict):
+        return 'Unknown'
+
+    year = date_data.get('year', {}).get('value')
+    month = date_data.get('month', {}).get('value')
+    day = date_data.get('day', {}).get('value')
+
+    if year:
+        if month and day:
+            return f"{int(day):02}/{int(month):02}/{year}"
+        elif month:
+            return f"{int(month):02}/{year}"
+        else:
+            return str(year)
+    return 'Unknown'
+
+# Function to normalize date format
 def normalize_date_format(date_str):
     try:
         if '/' in date_str:
@@ -578,8 +595,9 @@ def normalize_date_format(date_str):
     except ValueError:
         return 'Unknown'
 
-
+# Function to normalize placeholder values
 def normalize_placeholders(data):
+    # Normalizing Biography
     if isinstance(data.get('Biography'), dict):
         data['Biography'] = [data['Biography'].get('Biography', "No biographical information available.")]
     elif isinstance(data.get('Biography'), str):
@@ -588,21 +606,44 @@ def normalize_placeholders(data):
         data['Biography'] = ["No biographical information available."]
 
     for employment in data.get('Employment History', []):
-        employment["Role"] = employment.get("Role") or "Unknown"
-        employment["Department"] = employment.get("Department") or "Unknown Department"
+        employment["Organization"] = employment.get("Organization", "Unknown Organization")
+        employment["Role"] = employment.get("Role", "Unknown")
+        employment["Department"] = employment.get("Department", "Unknown Department")
         employment["Start Date"] = normalize_date_format(employment.get("Start Date", "Unknown"))
         employment["End Date"] = normalize_date_format(employment.get("End Date", "Unknown"))
 
     for education in data.get('Education History', []):
-        education["Institution"] = education.get("Institution") or "Unknown Institution"
-        education["Role"] = education.get("Role") or "N/A"
-        education["Department"] = education.get("Department") or "N/A"
+        education["Institution"] = education.get("Institution", "Unknown Institution")
+        education["Role"] = education.get("Role", "N/A")
+        education["Department"] = education.get("Department", "N/A")
         education["Start Date"] = normalize_date_format(education.get("Start Date", "Unknown"))
         education["End Date"] = normalize_date_format(education.get("End Date", "Unknown"))
 
+    for publication in data.get('Publications', []):
+        if "Co-Authors" in publication:
+            seen_co_authors = set()
+            unique_co_authors = []
+            for co_author in publication["Co-Authors"]:
+                co_author_key = (co_author.get("Name", "").strip().lower(), co_author.get("Orcid ID", ""))
+                if co_author_key not in seen_co_authors:
+                    seen_co_authors.add(co_author_key)
+                    unique_co_authors.append(co_author)
+            publication["Co-Authors"] = unique_co_authors
+
+            publication["Co-Authors"] = sorted(
+                publication["Co-Authors"],
+                key=lambda x: (x.get("Name", "").lower(), x.get("Orcid ID", ""))
+            )
+
+    data['Publications'] = sorted(
+        data.get('Publications', []),
+        key=lambda x: (x.get("Title", "").lower(), x.get("DOI", ""))
+    )
+
     return data
 
-# Fucntion to handle logic on when to scrape and etc.
+
+# Function to handle logic on when to scrape and update
 def update_author_if_needed(author_name, profile_link):
     try:
         scraped_author_details_json = scrape_author_details(author_name, profile_link)
@@ -611,15 +652,7 @@ def update_author_if_needed(author_name, profile_link):
             print("No author details found in scrape_author_details.")
             return None, None
 
-        try:
-            scraped_author_details = json.loads(scraped_author_details_json)
-        except json.JSONDecodeError:
-            print("Failed to parse JSON from scraped author details.")
-            return None, None
-
-        if not isinstance(scraped_author_details, dict):
-            print("Parsed author details are not in dictionary format.")
-            return None, None
+        scraped_author_details = json.loads(scraped_author_details_json)
 
         scraped_author_details = normalize_placeholders(scraped_author_details)
 
@@ -637,8 +670,7 @@ def update_author_if_needed(author_name, profile_link):
 
         author_details_db = normalize_placeholders(author_details_db)
 
-        diff = DeepDiff(author_details_db, scraped_author_details, ignore_order=True, ignore_string_case=True)
-
+        diff = DeepDiff(author_details_db, scraped_author_details, ignore_order=True, ignore_string_case=True, report_repetition=True)
         if not diff:
             summary = get_researcher_summary(orcid_id)
             if summary and summary != "Summary not available.":
@@ -649,15 +681,24 @@ def update_author_if_needed(author_name, profile_link):
                 return None, author_details_db
         else:
             print(f"\n--- Data differences found for ORCID ID {orcid_id} ---")
-            print(diff)
+            print(json.dumps(diff, indent=4))
+
+            print(f"Updating author details in the database for ORCID ID: {orcid_id}")
+            print("Updated Author Details:", json.dumps(scraped_author_details, indent=4))
 
             update_author_details_in_db(scraped_author_details)
-            print("Database updated with the latest details.")
+
+            author_details_db_after_update = get_author_details_from_db(orcid_id)
+            print("Author Details After Update:", json.dumps(author_details_db_after_update, indent=4))
+
             return None, scraped_author_details
 
+    except KeyError as e:
+        print(f"KeyError when trying to update: {e}")
     except Exception as e:
         print(f"An error occurred: {e}")
         return None, None
+
 
 
 
@@ -674,11 +715,15 @@ if authors:
     print(authors)
 else:
     print("No authors found.")
-'''
+
+author_name =  "huiqiang jia"
+profile_link = "https://dl.acm.org/profile/99659836122"
+
 selected_profile_author = "Adriana Wilde"
 selected_profile_link = "https://dl.acm.org/profile/99659070982"
 
-author_details_json = update_author_if_needed(selected_profile_author, selected_profile_link)
+author_details_json = update_author_if_needed(author_name, profile_link)
 
 print("\nDetailed Author Information:")
 print(author_details_json)
+'''

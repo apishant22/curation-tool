@@ -73,7 +73,15 @@ def test_author_in_database_with_updated_data(mock_update_author_details, mock_g
 
     update_author_if_needed("John Doe", "profile_link")
 
-    mock_update_author_details.assert_called_once_with(scraped_data)
+    expected_updated_data = {
+        "Orcid ID": "0000-0002-1684-1539",
+        "Name": "John Doe",
+        "Biography": ["Updated biography."],
+        "Employment History": [],
+        "Education History": [],
+        "Publications": []
+    }
+    mock_update_author_details.assert_called_once_with(expected_updated_data)
 
 
 @patch('backend.app.author_scraper.scrape_author_details')
