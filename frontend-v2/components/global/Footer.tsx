@@ -1,3 +1,5 @@
+"use client";
+
 import React from "react";
 import Logo from "../navbar/Logo";
 import Container from "./Container";

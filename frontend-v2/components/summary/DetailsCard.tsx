@@ -1,3 +1,5 @@
+"use client";
+
 import { Accordion } from "flowbite-react";
 import { BookOpen, Building2, Calendar, GraduationCap } from "lucide-react";
 import React from "react";
