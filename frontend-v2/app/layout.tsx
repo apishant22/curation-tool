@@ -18,7 +18,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className="flex min-h-screen flex-col">
+      <body
+        className="flex min-h-screen flex-col"
+        suppressHydrationWarning={true}>
         <ClientOnly>
           <Toaster position="top-right" />
           <NetworkModal />
