@@ -66,6 +66,8 @@ function Page() {
   const router = useRouter();
   const [data, setData] = useState<AuthorResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const name = searchParams.get("name") || "";
+  const profileId = parseInt(searchParams.get("profileId") || "0", 10);
 
   const fetchAuthor = async (name: string, profileId: number) => {
     try {
@@ -92,9 +94,6 @@ function Page() {
   };
 
   useEffect(() => {
-    const name = searchParams.get("name") || "";
-    const profileId = parseInt(searchParams.get("profileId") || "0", 10);
-
     // Check for cached results
     const cachedData = sessionStorage.getItem(`author_${name}_${profileId}`);
     if (cachedData) {
@@ -117,7 +116,7 @@ function Page() {
           setLoading(false);
         });
     }
-  }, [searchParams, router]);
+  }, [searchParams, router, name, profileId]);
 
   if (loading) {
     return (
@@ -140,7 +139,8 @@ function Page() {
   }
 
   if (!data || data.author_details == null) {
-    const cachedData = sessionStorage.getItem(`currentPageUrl`);
+    const cachedData = sessionStorage.getItem(`currentPagePath`);
+    sessionStorage.removeItem(`author_${name}_${profileId}`);
 
     return (
       <div className="pt-48 flex justify-center">
@@ -173,7 +173,6 @@ function Page() {
                   label={"Go back to results page"}
                   outline
                 />
-
                 <p className="text-sm text-gray-500 text-center">
                   If the problem persists, please try again later.
                 </p>
