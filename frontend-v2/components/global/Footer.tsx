@@ -12,9 +12,17 @@ const Footer = () => {
         <div className="flex items-center justify-between p-3 md:gap-6">
           <Logo />
           <div className="flex gap-6 items-center">
-            <FaInstagram size={36} color="white" />
-            <FaLinkedin size={36} color="white" />
-            <FaTwitter size={36} color="white" />
+            <a href="https://www.instagram.com/acmwomen/" target="_blank">
+              <FaInstagram size={36} color="white" />
+            </a>
+            <a
+              href="https://www.linkedin.com/company/acm-w-acms-women-in-computing/"
+              target="_blank">
+              <FaLinkedin size={36} color="white" />
+            </a>
+            <a href="http://twitter.com/officialacmw" target="_blank">
+              <FaTwitter size={36} color="white" />
+            </a>
           </div>
         </div>
       </Container>
