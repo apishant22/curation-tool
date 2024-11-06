@@ -151,7 +151,7 @@ function ResultsPage() {
                 <p className="flex items-center space-x-1">
                   <span className="font-medium">ACM DL:</span>
                   <a
-                    href={`https://orcid.org/${author["Orcid ID"]}`}
+                    href={`${author["Profile Link"]}`}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="hover:text-blue-600">
