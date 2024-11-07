@@ -1,7 +1,7 @@
 import os
 from dotenv import load_dotenv
 
-load_dotenv('llm.env')
+load_dotenv('backend\llm\llm.env')
 
 azure_openai_endpoint = os.getenv('AZURE_OPENAI_ENDPOINT')
 azure_openai_key_key = os.getenv('AZURE_OPENAI_KEY')
