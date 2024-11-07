@@ -128,7 +128,7 @@ function Page() {
     );
   }
 
-  if (error) {
+  if (error || !data) {
     return (
       <div className="pt-48 flex justify-center">
         <Container>
@@ -138,7 +138,7 @@ function Page() {
     );
   }
 
-  if (!data || data.author_details == null) {
+  if (error && data.author_details == null) {
     const cachedData = sessionStorage.getItem(`currentPagePath`);
     sessionStorage.removeItem(`author_${name}_${profileId}`);
 
@@ -190,7 +190,9 @@ function Page() {
         <div className="flex flex-grow bg-white shadow-2xl">
           <div className="w-[70%] p-4 flex flex-col">
             <div className="p-4">
-              <AuthorHeader name={data.author_details.Name} />
+              <AuthorHeader
+                name={data?.author_details?.Name || "No name available"}
+              />
               <DetailsCard
                 bioTitle="Biography"
                 bioContent={
@@ -234,7 +236,9 @@ function Page() {
           </div>
 
           <div className="flex max-w-[600px] p-3 flex-col gap-4 mt-6 overflow-auto">
-            <PublicationCard publications={data.author_details.Publications} />
+            <PublicationCard
+              publications={data?.author_details?.Publications}
+            />
           </div>
         </div>
       </Container>

@@ -131,13 +131,16 @@ const PublicationCard: React.FC<PublicationCardProps> = ({ publications }) => {
                   </a>
                 )}
 
-                <p className="text-xs text-gray-500 mt-1">
-                  Citation Count: {pub["Citation Count"]}
+                <p className="text-sm font-semibold text-gray-700 w-fit">
+                  Citations:{" "}
+                  <span className="px-2 rounded-md bg-yellow-200 text-black">
+                    {pub["Citation Count"]}
+                  </span>
                 </p>
                 {pub["Co-Authors"].length > 0 && (
                   <div>
                     <p className="text-sm font-medium text-gray-700 mt-3">
-                      Authors:
+                      Co-Authors:
                     </p>
                     <ul className="list-disc list-inside text-xs text-gray-600">
                       {pub["Co-Authors"].map((coAuthor, idx) => (
