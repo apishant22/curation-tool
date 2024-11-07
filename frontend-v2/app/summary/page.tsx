@@ -187,62 +187,72 @@ function Page() {
   return (
     <div className="pt-24">
       <Container>
-        <div className="flex flex-grow bg-white shadow-2xl">
-          <div className="w-[70%] p-4 flex flex-col">
-            <div className="p-4">
-              <AuthorHeader
-                name={data?.author_details?.Name || "No name available"}
-              />
-              <DetailsCard
-                bioTitle="Biography"
-                bioContent={
-                  data.author_details?.Biography?.Biography ||
-                  "No biography available."
-                } // Ensure it's an array
-                eduTitle="Education History"
-                eduContent={data?.author_details?.["Education History"] || []} // Ensure it's an array
-                empTitle="Employment History"
-                empContent={data?.author_details?.["Employment History"] || []} // Ensure it's an array
-              />
-            </div>
-            <div className="p-6 ">
-              <div className="flex-grow flex items-stretch bg-gray-100 rounded-lg">
-                {/* Added bg color to see the expansion */}
-                <div className="w-full">
-                  <div className="mt-4 flex justify-center">
-                    <span className="text-xs bg-gradient-to-r from-blue-500 to-purple-500 text-white px-3 py-1 rounded-full font-medium">
-                      AI-Generated Summary
-                    </span>
-                  </div>
-                  {!data.summary && (
-                    <div className="flex justify-center items-center min-h-80">
-                      <p>No summary available.</p>
+        {loading ? (
+          <Loading />
+        ) : (
+          <>
+            <div className="flex flex-grow bg-white shadow-2xl">
+              <div className="w-[70%] p-4 flex flex-col">
+                <div className="p-4">
+                  <AuthorHeader
+                    name={data?.author_details?.Name || "No name available"}
+                  />
+                  <DetailsCard
+                    bioTitle="Biography"
+                    bioContent={
+                      data.author_details?.Biography?.Biography ||
+                      "No biography available."
+                    } // Ensure it's an array
+                    eduTitle="Education History"
+                    eduContent={
+                      data?.author_details?.["Education History"] || []
+                    } // Ensure it's an array
+                    empTitle="Employment History"
+                    empContent={
+                      data?.author_details?.["Employment History"] || []
+                    } // Ensure it's an array
+                  />
+                </div>
+                <div className="p-6 ">
+                  <div className="flex-grow flex items-stretch bg-gray-100 rounded-lg">
+                    {/* Added bg color to see the expansion */}
+                    <div className="w-full">
+                      <div className="mt-4 flex justify-center">
+                        <span className="text-xs bg-gradient-to-r from-blue-500 to-purple-500 text-white px-3 py-1 rounded-full font-medium">
+                          AI-Generated Summary
+                        </span>
+                      </div>
+                      {!data.summary && (
+                        <div className="flex justify-center items-center min-h-80">
+                          <p>No summary available.</p>
+                        </div>
+                      )}
+                      <div className="p-6">
+                        <MarkdownContent content={data?.summary} />
+                      </div>
                     </div>
-                  )}
-                  <div className="p-6">
-                    <MarkdownContent content={data?.summary} />
                   </div>
                 </div>
+                <div className="flex gap-4 justify-center p-2 mb-6">
+                  <Button label={"Accept"} onClick={() => {}} />
+                  <Button label={"Regenerate"} onClick={() => {}} />
+                  <Button
+                    label={"Back"}
+                    onClick={() => {
+                      router.back();
+                    }}
+                  />
+                </div>
+              </div>
+
+              <div className="flex max-w-[600px] p-3 flex-col gap-4 mt-6 overflow-auto">
+                <PublicationCard
+                  publications={data?.author_details?.Publications || []}
+                />
               </div>
             </div>
-            <div className="flex gap-4 justify-center p-2 mb-6">
-              <Button label={"Accept"} onClick={() => {}} />
-              <Button label={"Regenerate"} onClick={() => {}} />
-              <Button
-                label={"Back"}
-                onClick={() => {
-                  router.back();
-                }}
-              />
-            </div>
-          </div>
-
-          <div className="flex max-w-[600px] p-3 flex-col gap-4 mt-6 overflow-auto">
-            <PublicationCard
-              publications={data?.author_details?.Publications || []}
-            />
-          </div>
-        </div>
+          </>
+        )}
       </Container>
     </div>
   );
