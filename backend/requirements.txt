@@ -5,6 +5,7 @@ certifi==2024.8.30
 charset-normalizer==3.4.0
 click==8.1.7
 deepdiff==8.0.1
+duckduckgo_search==6.3.3
 Flask==3.0.3
 Flask-Cors==5.0.0
 fuzzywuzzy==0.18.0
@@ -13,6 +14,7 @@ importlib_metadata==8.5.0
 itsdangerous==2.2.0
 Jinja2==3.1.4
 MarkupSafe==3.0.2
+openai==1.52.1
 orderly-set==5.2.2
 pyodbc==5.2.0
 python-dotenv==1.0.1
