@@ -297,144 +297,100 @@ def update_author_details_in_db(author_details, session=None):
 
     with get_session() as session:
         try:
-            existing_researcher = get_records(Researcher, filters={"orcid": orcid_id})
-        except InvalidRequestError as e:
-            print(f"Error retrieving records: {e}")
-            return
+            existing_researchers = get_records(Researcher, filters={"orcid": orcid_id})
 
-        if existing_researcher:
-            update_record(
-                Researcher,
-                filters={"orcid": orcid_id},
-                updates={"name": author_name, "bio": bio, "summary": None}
-            )
-        else:
-            try:
-                new_researcher = Researcher(orcid=orcid_id, name=author_name, bio=bio, summary=None)
-                session.add(new_researcher)
-                session.commit()
-            except (InvalidRequestError, IntegrityError) as e:
-                session.rollback()
-                print(f"Failed to add researcher '{author_name}' to the database: {e}")
+            if len(existing_researchers) > 1:
+                print(f"Error: Multiple researchers found with ORCID ID {orcid_id}.")
                 return
 
-        for pub in publications:
-            if not isinstance(pub, dict):
-                print("Skipping invalid publication entry: not a dictionary.")
-                continue
+            existing_researcher = existing_researchers[0] if existing_researchers else None
 
-            doi = pub['DOI']
-            title = pub['Title']
-            pub_date = convert_date_string(pub['Publication Date'])
-            abstract = pub['Abstract']
-            citation_count = pub.get('Citation Count', 0)
-
-            existing_pub = session.query(Paper).filter_by(doi=doi).first()
-            if existing_pub:
+            if existing_researcher:
                 update_record(
-                    Paper,
-                    filters={"doi": doi},
-                    updates={
-                        "title": title,
-                        "publication_date": pub_date,
-                        "abstract": abstract,
-                        "citations": citation_count
-                    }
+                    Researcher,
+                    filters={"orcid": orcid_id},
+                    updates={"name": author_name, "bio": bio, "summary": None}
                 )
             else:
-                new_paper = Paper(doi=doi, title=title, publication_date=pub_date, abstract=abstract, citations=citation_count)
-                session.add(new_paper)
-                session.commit()
+                try:
+                    new_researcher = Researcher(orcid=orcid_id, name=author_name, bio=bio, summary=None)
+                    session.add(new_researcher)
+                    session.commit()
+                except (InvalidRequestError, IntegrityError) as e:
+                    session.rollback()
+                    print(f"Failed to add researcher '{author_name}' to the database: {e}")
+                    return
 
-            existing_paper_author = session.query(Paper_Authors).filter_by(doi=doi, orcid=orcid_id).first()
-            if not existing_paper_author:
-                new_paper_author = Paper_Authors(doi=doi, orcid=orcid_id)
-                session.add(new_paper_author)
-                session.commit()
+            for employment in employment_history:
+                org_name = employment['Organization']
+                dept_name = employment.get('Department') if employment.get('Department') != "Unknown Department" else None
 
-            co_authors = pub.get('Co-Authors', [])
-            for co_author in co_authors:
-                co_author_name = co_author.get("Name")
-                co_author_orcid = co_author.get("Orcid ID")
+                if org_name:
+                    org_id, dept_id = get_or_add_org_and_dept(org_name, dept_name)
+                    start_date = convert_date_string(employment.get('Start Date', ''))
+                    end_date = convert_date_string(employment.get('End Date', ''))
 
-                if co_author_name and co_author_orcid:
-                    existing_co_author = get_records(Researcher, filters={"orcid": co_author_orcid})
-                    if not existing_co_author:
-                        new_co_author = Researcher(orcid=co_author_orcid, name=co_author_name)
-                        session.add(new_co_author)
-                        session.commit()
-
-                    existing_paper_coauthor = session.query(Paper_Authors).filter_by(doi=doi, orcid=co_author_orcid).first()
-                    if not existing_paper_coauthor:
-                        new_paper_coauthor = Paper_Authors(doi=doi, orcid=co_author_orcid)
-                        session.add(new_paper_coauthor)
-                        session.commit()
-
-        for employment in employment_history:
-            org_name = employment['Organization']
-            dept_name = employment.get('Department') if employment.get('Department') != "Unknown Department" else None
-
-            if org_name:
-                org_id, dept_id = get_or_add_org_and_dept(org_name, dept_name)
-                start_date = convert_date_string(employment.get('Start Date', ''))
-                end_date = convert_date_string(employment.get('End Date', ''))
-
-                existing_employment = session.query(Researcher_Employment).filter_by(
-                    orcid=orcid_id,
-                    dept_id=dept_id,
-                    start_date=start_date
-                ).first()
-
-                if existing_employment:
-                    update_record(
-                        Researcher_Employment,
-                        filters={"orcid": orcid_id, "dept_id": dept_id, "start_date": start_date},
-                        updates={"end_date": end_date, "role": employment['Role'] if employment['Role'] else "Unknown"}
-                    )
-                else:
-                    new_employment = Researcher_Employment(
+                    existing_employment = session.query(Researcher_Employment).filter_by(
                         orcid=orcid_id,
                         dept_id=dept_id,
-                        start_date=start_date,
-                        end_date=end_date,
-                        role=employment['Role'] if employment['Role'] else "Unknown"
-                    )
-                    session.add(new_employment)
-                    session.commit()
+                        start_date=start_date
+                    ).first()
 
-        for education in education_history:
-            org_name = education['Institution']
-            dept_name = education.get('Department') if education.get('Department') != "Unknown Department" else None
+                    if existing_employment:
+                        update_record(
+                            Researcher_Employment,
+                            filters={"orcid": orcid_id, "dept_id": dept_id, "start_date": start_date},
+                            updates={"end_date": end_date, "role": employment['Role'] if employment['Role'] else "Unknown"}
+                        )
+                    else:
+                        new_employment = Researcher_Employment(
+                            orcid=orcid_id,
+                            dept_id=dept_id,
+                            start_date=start_date,
+                            end_date=end_date,
+                            role=employment['Role'] if employment['Role'] else "Unknown"
+                        )
+                        session.add(new_employment)
+                        session.commit()
 
-            if org_name:
-                org_id, dept_id = get_or_add_org_and_dept(org_name, dept_name)
-                start_date = convert_date_string(education.get('Start Date', ''))
-                end_date = convert_date_string(education.get('End Date', ''))
+            for education in education_history:
+                org_name = education['Institution']
+                dept_name = education.get('Department') if education.get('Department') != "Unknown Department" else None
 
-                existing_education = session.query(Researcher_Edu).filter_by(
-                    orcid=orcid_id,
-                    dept_id=dept_id,
-                    start_date=start_date
-                ).first()
+                if org_name:
+                    org_id, dept_id = get_or_add_org_and_dept(org_name, dept_name)
+                    start_date = convert_date_string(education.get('Start Date', ''))
+                    end_date = convert_date_string(education.get('End Date', ''))
 
-                if existing_education:
-                    update_record(
-                        Researcher_Edu,
-                        filters={"orcid": orcid_id, "dept_id": dept_id, "start_date": start_date},
-                        updates={"end_date": end_date, "role": education['Role'] if education['Role'] else "Unknown"}
-                    )
-                else:
-                    new_education = Researcher_Edu(
+                    existing_education = session.query(Researcher_Edu).filter_by(
                         orcid=orcid_id,
                         dept_id=dept_id,
-                        start_date=start_date,
-                        end_date=end_date,
-                        role=education['Role'] if education['Role'] else "Unknown"
-                    )
-                    session.add(new_education)
-                    session.commit()
+                        start_date=start_date
+                    ).first()
 
-        session.close()
+                    if existing_education:
+                        update_record(
+                            Researcher_Edu,
+                            filters={"orcid": orcid_id, "dept_id": dept_id, "start_date": start_date},
+                            updates={"end_date": end_date, "role": education['Role'] if education['Role'] else "Unknown"}
+                        )
+                    else:
+                        new_education = Researcher_Edu(
+                            orcid=orcid_id,
+                            dept_id=dept_id,
+                            start_date=start_date,
+                            end_date=end_date,
+                            role=education['Role'] if education['Role'] else "Unknown"
+                        )
+                        session.add(new_education)
+                        session.commit()
+
+        except Exception as e:
+            session.rollback()
+            print(f"An error occurred while updating author details: {e}")
+
+        finally:
+            session.close()
 
 
 

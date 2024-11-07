@@ -137,7 +137,7 @@ const PublicationCard: React.FC<PublicationCardProps> = ({ publications }) => {
                 {pub["Co-Authors"].length > 0 && (
                   <div>
                     <p className="text-sm font-medium text-gray-700 mt-3">
-                      Authors:
+                      Co-Authors:
                     </p>
                     <ul className="list-disc list-inside text-xs text-gray-600">
                       {pub["Co-Authors"].map((coAuthor, idx) => (

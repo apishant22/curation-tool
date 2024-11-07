@@ -597,7 +597,6 @@ def normalize_date_format(date_str):
 
 # Function to normalize placeholder values
 def normalize_placeholders(data):
-    # Normalizing Biography
     if isinstance(data.get('Biography'), dict):
         data['Biography'] = [data['Biography'].get('Biography', "No biographical information available.")]
     elif isinstance(data.get('Biography'), str):
@@ -606,16 +605,16 @@ def normalize_placeholders(data):
         data['Biography'] = ["No biographical information available."]
 
     for employment in data.get('Employment History', []):
-        employment["Organization"] = employment.get("Organization", "Unknown Organization")
-        employment["Role"] = employment.get("Role", "Unknown")
-        employment["Department"] = employment.get("Department", "Unknown Department")
+        employment["Organization"] = employment.get("Organization") or "Unknown Organization"
+        employment["Role"] = employment.get("Role") or "Unknown"
+        employment["Department"] = employment.get("Department") or "Unknown Department"
         employment["Start Date"] = normalize_date_format(employment.get("Start Date", "Unknown"))
         employment["End Date"] = normalize_date_format(employment.get("End Date", "Unknown"))
 
     for education in data.get('Education History', []):
-        education["Institution"] = education.get("Institution", "Unknown Institution")
-        education["Role"] = education.get("Role", "N/A")
-        education["Department"] = education.get("Department", "N/A")
+        education["Institution"] = education.get("Institution") or "Unknown Institution"
+        education["Role"] = education.get("Role") or "N/A"
+        education["Department"] = education.get("Department") or "N/A"
         education["Start Date"] = normalize_date_format(education.get("Start Date", "Unknown"))
         education["End Date"] = normalize_date_format(education.get("End Date", "Unknown"))
 
@@ -653,7 +652,6 @@ def update_author_if_needed(author_name, profile_link):
             return None, None
 
         scraped_author_details = json.loads(scraped_author_details_json)
-
         scraped_author_details = normalize_placeholders(scraped_author_details)
 
         orcid_id = scraped_author_details.get("Orcid ID")
@@ -670,7 +668,7 @@ def update_author_if_needed(author_name, profile_link):
 
         author_details_db = normalize_placeholders(author_details_db)
 
-        diff = DeepDiff(author_details_db, scraped_author_details, ignore_order=True, ignore_string_case=True, report_repetition=True)
+        diff = DeepDiff(author_details_db, scraped_author_details, ignore_order=True, ignore_string_case=True, report_repetition=False)
         if not diff:
             summary = get_researcher_summary(orcid_id)
             if summary and summary != "Summary not available.":
@@ -681,8 +679,7 @@ def update_author_if_needed(author_name, profile_link):
                 return None, author_details_db
         else:
             print(f"\n--- Data differences found for ORCID ID {orcid_id} ---")
-            print(json.dumps(diff, indent=4))
-
+            print(diff)
             print(f"Updating author details in the database for ORCID ID: {orcid_id}")
             print("Updated Author Details:", json.dumps(scraped_author_details, indent=4))
 
@@ -698,6 +695,7 @@ def update_author_if_needed(author_name, profile_link):
     except Exception as e:
         print(f"An error occurred: {e}")
         return None, None
+
 
 
 
@@ -727,3 +725,4 @@ author_details_json = update_author_if_needed(author_name, profile_link)
 print("\nDetailed Author Information:")
 print(author_details_json)
 '''
+
