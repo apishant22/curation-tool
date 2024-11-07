@@ -200,9 +200,9 @@ function Page() {
                   "No biography available."
                 } // Ensure it's an array
                 eduTitle="Education History"
-                eduContent={data.author_details?.["Education History"] || []} // Ensure it's an array
+                eduContent={data?.author_details?.["Education History"] || []} // Ensure it's an array
                 empTitle="Employment History"
-                empContent={data.author_details?.["Employment History"] || []} // Ensure it's an array
+                empContent={data?.author_details?.["Employment History"] || []} // Ensure it's an array
               />
             </div>
             <div className="p-6 ">
@@ -219,7 +219,7 @@ function Page() {
                       <p>No summary available.</p>
                     </div>
                   )}
-                  <MarkdownContent content={data.summary} />
+                  <MarkdownContent content={data?.summary} />
                 </div>
               </div>
             </div>
@@ -237,7 +237,7 @@ function Page() {
 
           <div className="flex max-w-[600px] p-3 flex-col gap-4 mt-6 overflow-auto">
             <PublicationCard
-              publications={data?.author_details?.Publications}
+              publications={data?.author_details?.Publications || []}
             />
           </div>
         </div>

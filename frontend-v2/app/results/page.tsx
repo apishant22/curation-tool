@@ -3,6 +3,7 @@ import React, { useEffect, useState } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import PaginationControls from "@/components/results/PaginationControls";
 import { MdOutlineWork } from "react-icons/md";
+import toast from "react-hot-toast";
 
 interface Author {
   Location: string;
@@ -115,6 +116,10 @@ function ResultsPage() {
       orcid: orcidId,
       profileId: profileId,
     });
+
+    toast.success(
+      "Author has been successfully clicked! Redirecting to the summary page."
+    );
 
     router.push(`/summary?${searchParams.toString()}`);
   };

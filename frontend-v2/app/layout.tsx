@@ -4,7 +4,7 @@ import ClientOnly from "@/components/global/ClientOnly";
 import Navbar from "@/components/navbar/Navbar";
 import Footer from "@/components/global/Footer";
 import NetworkModal from "@/components/modal/NetworkModal";
-import { Toaster } from "react-hot-toast";
+import ToasterProvider from "@/components/providers/ToasterProvider";
 
 export const metadata: Metadata = {
   title: "ACM Curation Tool",
@@ -22,7 +22,7 @@ export default function RootLayout({
         className="flex min-h-screen flex-col"
         suppressHydrationWarning={true}>
         <ClientOnly>
-          <Toaster position="top-right" />
+          <ToasterProvider />
           <NetworkModal />
           <Navbar />
         </ClientOnly>
