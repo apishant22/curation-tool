@@ -219,7 +219,9 @@ function Page() {
                       <p>No summary available.</p>
                     </div>
                   )}
-                  <MarkdownContent content={data?.summary} />
+                  <div className="p-6">
+                    <MarkdownContent content={data?.summary} />
+                  </div>
                 </div>
               </div>
             </div>
