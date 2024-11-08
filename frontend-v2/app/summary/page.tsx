@@ -138,7 +138,7 @@ function Page() {
     );
   }
 
-  if (error && data.author_details == null) {
+  if (data.author_details == null) {
     const cachedData = sessionStorage.getItem(`currentPagePath`);
     sessionStorage.removeItem(`author_${name}_${profileId}`);
 
