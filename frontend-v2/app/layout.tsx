@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import "./globals.css";
-import ClientOnly from "@/components/global/ClientOnly";
 import Navbar from "@/components/navbar/Navbar";
 import Footer from "@/components/global/Footer";
 import NetworkModal from "@/components/modal/NetworkModal";
@@ -21,11 +20,10 @@ export default function RootLayout({
       <body
         className="flex min-h-screen flex-col"
         suppressHydrationWarning={true}>
-        <ClientOnly>
-          <ToasterProvider />
-          <NetworkModal />
-          <Navbar />
-        </ClientOnly>
+        <ToasterProvider />
+        <NetworkModal />
+        <Navbar />
+
         <main className="flex-grow">{children}</main>
         <Footer />
       </body>

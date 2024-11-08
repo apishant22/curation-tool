@@ -4,6 +4,7 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import PaginationControls from "@/components/results/PaginationControls";
 import { MdOutlineWork } from "react-icons/md";
 import toast from "react-hot-toast";
+import Container from "@/components/global/Container";
 
 interface Author {
   Location: string;
@@ -125,68 +126,70 @@ function ResultsPage() {
   };
 
   return (
-    <div className="pmax-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 pt-12">
-      <h1 className="text-3xl font-bold mb-6">Search Results</h1>
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-        {searchData.authors.map((author, index) => (
-          <div
-            key={index}
-            className="p-6 border rounded-lg shadow-sm hover:shadow-md transition bg-white">
-            <div className="space-y-2">
-              <div>
-                <h2 className="text-xl font-semibold text-blue-600 hover:text-blue-800">
-                  <p
-                    className="cursor-pointer"
-                    onClick={() =>
-                      handleNameClick(
-                        author.Name,
-                        author["Orcid ID"],
-                        author["Profile Link"]
-                      )
-                    }>
-                    {author.Name}
+    <Container>
+      <div className="pmax-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 pt-12">
+        <h1 className="text-3xl font-bold mb-6">Search Results</h1>
+        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+          {searchData.authors.map((author, index) => (
+            <div
+              key={index}
+              className="p-6 border rounded-lg shadow-sm hover:shadow-md transition bg-white">
+              <div className="space-y-2">
+                <div>
+                  <h2 className="text-xl font-semibold text-blue-600 hover:text-blue-800">
+                    <p
+                      className="cursor-pointer"
+                      onClick={() =>
+                        handleNameClick(
+                          author.Name,
+                          author["Orcid ID"],
+                          author["Profile Link"]
+                        )
+                      }>
+                      {author.Name}
+                    </p>
+                  </h2>
+                  <p className="text-gray-600 flex gap-2 items-center">
+                    <MdOutlineWork size={16} />
+                    {author.Location}
                   </p>
-                </h2>
-                <p className="text-gray-600 flex gap-2 items-center">
-                  <MdOutlineWork size={16} />
-                  {author.Location}
-                </p>
-              </div>
-              <div className="text-sm text-gray-500">
-                <p className="flex items-center space-x-1">
-                  <span className="font-medium">ACM DL:</span>
-                  <a
-                    href={`${author["Profile Link"]}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="hover:text-blue-600">
-                    {author["Profile Link"]}
-                  </a>
-                </p>
-              </div>
-              <div className="text-sm text-gray-500">
-                <p className="flex items-center space-x-2">
-                  <span className="font-medium">ORCID:</span>
-                  <a
-                    href={`https://orcid.org/${author["Orcid ID"]}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="hover:text-blue-600">
-                    {author["Orcid ID"]}
-                  </a>
-                </p>
+                </div>
+                <div className="text-sm text-gray-500">
+                  <p className="flex items-center space-x-1">
+                    <span className="font-medium">ACM DL:</span>
+                    <a
+                      href={`${author["Profile Link"]}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="hover:text-blue-600">
+                      {author["Profile Link"]}
+                    </a>
+                  </p>
+                </div>
+                <div className="text-sm text-gray-500">
+                  <p className="flex items-center space-x-2">
+                    <span className="font-medium">ORCID:</span>
+                    <a
+                      href={`https://orcid.org/${author["Orcid ID"]}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="hover:text-blue-600">
+                      {author["Orcid ID"]}
+                    </a>
+                  </p>
+                </div>
               </div>
             </div>
-          </div>
-        ))}
+          ))}
+        </div>
+        <PaginationControls
+          currentPage={Number(searchParams.get("page") || "1")}
+          maxPages={searchData.max_pages}
+          hasNext={!searchData.no_next_page}
+          hasPrevious={!searchData.no_previous_page}
+        />
       </div>
-      <PaginationControls
-        currentPage={Number(searchParams.get("page") || "1")}
-        maxPages={searchData.max_pages}
-        hasNext={!searchData.no_next_page}
-        hasPrevious={!searchData.no_previous_page}
-      />
-    </div>
+    </Container>
   );
 }
 
