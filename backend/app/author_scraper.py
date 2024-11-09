@@ -7,6 +7,9 @@ from fuzzywuzzy import fuzz, process
 from backend.db.db_helper import *
 from deepdiff import DeepDiff
 
+from backend.llm import llm
+
+
 # Function to search ORCID by ORCID ID and get author name
 def search_orcid_by_id(orcid_id):
     orcid_url = f"https://pub.orcid.org/v3.0/{orcid_id}"
@@ -564,24 +567,6 @@ def format_date(date_data):
             return str(year)
     return 'Unknown'
 
-# Function to format date from ORCID data
-def format_date(date_data):
-    if not isinstance(date_data, dict):
-        return 'Unknown'
-
-    year = date_data.get('year', {}).get('value')
-    month = date_data.get('month', {}).get('value')
-    day = date_data.get('day', {}).get('value')
-
-    if year:
-        if month and day:
-            return f"{int(day):02}/{int(month):02}/{year}"
-        elif month:
-            return f"{int(month):02}/{year}"
-        else:
-            return str(year)
-    return 'Unknown'
-
 # Function to normalize date format
 def normalize_date_format(date_str):
     try:
@@ -675,8 +660,10 @@ def update_author_if_needed(author_name, profile_link):
                 print("Data is up to date and summary is present. Returning existing summary.")
                 return summary, author_details_db
             else:
-                print("Summary is missing.")
-                return None, author_details_db
+                print("Summary is missing. Creating Summary...")
+                llm.request(orcid_id)
+                summary = get_researcher_summary(orcid_id)
+                return summary, author_details_db
         else:
             print(f"\n--- Data differences found for ORCID ID {orcid_id} ---")
             print(diff)
@@ -687,8 +674,9 @@ def update_author_if_needed(author_name, profile_link):
 
             author_details_db_after_update = get_author_details_from_db(orcid_id)
             print("Author Details After Update:", json.dumps(author_details_db_after_update, indent=4))
-
-            return None, scraped_author_details
+            llm.request(orcid_id)
+            summary = get_researcher_summary(orcid_id)
+            return summary, scraped_author_details
 
     except KeyError as e:
         print(f"KeyError when trying to update: {e}")
