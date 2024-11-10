@@ -7,7 +7,7 @@ from fuzzywuzzy import fuzz, process
 from backend.db.db_helper import *
 from deepdiff import DeepDiff
 
-from backend.llm import llm
+from backend.llm import llmNew
 
 
 # Function to search ORCID by ORCID ID and get author name
@@ -661,7 +661,7 @@ def update_author_if_needed(author_name, profile_link):
                 return summary, author_details_db
             else:
                 print("Summary is missing. Creating Summary...")
-                llm.request(orcid_id)
+                llmNew.request(orcid_id)
                 summary = get_researcher_summary(orcid_id)
                 return summary, author_details_db
         else:
@@ -674,7 +674,7 @@ def update_author_if_needed(author_name, profile_link):
 
             author_details_db_after_update = get_author_details_from_db(orcid_id)
             print("Author Details After Update:", json.dumps(author_details_db_after_update, indent=4))
-            llm.request(orcid_id)
+            llmNew.request(orcid_id)
             summary = get_researcher_summary(orcid_id)
             return summary, scraped_author_details
 

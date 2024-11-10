@@ -4,7 +4,7 @@ from typing import Optional, Callable, List, Dict
 
 from openai import AzureOpenAI
 
-from core.parser import FunctionDefinitionParser
+from backend.llm.core.parser import FunctionDefinitionParser
 
 # Configure logger for better debugging and monitoring
 logger = logging.getLogger(__name__)

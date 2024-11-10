@@ -3,9 +3,9 @@ from datetime import datetime
 from pydantic import BaseModel
 from typing import List
 
-from core.azure_functions import AzureOpenAIFunctions
-import config
-import functions.web_browsing as browser
+from backend.llm.core.azure_functions import AzureOpenAIFunctions
+import backend.llm.config as config
+import backend.llm.functions.web_browsing as browser
 
 import sys
 
