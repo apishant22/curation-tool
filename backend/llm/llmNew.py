@@ -80,4 +80,5 @@ def request(orcid_id):
     db_helper.update_researcher_summary(orcid_id, summary)
     #print(f"{RED}{db_helper.get_researcher_summary(orcid_id, session=None)}")
 
-request("0000-0002-1684-1539")
+
+#request("0000-0002-1684-1539")
