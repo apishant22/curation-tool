@@ -364,8 +364,8 @@ def update_author_if_needed(author_name, profile_link):
 input = "Adriana Wilde"
 i = "Huiqiang Jia"
 page_number = 0
-search type
-authors = identify_input_type_and_search(i, page_number, 1)
+search_type = "author" or "field"
+authors = identify_input_type_and_search(i, page_number, search_type, 1)
 
 if authors:
     print("\nAuthor Search Results:")
@@ -384,12 +384,4 @@ author_details_json = update_author_if_needed(author_name, profile_link)
 print("\nDetailed Author Information:")
 print(author_details_json)
 '''
-
-selected_profile_author = "Leslie Anthony Carr"
-selected_profile_link = "https://dl.acm.org/profile/81100072950"
-
-author_details_json = update_author_if_needed(selected_profile_author, selected_profile_link)
-
-print("\nDetailed Author Information:")
-print(author_details_json)
 
