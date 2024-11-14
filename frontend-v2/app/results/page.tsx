@@ -5,6 +5,7 @@ import PaginationControls from "@/components/results/PaginationControls";
 import { MdOutlineWork } from "react-icons/md";
 import toast from "react-hot-toast";
 import Container from "@/components/global/Container";
+import Search from "@/components/navbar/Search";
 
 interface Author {
   Location: string;
@@ -128,7 +129,14 @@ function ResultsPage() {
   return (
     <Container>
       <div className="pmax-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 pt-12">
-        <h1 className="text-3xl font-bold mb-6">Search Results</h1>
+      <Container>
+        <div className="pt-12 pb-6 flex flex-row justify-between" >   
+            <div className="text-2xl mt-4 font-semibold text-gray-400">Search Result</div>
+            <div className="items-end">
+              <Search />
+            </div>
+        </div>
+      </Container>
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
           {searchData.authors.map((author, index) => (
             <div
