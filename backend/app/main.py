@@ -1,6 +1,6 @@
 import json
 
-from flask import Flask, jsonify
+from flask import Flask, jsonify, View
 from flask_cors import CORS
 
 import re
@@ -10,41 +10,38 @@ import backend.db.models as model
 import backend.llm.llm as llm
 
 app = Flask(__name__)
-
 CORS(app)
 
-max_pages_cache = {}
-author_name_cache = {}
-last_searched_name = None
+# author_name_cache = {}  # is this ever used?
 
-@app.route('/search/<name>/<page>')
-def search(name, page):
-    global last_searched_name
+# This view is a class as it requires state in the form of a cache
+class Search(View):
     orcid_pattern = re.compile(r"^\d{4}-\d{4}-\d{4}-\d{4}$")
 
-    is_orcid = bool(orcid_pattern.match(name))
+    def __init__(self):
+        self.max_pages_cache = dict()
+        self.last_searched_name = None
 
-    if is_orcid:
-        print(f"Detected ORCID ID: {name}. Fetching associated author name.")
-        max_pages = 1
-        page = int(page)
-        search_results = scraper.identify_input_type_and_search_author(name, page, max_pages)
-    else:
-        normalized_name = name.lower()
-        if normalized_name != last_searched_name:
-            print(f"Cache miss or new name. Running scraper.get_estimated_max_pages for: {name}")
-            max_pages = scraper.get_estimated_max_pages(name)
-            max_pages_cache[normalized_name] = max_pages
-            last_searched_name = normalized_name
+    def dispatch_request(self, name, page):
+        if orcid_pattern.match(name):
+            print(f"Detected ORCID ID: {name}. Fetching associated author name.")
+            max_pages = 1
+
         else:
-            print(f"Cache hit for: {name}")
-            max_pages = max_pages_cache.get(normalized_name, 0)
+            normalized_name = name.lower()
+            if normalized_name != self.last_searched_name:
+                print(f"Cache miss or new name. Running scraper.get_estimated_max_pages for: {name}")
+                max_pages = scraper.get_estimated_max_pages(name)
+                self.max_pages_cache[normalized_name] = max_pages
+                self.last_searched_name = normalized_name
+            else:
+                print(f"Cache hit for: {name}")
+                max_pages = self.max_pages_cache.get(normalized_name, 0)
 
-        page = int(page)
         search_results = scraper.identify_input_type_and_search_author(name, page, max_pages)
+        return jsonify(search_results)
 
-    return jsonify(search_results)
-
+app.add_url_rule('/search/<name>/<int:page>', view_func=Search.as_view('search'))
 
 @app.route('/query/<name>/<profile_link>')
 def query(name, profile_link):
