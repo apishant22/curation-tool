@@ -1,12 +1,9 @@
 import requests
-from unidecode import unidecode
 from bs4 import BeautifulSoup
 import re
 import math
 import json
-from fuzzywuzzy import fuzz, process
 from backend.db.db_helper import *
-from deepdiff import DeepDiff
 
 # from backend.llm import llmNew
 
@@ -247,50 +244,117 @@ def get_metadata_from_doi(doi, target_author_name):
 
     return "No abstract available.", "Unknown", 0
 
-# Function to handle logic on when to scrape and update
+def scrape_latest_publication(profile_link, author):
+    publications_url = f"{profile_link}/publications?Role=author&startPage=0&pageSize=1"
+    headers = {'User-Agent': 'Mozilla/5.0', 'Accept': 'text/html'}
+
+    response = requests.get(publications_url, headers=headers)
+    if response.status_code != 200:
+        print(f"Failed to retrieve publications for {profile_link}")
+        return None
+
+    soup = BeautifulSoup(response.content, 'html.parser')
+    latest_item = soup.find('li', class_='search__item')
+    if not latest_item:
+        return None
+
+    title_tag = latest_item.find('h5', class_='issue-item__title')
+    title = title_tag.text.strip() if title_tag else 'Unknown title'
+
+    doi_tag = latest_item.find('div', class_='issue-item__detail').find_all('a', href=True)
+    doi = next((link['href'].replace("https://doi.org/", "") for link in doi_tag if "https://doi.org/" in link['href']), 'No DOI')
+
+    if doi != 'No DOI':
+        abstract, publication_date, citation_count = get_metadata_from_doi(doi, author)
+    else:
+        abstract, publication_date, citation_count = 'N/A', 'Unknown', 0
+
+    if publication_date == "Unknown":
+        publication_date = None
+
+    latest_publication = {
+        'Title': title,
+        'DOI': doi,
+        'Abstract': abstract,
+        'Publication Date': publication_date,
+        'Citation Count': citation_count,
+    }
+    print("Latest Scraped Publication:", json.dumps(latest_publication, indent=4))
+    return latest_publication
+
+def get_latest_publication(publications):
+    valid_publications = [
+        pub for pub in publications if pub["Publication Date"] and pub["Publication Date"] != "None"
+    ]
+
+    latest_publication = max(
+        valid_publications,
+        key=lambda pub: datetime.strptime(pub["Publication Date"], "%Y-%m-%d")
+    )
+    return latest_publication
+
 def update_author_if_needed(author_name, profile_link):
     try:
-        scraped_author_details_json = scrape_author_details(author_name, profile_link)
+        latest_scraped_publication = scrape_latest_publication(profile_link, author_name)
+        if not latest_scraped_publication:
+            print("No latest publication found.")
+            return None, None
 
+        author_details_db = get_author_details_from_db(author_name)
+
+        if not author_details_db or "Publications" not in author_details_db:
+            print("No publication data found in the database for this author. Scraping and adding new author data...")
+
+            scraped_author_details_json = scrape_author_details(author_name, profile_link)
+            if not scraped_author_details_json:
+                print("Failed to retrieve full author details during scrape.")
+                return None, None
+
+            scraped_author_details = json.loads(scraped_author_details_json)
+            store_author_details_in_db(scraped_author_details)
+            author_details_db = get_author_details_from_db(author_name)
+            if not author_details_db:
+                print(f"Failed to retrieve updated details from database for new author: {author_name}")
+                return None, None
+
+            print("New Author Details:", json.dumps(author_details_db, indent=4))
+            return None, author_details_db
+
+        latest_db_publication = get_latest_publication(author_details_db["Publications"])
+        db_pub_date = latest_db_publication.get("Publication Date") if latest_db_publication else None
+        scraped_pub_date = latest_scraped_publication.get("Publication Date")
+
+        print("Latest Publication in Database:", json.dumps(latest_db_publication, indent=4) if latest_db_publication else "None")
+        print("Latest Scraped Publication:", json.dumps(latest_scraped_publication, indent=4))
+
+        if db_pub_date and scraped_pub_date:
+            db_pub_date_obj = datetime.strptime(db_pub_date, "%Y-%m-%d")
+            scraped_pub_date_obj = datetime.strptime(scraped_pub_date, "%Y-%m-%d")
+
+            if db_pub_date_obj >= scraped_pub_date_obj:
+                summary = get_researcher_summary(author_name)
+                if summary and summary != "Summary not available.":
+                    print("Data is up-to-date, and summary is present.")
+                    return summary, author_details_db
+                else:
+                    print("Summary missing. Generating summary...")
+                    return None, author_details_db
+
+        print("New publication found or mismatch in data. Performing full scrape and updating database.")
+        scraped_author_details_json = scrape_author_details(author_name, profile_link)
         if not scraped_author_details_json:
-            print("No author details found in scrape_author_details.")
+            print("Failed to retrieve full author details.")
             return None, None
 
         scraped_author_details = json.loads(scraped_author_details_json)
-        author_details_db = get_author_details_from_db(author_name)
+        update_author_details_in_db(scraped_author_details)
 
-        if author_details_db is None:
-            print(f"No author found. Adding new details to the database.")
-            store_author_details_in_db(scraped_author_details)
-            return None, scraped_author_details
-
-        diff = DeepDiff(author_details_db, scraped_author_details, ignore_order=True, ignore_string_case=True, report_repetition=False)
-        if not diff:
-            summary = get_researcher_summary(author_name)
-            if summary and summary != "Summary not available.":
-                print("Data is up to date and summary is present. Returning existing summary.")
-                return summary, author_details_db
-            else:
-                print("Summary is missing. Creating Summary...")
-                # llmNew.request(author_name)
-                summary = get_researcher_summary(author_name)
-                return summary, author_details_db
-        else:
-            print(f"\n--- Data differences found for {author_name} ---")
-            print(diff)
-            print(f"Updating author details in the database.")
-            print("Updated Author Details:", json.dumps(scraped_author_details, indent=4))
-
-            update_author_details_in_db(scraped_author_details)
-
-            author_details_db_after_update = get_author_details_from_db(author_name)
-            print("Author Details After Update:", json.dumps(author_details_db_after_update, indent=4))
-            # llmNew.request(author_name)
-            summary = get_researcher_summary(author_name)
-            return summary, scraped_author_details
+        author_details_db_after_update = get_author_details_from_db(author_name)
+        print("Author Details After Update:", json.dumps(author_details_db_after_update, indent=4))
+        return None, author_details_db_after_update
 
     except KeyError as e:
-        print(f"KeyError when trying to update: {e}")
+        print(f"KeyError during update: {e}")
     except Exception as e:
         print(f"An error occurred: {e}")
         return None, None
@@ -300,7 +364,8 @@ def update_author_if_needed(author_name, profile_link):
 input = "Adriana Wilde"
 i = "Huiqiang Jia"
 page_number = 0
-authors = identify_input_type_and_search_author(i, page_number, 1)
+search type
+authors = identify_input_type_and_search(i, page_number, 1)
 
 if authors:
     print("\nAuthor Search Results:")
@@ -319,3 +384,12 @@ author_details_json = update_author_if_needed(author_name, profile_link)
 print("\nDetailed Author Information:")
 print(author_details_json)
 '''
+
+selected_profile_author = "Leslie Anthony Carr"
+selected_profile_link = "https://dl.acm.org/profile/81100072950"
+
+author_details_json = update_author_if_needed(selected_profile_author, selected_profile_link)
+
+print("\nDetailed Author Information:")
+print(author_details_json)
+

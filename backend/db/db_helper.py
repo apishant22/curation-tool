@@ -151,7 +151,6 @@ def store_author_details_in_db(author_details, session=None):
             researcher = Researcher(name=author_name, profile_link=profile_link)
             session.add(researcher)
             session.commit()
-            print(f"Stored new researcher: {researcher.name}")
 
         for field in fields_of_study:
             field_record = session.query(Fields_of_Study).filter(func.lower(Fields_of_Study.field_name) == func.lower(field)).first()
