@@ -103,6 +103,7 @@ function ResultsPage() {
     );
   }
 
+  // TODO: remove ORCID in this function (YUQING)
   const handleNameClick = (
     name: string,
     orcidId: string,
@@ -126,17 +127,20 @@ function ResultsPage() {
     router.push(`/summary?${searchParams.toString()}`);
   };
 
+  // TODO: REMOVE ORCID IN THIS HTML (YUQING)
   return (
     <Container>
       <div className="pmax-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 pt-12">
-      <Container>
-        <div className="pt-12 pb-6 flex flex-row justify-between" >   
-            <div className="text-2xl mt-4 font-semibold text-gray-400">Search Result</div>
+        <Container>
+          <div className="pt-12 pb-6 flex flex-row justify-between">
+            <div className="text-2xl mt-4 font-semibold text-gray-400">
+              Search Result
+            </div>
             <div className="items-end">
               <Search />
             </div>
-        </div>
-      </Container>
+          </div>
+        </Container>
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
           {searchData.authors.map((author, index) => (
             <div

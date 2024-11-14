@@ -27,7 +27,9 @@
     "**/*.ts",
     "**/*.tsx",
     ".next/types/**/*.ts",
-    "components/modal/NetworkModal.jsx"
+    "components/modal/NetworkModal.jsx",
+    "components/editor/EditorContext.jsx",
+    "components/modal/EditorModal.jsx"
   ],
   "exclude": ["node_modules"]
 }

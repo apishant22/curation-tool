@@ -193,6 +193,7 @@ function Page() {
           <>
             <div className="flex flex-grow bg-white shadow-2xl">
               <div className="w-[70%] p-4 flex flex-col">
+                {/* TODO: YUQING TO REMOVE THIS PART */}
                 <div className="p-4">
                   <AuthorHeader
                     name={data?.author_details?.Name || "No name available"}
