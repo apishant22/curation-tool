@@ -6,7 +6,7 @@ Base = declarative_base()
 
 class Researcher(Base):
     __tablename__ = 'Researcher'
-    orcid = Column(String(16), primary_key=True)
+    id = Column(Integer, primary_key=True)
     name = Column(String, nullable=True)
     bio = Column(String, nullable=True)
     summary = Column(String, nullable=True)
@@ -22,40 +22,20 @@ class Paper(Base):
 class Paper_Authors(Base):
     __tablename__ = 'Paper_Authors'
     doi = Column(String, ForeignKey('Paper.doi'), primary_key=True)
-    orcid = Column(String(16), ForeignKey('Researcher.orcid'), primary_key=True)
+    id = Column(Integer, ForeignKey('Researcher.id'), primary_key=True)
 
-class Organisation(Base):
-    __tablename__ = 'Organisation'
-    org_id = Column(Integer, primary_key=True, autoincrement=True)
-    org_name = Column(String, nullable=False)
+class Fields_of_study(Base):
+    __tablename__ = 'Fields_of_study'
+    field_id = Column(Integer, primary_key=True)
+    field_name = Column(String, nullable=True)
 
-class Dept(Base):
-    __tablename__ = 'Dept'
-    dept_id = Column(Integer, primary_key=True, autoincrement=True)
-    org_id = Column(Integer, ForeignKey('Organisation.org_id'), nullable=False)
-    dept_name = Column(String, nullable=False)
+class Researcher_Fields_of_Study(Base):
+    __tablename__ = 'Researcher_Fields_of_Study'
+    id = Column(Integer, ForeignKey('Researcher.id'), primary_key=True)
+    field_id = Column(Integer, ForeignKey('Fields_of_study.field_id'), primary_key=True)
 
-class Researcher_Employment(Base):
-    __tablename__ = 'Researcher_Employment'
-    orcid = Column(String(16), ForeignKey('Researcher.orcid'), primary_key=True)
-    dept_id = Column(Integer, ForeignKey('Dept.dept_id'), primary_key=True)
-    start_date = Column(Date, nullable=True)
-    end_date = Column(Date, nullable=True)
-    role = Column(String, nullable=True)
-
-class Researcher_Edu(Base):
-    __tablename__ = 'Researcher_Edu'
-    orcid = Column(String(16), ForeignKey('Researcher.orcid'), primary_key=True)
-    dept_id = Column(Integer, ForeignKey('Dept.dept_id'), primary_key=True)
-    start_date = Column(Date, nullable=True)
-    end_date = Column(Date, nullable=True)
-    role = Column(String, nullable=True)
-
-# Relationships
-Researcher.employments = relationship('Researcher_Employment', backref='researcher', cascade="all, delete-orphan")
-Researcher.education = relationship('Researcher_Edu', backref='researcher', cascade="all, delete-orphan")
 Researcher.papers = relationship('Paper_Authors', backref='researcher', cascade="all, delete-orphan")
 Paper.authors = relationship('Paper_Authors', backref='paper', cascade="all, delete-orphan")
-Organisation.departments = relationship('Dept', backref='organisation', cascade="all, delete-orphan")
-Dept.employments = relationship('Researcher_Employment', backref='department', cascade="all, delete-orphan")
-Dept.education = relationship('Researcher_Edu', backref='department', cascade="all, delete-orphan")
+
+Researcher.fields_of_study = relationship('Researcher_Fields_of_Study', backref='researcher', cascade="all, delete-orphan")
+Fields_of_study.researchers = relationship('Researcher_Fields_of_Study', backref='fields_of_study', cascade="all, delete-orphan")
