@@ -70,27 +70,31 @@ def search_acm_field(field_name, page_number, max_pages):
     items = soup.find_all('li', class_='search__item')
 
     author_list = []
-    unique_authors = set()
 
     profile_url_pattern = re.compile(r"^https://dl\.acm\.org/profile/\d+$")
 
     for item in items:
-        co_author_elements = item.find_all('a', title=True)
+        author_elements = item.find_all('a', title=True)
 
-        for co_author in co_author_elements:
-            co_author_name = co_author['title'].strip()
-            co_author_link = f"https://dl.acm.org{co_author['href']}"
+        for author in author_elements:
+            author_name = author['title'].strip()
+            author_link = f"https://dl.acm.org{author['href']}"
 
-            if profile_url_pattern.match(co_author_link) and co_author_name not in unique_authors:
-                unique_authors.add(co_author_name)
-                author_list.append({"Name": co_author_name, "Profile Link": co_author_link})
+            if profile_url_pattern.match(author_link) and author_name not in unique_authors:
+                unique_authors.add(author_name)
+                author_list.append({
+                    "Name": author_name,
+                    'Location': None,
+                    "Profile Link": author_link,
+                })
 
-    print(f"Total unique authors found on page {page_number}: {len(author_list)}")
+    print(f"Total unique authors found for field '{field_name}' on page {page_number}: {len(author_list)}")
     return {
         "results": author_list,
         "no_previous_page": page_number == 0,
         "no_next_page": page_number >= (max_pages - 1)
     }
+
 
 
 def identify_input_type_and_search(input_value, page_number, search_type, max_pages=None):
@@ -384,4 +388,3 @@ author_details_json = update_author_if_needed(author_name, profile_link)
 print("\nDetailed Author Information:")
 print(author_details_json)
 '''
-
