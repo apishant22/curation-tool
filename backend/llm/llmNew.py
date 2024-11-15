@@ -69,12 +69,12 @@ def request(author_name):
     response = assistant.ask(conversation_dict)
     summary = response.choices[0].message.content
     log(response)
-    RED = '\033[91m'
-    GREEN = '\033[92m'
-    ENDC = '\033[0m'  # Resets the color to default
-    print(f"{RED}\nQuery: {prompt_message} {ENDC}\n")
-    print(f"{GREEN}Reply: {summary}{ENDC}\n")
-    print(f"{RED}\nOutput: {response} {ENDC}\n")
+    #RED = '\033[91m'
+    #GREEN = '\033[92m'
+    #ENDC = '\033[0m'  # Resets the color to default
+    #print(f"{RED}\nQuery: {prompt_message} {ENDC}\n")
+    #print(f"{GREEN}Reply: {summary}{ENDC}\n")
+    #print(f"{RED}\nOutput: {response} {ENDC}\n")
     #return {"reply": response.choices[0].message.content}
     db_helper.update_researcher_summary(author_name, summary)
     #print(f"{RED}{db_helper.get_researcher_summary(orcid_id, session=None)}")
