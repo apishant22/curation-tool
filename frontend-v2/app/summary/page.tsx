@@ -168,6 +168,7 @@ function Page() {
                       router.push(cachedData); // Push to cached URL
                     } else {
                       console.warn("No cached URL found in sessionStorage");
+                      router.back();
                     }
                   }}
                   label={"Go back to results page"}
