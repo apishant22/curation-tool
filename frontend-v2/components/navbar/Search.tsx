@@ -90,7 +90,7 @@ const Search = () => {
   };
 
   return (
-    <div className="flex w-full cursor-pointer items-center justify-between rounded-full border-[1px] p-1 shadow-sm transition hover:shadow-md md:max-w-[1200px] md:min-w-[600px]">
+    <div className=" bg-white flex w-full cursor-pointer items-center justify-between rounded-full border-[1px] p-1 shadow-sm transition hover:shadow-md md:max-w-[1200px] md:min-w-[600px]">
       <div className="pl-2 text-sm">
         <div className="relative">
           <div

@@ -18,7 +18,7 @@ const ContentCard: React.FC<ContentCardProps> = ({ name, summary, orcid }) => {
   };
   const router = useRouter();
   return (
-    <div className="w-[600px] p-4 bg-blue-50/75 shadow-gray-400 shadow-md">
+    <div className="w-[500px] rounded-md p-4 bg-slate-50 shadow-gray-400 shadow-md">
       <div className="p-1 font-archivo text-blue-800">{name}</div>
       <div className="p-1 h-20 overflow-hidden text-gray-700/75">
         {summaryShorten(summary)}
