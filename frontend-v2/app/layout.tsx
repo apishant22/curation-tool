@@ -4,7 +4,6 @@ import Navbar from "@/components/navbar/Navbar";
 import Footer from "@/components/global/Footer";
 import NetworkModal from "@/components/modal/NetworkModal";
 import ToasterProvider from "@/components/providers/ToasterProvider";
-import EditorContextProvider from "@/components/editor/EditorContext";
 
 export const metadata: Metadata = {
   title: "ACM Curation Tool",
@@ -24,9 +23,9 @@ export default function RootLayout({
         <ToasterProvider />
         <NetworkModal />
         <Navbar />
-        <EditorContextProvider>
-          <main className="flex-grow">{children}</main>
-        </EditorContextProvider>
+
+        <main className="flex-grow">{children}</main>
+
         <Footer />
       </body>
     </html>
