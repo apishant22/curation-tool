@@ -61,7 +61,7 @@ def request(author_name):
     if author is None:
         return {"reply": "Author not found in the database."}
     conversation = Conversation(conversation=[])
-    system_message = Message(role='system', content=load_prompt('system_prompt.txt'))
+    system_message = Message(role='system', content=load_prompt('generate_system_prompt.txt'))
     conversation.conversation.insert(0, system_message)
     prompt_message = Message(role='user', content=str(author))
     conversation.conversation.insert(1, prompt_message)
@@ -75,6 +75,38 @@ def request(author_name):
     # print(f"{RED}\nQuery: {prompt_message} {ENDC}\n")
     # print(f"{GREEN}Reply: {summary}{ENDC}\n")
     # print(f"{RED}\nOutput: {response} {ENDC}\n")
-    #return {"reply": response.choices[0].message.content}
     db_helper.update_researcher_summary(author_name, summary)
     #print(f"{RED}{db_helper.get_researcher_summary(orcid_id, session=None)}")
+
+def create_regeneration_prompt(author_name, text_to_change, reason_for_change):
+    author = db_helper.get_author_details_from_db(author_name)
+    summary = db_helper.get_researcher_summary(author_name)        
+    prompt = "Author: " + str(author) + "\n\nCurrent summary: " + str(summary) + "\n\nText to regenerate: " + text_to_change + "\n\nReason for change: " + reason_for_change
+    #print(prompt)
+    return prompt
+
+def reconstruct_summary(author_name, text_to_change, new_text):
+    summary = db_helper.get_researcher_summary(author_name)
+    reconstructed_summary = summary.replace(text_to_change, new_text)
+    print(reconstructed_summary)
+    return reconstructed_summary
+
+def regenerate_request (author_name, text_to_change, reason_for_change):
+    conversation = Conversation(conversation=[])
+    system_message = Message(role='system', content=load_prompt('regenerate_system_prompt.txt'))
+    conversation.conversation.insert(0, system_message)
+    prompt_message = Message(role='user', content=create_regeneration_prompt(author_name, text_to_change, reason_for_change))
+    conversation.conversation.insert(1, prompt_message)
+    conversation_dict = [message.model_dump() for message in conversation.conversation]
+    response = assistant.ask(conversation_dict)
+    regenerated_text = response.choices[0].message.content
+    reconstructed_summary = reconstruct_summary(author_name, text_to_change, regenerated_text)
+    log(response)
+    # RED = '\033[91m'
+    # GREEN = '\033[92m'
+    # ENDC = '\033[0m'  # Resets the color to default
+    # print(f"{RED}\nQuery: {prompt_message} {ENDC}\n")
+    # print(f"{GREEN}Reply: {reconstructed_summary}{ENDC}\n")
+    # print(f"{RED}\nOutput: {response} {ENDC}\n")
+    db_helper.update_researcher_summary(author_name, reconstructed_summary)
+    #print(f"{RED}{db_helper.get_researcher_summary(author_name, session=None)}")
