@@ -29,7 +29,11 @@ const Search = () => {
   // to use the api, need to give /search/{name}/{counter (referring to the page number, initially at 0)}
   // after fetching the data, navigate to the results page and pass the data to them
 
-  const fetchSearchResults = async (searchTerm: string, page: number, category: string) => {
+  const fetchSearchResults = async (
+    searchTerm: string,
+    page: number,
+    category: string
+  ) => {
     try {
       setLoading(true);
 
@@ -47,8 +51,8 @@ const Search = () => {
       console.log("Fetched Data:", data);
 
       sessionStorage.setItem(
-          `searchResults_${categoryPath}_${searchTerm}_${page}`,
-          JSON.stringify(data)
+        `searchResults_${categoryPath}_${searchTerm}_${page}`,
+        JSON.stringify(data)
       );
 
       return data;
@@ -60,7 +64,7 @@ const Search = () => {
     }
   };
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e: React.KeyboardEvent<HTMLInputElement>) => {
     e.preventDefault();
     if (!input.trim()) {
       return;
@@ -95,8 +99,8 @@ const Search = () => {
   }, []);
 
   const handleCategoryClick = (
-      categoryName: string,
-      placeholderName: string
+    categoryName: string,
+    placeholderName: string
   ) => {
     toggleOpen();
     setCategory(categoryName); // Use the display name here
@@ -104,78 +108,73 @@ const Search = () => {
   };
 
   return (
-      <div className="bg-white flex w-full cursor-pointer items-center justify-between rounded-full border-[1px] p-1 shadow-sm transition hover:shadow-md md:max-w-[1200px] md:min-w-[600px]">
-        <div className="pl-2 text-sm">
-          <div className="relative">
+    <div className="bg-white flex w-full cursor-pointer items-center justify-between rounded-full border-[1px] p-1 shadow-sm transition hover:shadow-md md:max-w-[1200px] md:min-w-[600px]">
+      <div className="pl-2 text-sm">
+        <div className="relative">
+          <div
+            className="flex items-center rounded-md border hover:bg-zinc-100 transition duration-100"
+            onClick={toggleOpen}>
+            <div className="p-1">{category}</div>
+            <div>
+              <TbCaretDownFilled />
+            </div>
+          </div>
+          {isOpen && (
             <div
-                className="flex items-center rounded-md border hover:bg-zinc-100 transition duration-100"
-                onClick={toggleOpen}
-            >
-              <div className="p-1">{category}</div>
-              <div>
-                <TbCaretDownFilled />
+              className={`absolute left-0 top-9 w-40 bg-white border-[1px] shadow-lg rounded-md`}>
+              <div
+                className="p-1"
+                onClick={() =>
+                  handleCategoryClick("Author", "Search any scholar!")
+                }>
+                <div className="flex items-center p-1 transition duration-200 hover:bg-zinc-100 rounded-md">
+                  <div className="p-1">
+                    <FaUserGraduate />
+                  </div>
+                  <div className="pl-1 flex-grow">Author</div>
+                </div>
+              </div>
+              <hr />
+              <div
+                className="p-1"
+                onClick={() =>
+                  handleCategoryClick(
+                    "Research Field", // Displayed as "Research Field"
+                    "Search any research fields!"
+                  )
+                }>
+                <div className="flex items-center p-1 transition duration-200 hover:bg-zinc-100 rounded-md">
+                  <div className="p-1">
+                    <IoBookSharp />
+                  </div>
+                  <div className="pl-1 flex-grow">Research Field</div>
+                </div>
               </div>
             </div>
-            {isOpen && (
-                <div
-                    className={`absolute left-0 top-9 w-40 bg-white border-[1px] shadow-lg rounded-md`}
-                >
-                  <div
-                      className="p-1"
-                      onClick={() =>
-                          handleCategoryClick("Author", "Search any scholar!")
-                      }
-                  >
-                    <div className="flex items-center p-1 transition duration-200 hover:bg-zinc-100 rounded-md">
-                      <div className="p-1">
-                        <FaUserGraduate />
-                      </div>
-                      <div className="pl-1 flex-grow">Author</div>
-                    </div>
-                  </div>
-                  <hr />
-                  <div
-                      className="p-1"
-                      onClick={() =>
-                          handleCategoryClick(
-                              "Research Field", // Displayed as "Research Field"
-                              "Search any research fields!"
-                          )
-                      }
-                  >
-                    <div className="flex items-center p-1 transition duration-200 hover:bg-zinc-100 rounded-md">
-                      <div className="p-1">
-                        <IoBookSharp />
-                      </div>
-                      <div className="pl-1 flex-grow">Research Field</div>
-                    </div>
-                  </div>
-                </div>
-            )}
-          </div>
-        </div>
-        <input
-            className="ml-2 flex-1 bg-transparent font-sans text-xs outline-none md:text-base border-none focus:ring-0"
-            type="search"
-            placeholder={placeholder}
-            value={input}
-            onChange={(e) => handleChange(e.target.value)}
-            onKeyDown={handleKeyDown}
-            disabled={loading}
-            required
-        />
-        <button
-            onClick={handleSubmit}
-            disabled={loading}
-            className="flex items-center justify-center"
-        >
-          {loading ? (
-              <div className="animate-spin h-5 w-5 border-2 border-gray-500 border-t-transparent rounded-full" />
-          ) : (
-              <BiSearch size={18} />
           )}
-        </button>
+        </div>
       </div>
+      <input
+        className="ml-2 flex-1 bg-transparent font-sans text-xs outline-none md:text-base border-none focus:ring-0"
+        type="search"
+        placeholder={placeholder}
+        value={input}
+        onChange={(e) => handleChange(e.target.value)}
+        onKeyDown={handleKeyDown}
+        disabled={loading}
+        required
+      />
+      <button
+        onClick={() => handleSubmit}
+        disabled={loading}
+        className="flex items-center justify-center">
+        {loading ? (
+          <div className="animate-spin h-5 w-5 border-2 border-gray-500 border-t-transparent rounded-full" />
+        ) : (
+          <BiSearch size={18} />
+        )}
+      </button>
+    </div>
   );
 };
 

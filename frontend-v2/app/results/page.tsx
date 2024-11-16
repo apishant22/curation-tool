@@ -102,11 +102,19 @@ function ResultsPage() {
   }
 
   const handleNameClick = (name: string, profileLink: string) => {
+    const formattedName = name.trim().replace(/\s+/g, " ").toLowerCase();
+    const profileIdMatch = profileLink.match(/profile\/(\d+)$/);
+    const profileId = profileIdMatch ? profileIdMatch[1] : "";
+    const searchParams = new URLSearchParams({
+      name: formattedName,
+      profileId: profileId,
+    });
+
     toast.success(
       "Item has been successfully clicked! Redirecting to the details page."
     );
 
-    router.push(`/summary?name=${name}&profile=${profileLink}`);
+    router.push(`/summary?${searchParams.toString()}`);
   };
 
   return (
