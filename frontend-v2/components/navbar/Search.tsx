@@ -7,7 +7,7 @@ import { FaUserGraduate } from "react-icons/fa";
 import { IoBookSharp } from "react-icons/io5";
 import { TbCaretDownFilled } from "react-icons/tb";
 
-const categoryMapping = {
+const categoryMapping: { [key: string]: string } = {
   Author: "author",
   "Research Field": "field",
 };
