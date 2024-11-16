@@ -2,10 +2,10 @@
 import Button from "@/components/global/Button";
 import Container from "@/components/global/Container";
 import AuthorHeader from "@/components/summary/AuthorHeader";
-import DetailsCard from "@/components/summary/DetailsCard";
 import Loading from "@/components/summary/Loading";
-import MarkdownContent from "@/components/summary/MarkdownContent";
+// import MarkdownContent from "@/components/summary/MarkdownContent";
 import PublicationCard from "@/components/summary/PublicationCard";
+import SelectableSummary from "@/components/summary/SelectableSummary";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { AlertCircle } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -59,6 +59,10 @@ interface AuthorResponse {
   message: string;
   summary: string;
 }
+
+const testContent = `This is a test summary. You can select any part of this text and try to regenerate it.
+This is just a mock implementation to test the UI functionality.
+Feel free to select multiple sentences and see how it works.`;
 
 function Page() {
   const searchParams = useSearchParams();
@@ -117,6 +121,52 @@ function Page() {
         });
     }
   }, [searchParams, router, name, profileId]);
+
+  const handleRegeneratePart = async (
+    selectedText: string,
+    startIndex: number,
+    endIndex: number
+  ) => {
+    try {
+      if (!data) return; // Guard clause to handle null case
+
+      const response = await fetch("http://localhost:3002/regenerate", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          originalText: data.summary,
+          selectedText,
+          startIndex,
+          endIndex,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
+      }
+
+      const result = await response.json();
+
+      // Update the summary with the regenerated text while maintaining the type structure
+      setData((prevData): AuthorResponse => {
+        if (!prevData) throw new Error("Previous data is null");
+
+        return {
+          ...prevData,
+          summary:
+            prevData.summary.substring(0, startIndex) +
+            result.regeneratedText +
+            prevData.summary.substring(endIndex),
+          author_details: prevData.author_details, // Maintain the existing author_details
+          message: prevData.message, // Maintain the existing message
+        };
+      });
+    } catch (error) {
+      console.error("Error regenerating text:", error);
+    }
+  };
 
   if (loading) {
     return (
@@ -194,25 +244,9 @@ function Page() {
           <>
             <div className="flex flex-grow bg-white shadow-2xl">
               <div className="w-[70%] p-4 flex flex-col">
-                {/* TODO: YUQING TO REMOVE THIS PART */}
                 <div className="p-4">
                   <AuthorHeader
                     name={data?.author_details?.Name || "No name available"}
-                  />
-                  <DetailsCard
-                    bioTitle="Biography"
-                    bioContent={
-                      data.author_details?.Biography?.Biography ||
-                      "No biography available."
-                    } // Ensure it's an array
-                    eduTitle="Education History"
-                    eduContent={
-                      data?.author_details?.["Education History"] || []
-                    } // Ensure it's an array
-                    empTitle="Employment History"
-                    empContent={
-                      data?.author_details?.["Employment History"] || []
-                    } // Ensure it's an array
                   />
                 </div>
                 <div className="p-6 ">
@@ -224,13 +258,21 @@ function Page() {
                           AI-Generated Summary
                         </span>
                       </div>
-                      {!data.summary && (
+                      {/* {!data.summary && (
                         <div className="flex justify-center items-center min-h-80">
                           <p>No summary available.</p>
                         </div>
-                      )}
+                      )} */}
                       <div className="p-6">
-                        <MarkdownContent content={data?.summary} />
+                        <SelectableSummary
+                          content={testContent} // Use test content for now
+                          onRegeneratePart={async (text, start, end) => {
+                            // This is just for testing
+                            console.log("Selected text:", text);
+                            console.log("Start index:", start);
+                            console.log("End index:", end);
+                          }}
+                        />
                       </div>
                     </div>
                   </div>
