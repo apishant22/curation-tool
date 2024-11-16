@@ -12,7 +12,7 @@ import useNetworkModal from "@/app/hooks/useNetworkModal";
 
 interface CoAuthor {
   Name: string;
-  "Orcid ID": string;
+  "Profile Link": string;
 }
 
 interface Publication {
@@ -141,7 +141,11 @@ const PublicationCard: React.FC<PublicationCardProps> = ({ publications }) => {
                     </p>
                     <ul className="list-disc list-inside text-xs text-gray-600">
                       {pub["Co-Authors"].map((coAuthor, idx) => (
-                        <li key={idx}>{coAuthor.Name}</li>
+                        <li key={idx}>
+                          <a href={coAuthor["Profile Link"]} target="_blank">
+                            {coAuthor.Name}
+                          </a>{" "}
+                        </li>
                       ))}
                     </ul>
                   </div>
