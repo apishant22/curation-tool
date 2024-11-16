@@ -33,7 +33,7 @@ interface EmploymentHistory {
 
 interface CoAuthor {
   Name: string;
-  "Orcid ID": string;
+  "Profile Link": string;
 }
 
 interface Publication {
