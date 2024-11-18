@@ -30,7 +30,8 @@
     "components/modal/NetworkModal.jsx",
     "components/editor/EditorContext.jsx",
     "components/modal/EditorModal.jsx",
-    "components/summary/SelectableSummary.tsx"
+    "components/summary/SelectableSummary.tsx",
+    "components/summary/RegenerateCard.jsx"
   ],
   "exclude": ["node_modules"]
 }

@@ -1,5 +1,5 @@
 "use client";
-import Button from "@/components/global/Button";
+import Buttons from "@/components/global/Button";
 import Container from "@/components/global/Container";
 import AuthorHeader from "@/components/summary/AuthorHeader";
 import Loading from "@/components/summary/Loading";
@@ -7,8 +7,13 @@ import PublicationCard from "@/components/summary/PublicationCard";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { AlertCircle } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import Tiptap from "@/components/tiptap/Tiptap";
+import useRegenerateModal from "../hooks/useRegenerateModal";
+import RegenerateCard from "@/components/summary/RegenerateCard";
+import { Button } from "@/components/ui/button";
+import { IoMdArrowBack, IoMdCheckmark } from "react-icons/io";
+import { FaBackspace } from "react-icons/fa";
 
 interface Biography {
   Biography: string;
@@ -69,6 +74,7 @@ function Page() {
   const [error, setError] = useState<string | null>(null);
   const name = searchParams.get("name") || "";
   const profileId = parseInt(searchParams.get("profileId") || "0", 10);
+  const regenerateModal = useRegenerateModal();
 
   const fetchAuthor = async (name: string, profileId: number) => {
     try {
@@ -162,7 +168,7 @@ function Page() {
               </Alert>
 
               <div className="flex flex-col gap-4">
-                <Button
+                <Buttons
                   onClick={() => {
                     // Check if cachedData exists
                     if (cachedData) {
@@ -204,14 +210,12 @@ function Page() {
                 <Tiptap contentHere={testContent} />
 
                 <div className="flex gap-4 justify-center p-2 mb-6">
-                  <Button label={"Accept"} onClick={() => {}} />
-                  <Button label={"Regenerate"} onClick={() => {}} />
-                  <Button
-                    label={"Back"}
-                    onClick={() => {
-                      router.back();
-                    }}
-                  />
+                  <Button className="bg-green-400 hover:bg-green-600">
+                    <IoMdCheckmark size={30} />
+                  </Button>
+                  <Button>
+                    <IoMdArrowBack />
+                  </Button>
                 </div>
               </div>
 

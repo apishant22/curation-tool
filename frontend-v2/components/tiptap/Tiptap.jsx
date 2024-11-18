@@ -7,11 +7,20 @@ import MarkdownContent from "@/components/summary/MarkdownContent";
 import Highlight from "@tiptap/extension-highlight";
 import Typography from "@tiptap/extension-typography";
 import { FaEdit } from "react-icons/fa";
+import RegenerateCard from "../summary/RegenerateCard";
+import { Button } from "../ui/button";
+import { LucideRefreshCw } from "lucide-react";
+import { IoMdRefreshCircle } from "react-icons/io";
 
 const Tiptap = ({ contentHere }) => {
   const [content, setContent] = useState(contentHere);
   const [isEdit, setIsEdit] = useState(false);
   const [clicked, setClicked] = useState(false);
+  const [isOpen, setIsOpen] = useState(false);
+
+  const toggleOpen = useCallback(() => {
+    setIsOpen((value) => !value);
+  }, []);
 
   const editor = useEditor({
     extensions: [StarterKit, Highlight, Typography],
@@ -62,18 +71,48 @@ const Tiptap = ({ contentHere }) => {
             </div>
           </div>
         </div>
-        <div className="p-2">
-          <button onClick={handleEdit}>
-            <FaEdit
-              size={20}
-              className={`${
-                clicked ? "text-blue-400" : ""
-              } hover:text-neutral-400`}
-            />
-          </button>
+        <div className="p-2 flex flex-col items-center">
+          <div>
+            <button onClick={handleEdit}>
+              <FaEdit
+                size={20}
+                className={`${
+                  clicked ? "text-blue-400" : ""
+                } hover:text-neutral-400`}
+              />
+            </button>
+          </div>
+          <div>
+            <button onClick={toggleOpen}>
+              <IoMdRefreshCircle size={22} />
+            </button>
+          </div>
         </div>
       </div>
-      {isEdit && <EditorContent editor={editor} />}
+      {isEdit && (
+        <>
+          <h1 className="text-center font-bold font-sans pb-2">Editor Mode</h1>
+          <EditorContent editor={editor} />
+        </>
+      )}
+      {isOpen && (
+        <div className="bg-zinc-100/75 dark:bg-zinc-800 rounded-md mt-6">
+          <h1 className="text-center font-bold p-4 font-sans">
+            Regenerate your summary!
+          </h1>
+
+          <div
+            className="overflow-y-auto flex justify-center max-h-[800px] p-4
+      ">
+            <RegenerateCard />
+          </div>
+          <div className="flex justify-end p-4">
+            <Button className="bg-blue-500 hover:bg-blue-700 dark:text-white">
+              Regenerate
+            </Button>
+          </div>
+        </div>
+      )}
     </>
   );
 };
