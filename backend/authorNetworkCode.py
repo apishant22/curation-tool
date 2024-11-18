@@ -64,20 +64,21 @@ def generatesNodesAndEdges(id):
 
 
 
-def convert_to_json(id):
-    nodes,edges = generatesNodesAndEdges(id)
+def convert_to_json(name):
+    record = retrieve_formatted_records(Researcher,{'name':name})
+    id = record[0].get('id')
+    nodes,edges = generatesNodesAndEdges(int(id))
 
     graph_data = {
         "nodes":nodes,
         "edges":edges
     }
     json_string = json.dumps(graph_data, indent=4)
-    print(json_string)
 
     with open("graph.json", "w") as json_file:
         json.dump(graph_data, json_file, indent=4)
 
-
+convert_to_json("Leslie Anthony Carr")
 
 
 
