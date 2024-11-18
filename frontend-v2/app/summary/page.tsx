@@ -2,7 +2,6 @@
 import Button from "@/components/global/Button";
 import Container from "@/components/global/Container";
 import AuthorHeader from "@/components/summary/AuthorHeader";
-import DetailsCard from "@/components/summary/DetailsCard";
 import Loading from "@/components/summary/Loading";
 import MarkdownContent from "@/components/summary/MarkdownContent";
 import PublicationCard from "@/components/summary/PublicationCard";
@@ -33,7 +32,7 @@ interface EmploymentHistory {
 
 interface CoAuthor {
   Name: string;
-  "Orcid ID": string;
+  "Profile Link": string;
 }
 
 interface Publication {
@@ -168,6 +167,7 @@ function Page() {
                       router.push(cachedData); // Push to cached URL
                     } else {
                       console.warn("No cached URL found in sessionStorage");
+                      router.back();
                     }
                   }}
                   label={"Go back to results page"}
@@ -197,21 +197,6 @@ function Page() {
                 <div className="p-4">
                   <AuthorHeader
                     name={data?.author_details?.Name || "No name available"}
-                  />
-                  <DetailsCard
-                    bioTitle="Biography"
-                    bioContent={
-                      data.author_details?.Biography?.Biography ||
-                      "No biography available."
-                    } // Ensure it's an array
-                    eduTitle="Education History"
-                    eduContent={
-                      data?.author_details?.["Education History"] || []
-                    } // Ensure it's an array
-                    empTitle="Employment History"
-                    empContent={
-                      data?.author_details?.["Employment History"] || []
-                    } // Ensure it's an array
                   />
                 </div>
                 <div className="p-6 ">

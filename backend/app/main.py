@@ -1,6 +1,7 @@
 import json
 
-from flask import Flask, jsonify, View
+from flask import Flask, jsonify
+from flask.views import View
 from flask_cors import CORS
 
 import re
@@ -12,36 +13,61 @@ import backend.llm.llm as llm
 app = Flask(__name__)
 CORS(app)
 
-# author_name_cache = {}  # is this ever used?
-
 # This view is a class as it requires state in the form of a cache
 class Search(View):
-    orcid_pattern = re.compile(r"^\d{4}-\d{4}-\d{4}-\d{4}$")
-
     def __init__(self):
-        self.max_pages_cache = dict()
+        self.max_pages_cache = {}
         self.last_searched_name = None
 
-    def dispatch_request(self, name, page):
-        if orcid_pattern.match(name):
-            print(f"Detected ORCID ID: {name}. Fetching associated author name.")
-            max_pages = 1
+    def dispatch_request(self, search_type, input, page):
+        if search_type not in ['author', 'field']:
+            return jsonify({"error": "Invalid search type. Must be 'author' or 'field'."}), 400
 
-        else:
-            normalized_name = name.lower()
+        normalized_name = input.lower()
+        try:
             if normalized_name != self.last_searched_name:
-                print(f"Cache miss or new name. Running scraper.get_estimated_max_pages for: {name}")
-                max_pages = scraper.get_estimated_max_pages(name)
+                print(f"Cache miss or new input. Running scraper.get_estimated_max_pages for: {input}")
+                max_pages = scraper.get_estimated_max_pages(input)
                 self.max_pages_cache[normalized_name] = max_pages
                 self.last_searched_name = normalized_name
             else:
-                print(f"Cache hit for: {name}")
+                print(f"Cache hit for: {input}")
                 max_pages = self.max_pages_cache.get(normalized_name, 0)
 
-        search_results = scraper.identify_input_type_and_search_author(name, page, max_pages)
-        return jsonify(search_results)
+            search_results = scraper.identify_input_type_and_search(
+                input_value=input,
+                page_number=page,
+                search_type=search_type,
+                max_pages=max_pages
+            )
 
-app.add_url_rule('/search/<name>/<int:page>', view_func=Search.as_view('search'))
+            response = {
+                "results": search_results["results"],
+                "max_pages": search_results["max_pages"],
+                "no_previous_page": search_results["no_previous_page"],
+                "no_next_page": search_results["no_next_page"],
+                "search_type": search_type
+            }
+            return jsonify(response), 200
+
+        except ValueError as ve:
+            print(f"ValueError during search: {ve}")
+            return jsonify({"error": str(ve)}), 400
+        except KeyError as ke:
+            print(f"KeyError during search: {ke}")
+            return jsonify({"error": "Internal error occurred. Please try again later."}), 500
+        except Exception as e:
+            print(f"An unexpected error occurred: {e}")
+            return jsonify({"error": "Unexpected error occurred. Please try again later."}), 500
+
+app.add_url_rule('/search/<search_type>/<input>/<int:page>', view_func=Search.as_view('search'))
+
+@app.route('/search/<search_type>/<input>/<int:page>', methods=['GET'])
+def search_endpoint(search_type, input, page):
+    print(f"Received request: search_type={search_type}, input={input}, page={page}")
+    if search_type not in ['author', 'field']:
+        return jsonify({"error": "Invalid search type. Must be 'author' or 'field'."}), 400
+    return Search().dispatch_request(search_type, input, page)
 
 @app.route('/query/<name>/<profile_link>')
 def query(name, profile_link):
