@@ -3,13 +3,12 @@ import Button from "@/components/global/Button";
 import Container from "@/components/global/Container";
 import AuthorHeader from "@/components/summary/AuthorHeader";
 import Loading from "@/components/summary/Loading";
-import MarkdownContent from "@/components/summary/MarkdownContent";
-// import MarkdownContent from "@/components/summary/MarkdownContent";
 import PublicationCard from "@/components/summary/PublicationCard";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { AlertCircle } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import React, { useEffect, useState } from "react";
+import Tiptap from "@/components/tiptap/Tiptap";
 
 interface Biography {
   Biography: string;
@@ -120,52 +119,6 @@ function Page() {
     }
   }, [searchParams, router, name, profileId]);
 
-  // const handleRegeneratePart = async (
-  //   selectedText: string,
-  //   startIndex: number,
-  //   endIndex: number
-  // ) => {
-  //   try {
-  //     if (!data) return; // Guard clause to handle null case
-
-  //     const response = await fetch("http://localhost:3002/regenerate", {
-  //       method: "POST",
-  //       headers: {
-  //         "Content-Type": "application/json",
-  //       },
-  //       body: JSON.stringify({
-  //         originalText: data.summary,
-  //         selectedText,
-  //         startIndex,
-  //         endIndex,
-  //       }),
-  //     });
-
-  //     if (!response.ok) {
-  //       throw new Error(`HTTP error! Status: ${response.status}`);
-  //     }
-
-  //     const result = await response.json();
-
-  //     // Update the summary with the regenerated text while maintaining the type structure
-  //     setData((prevData): AuthorResponse => {
-  //       if (!prevData) throw new Error("Previous data is null");
-
-  //       return {
-  //         ...prevData,
-  //         summary:
-  //           prevData.summary.substring(0, startIndex) +
-  //           result.regeneratedText +
-  //           prevData.summary.substring(endIndex),
-  //         author_details: prevData.author_details, // Maintain the existing author_details
-  //         message: prevData.message, // Maintain the existing message
-  //       };
-  //     });
-  //   } catch (error) {
-  //     console.error("Error regenerating text:", error);
-  //   }
-  // };
-
   if (loading) {
     return (
       <div className="pt-48 flex justify-center">
@@ -247,28 +200,9 @@ function Page() {
                     name={data?.author_details?.Name || "No name available"}
                   />
                 </div>
-                <div className="p-6 ">
-                  <div className="flex-grow flex items-stretch bg-gray-100 dark:bg-zinc-800 rounded-lg">
-                    {/* Added bg color to see the expansion */}
-                    <div className="w-full">
-                      <div className="mt-4 flex justify-center">
-                        <span className="text-xs bg-gradient-to-r from-blue-500 to-purple-500 text-white px-3 py-1 rounded-full font-medium">
-                          AI-Generated Summary
-                        </span>
-                      </div>
-                      {/* {!data.summary && (
-                        <div className="flex justify-center items-center min-h-80">
-                          <p>No summary available.</p>
-                        </div>
-                      )} */}
-                      <div className="p-6">
-                        <MarkdownContent
-                          content={testContent} // Use test content for now
-                        />
-                      </div>
-                    </div>
-                  </div>
-                </div>
+
+                <Tiptap contentHere={testContent} />
+
                 <div className="flex gap-4 justify-center p-2 mb-6">
                   <Button label={"Accept"} onClick={() => {}} />
                   <Button label={"Regenerate"} onClick={() => {}} />
