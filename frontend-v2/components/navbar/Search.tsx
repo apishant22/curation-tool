@@ -108,11 +108,11 @@ const Search = () => {
   };
 
   return (
-    <div className="bg-white flex w-full cursor-pointer items-center justify-between rounded-full border-[1px] p-1 shadow-sm transition hover:shadow-md md:max-w-[1200px] md:min-w-[600px]">
+    <div className=" flex w-full cursor-pointer items-center justify-between rounded-full border-[1px] p-1 shadow-sm transition hover:shadow-md md:max-w-[1200px] md:min-w-[600px] dark:bg-zinc-800">
       <div className="pl-2 text-sm">
         <div className="relative">
           <div
-            className="flex items-center rounded-md border hover:bg-zinc-100 transition duration-100"
+            className="flex items-center rounded-md border dark:bg-zinc-900 hover:bg-zinc-100 dark:hover:bg-zinc-950 transition duration-100"
             onClick={toggleOpen}>
             <div className="p-1">{category}</div>
             <div>
@@ -121,13 +121,13 @@ const Search = () => {
           </div>
           {isOpen && (
             <div
-              className={`absolute left-0 top-9 w-40 bg-white border-[1px] shadow-lg rounded-md`}>
+              className={`absolute left-0 dark:bg-zinc-900 top-9 w-40 border-[1px] shadow-lg rounded-md`}>
               <div
                 className="p-1"
                 onClick={() =>
                   handleCategoryClick("Author", "Search any scholar!")
                 }>
-                <div className="flex items-center p-1 transition duration-200 hover:bg-zinc-100 rounded-md">
+                <div className="flex items-center p-1 transition duration-200 hover:bg-zinc-100 dark:hover:bg-zinc-950 rounded-md">
                   <div className="p-1">
                     <FaUserGraduate />
                   </div>
@@ -143,7 +143,7 @@ const Search = () => {
                     "Search any research fields!"
                   )
                 }>
-                <div className="flex items-center p-1 transition duration-200 hover:bg-zinc-100 rounded-md">
+                <div className="flex items-center p-1 transition duration-200 hover:bg-zinc-100 dark:hover:bg-zinc-950 rounded-md">
                   <div className="p-1">
                     <IoBookSharp />
                   </div>

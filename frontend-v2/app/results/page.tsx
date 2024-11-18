@@ -134,10 +134,10 @@ function ResultsPage() {
           {searchData.results.map((result, index) => (
             <div
               key={index}
-              className="p-6 border rounded-lg shadow-sm hover:shadow-md transition bg-white">
+              className="p-6 border rounded-lg shadow-sm hover:shadow-md transition dark:bg-zinc-800">
               <div className="space-y-2">
                 <div>
-                  <h2 className="text-xl font-semibold text-blue-600 hover:text-blue-800">
+                  <h2 className="text-xl font-semibold text-blue-600 dark:text-white hover:text-blue-800 dark:hover:text-neutral-500">
                     <p
                       className="cursor-pointer"
                       onClick={() =>
@@ -147,7 +147,7 @@ function ResultsPage() {
                     </p>
                   </h2>
                   {searchData.search_type === "author" && result.Location && (
-                    <p className="text-gray-600 flex gap-2 items-center">
+                    <p className="text-gray-600 dark:text-neutral-400 flex gap-2 items-center">
                       <MdOutlineWork size={16} />
                       {result.Location}
                     </p>
