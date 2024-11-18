@@ -40,5 +40,7 @@ class ResearcherFieldsOfStudy(Base):
     id = Column(Integer, ForeignKey('Researcher.id'), primary_key=True)
     field_id = Column(Integer, ForeignKey('Fields_of_Study.field_id'), primary_key=True)
 
-
-
+class MaxPagesCache(Base):
+    __tablename__ = 'Max_Pages_Cache'
+    name = Column(String, primary_key=True)
+    max_pages = Column(Integer, nullable=True)

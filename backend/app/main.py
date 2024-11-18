@@ -1,10 +1,7 @@
-import json
-
 from flask import Flask, jsonify
 from flask.views import View
 from flask_cors import CORS
 
-import re
 import backend.app.author_scraper as scraper
 import backend.db.db_helper as db
 import backend.db.models as model
@@ -13,61 +10,45 @@ import backend.llm.llm as llm
 app = Flask(__name__)
 CORS(app)
 
-# This view is a class as it requires state in the form of a cache
-class Search(View):
-    def __init__(self):
-        self.max_pages_cache = {}
-        self.last_searched_name = None
+def _search(search_type, name, page):
+    assert(search_type in ('author', 'field'))
 
-    def dispatch_request(self, search_type, input, page):
-        if search_type not in ['author', 'field']:
-            return jsonify({"error": "Invalid search type. Must be 'author' or 'field'."}), 400
+    normalized_name = name.lower()
 
-        normalized_name = input.lower()
-        try:
-            if normalized_name != self.last_searched_name:
-                print(f"Cache miss or new input. Running scraper.get_estimated_max_pages for: {input}")
-                max_pages = scraper.get_estimated_max_pages(input)
-                self.max_pages_cache[normalized_name] = max_pages
-                self.last_searched_name = normalized_name
-            else:
-                print(f"Cache hit for: {input}")
-                max_pages = self.max_pages_cache.get(normalized_name, 0)
+    # try to get the estimated max pages from the database
+    try:
+        max_pages = db.get_records(model.MaxPagesCache.max_pages, {'name': normalized_name})[0][0]
+    except IndexError:
+        # scrape it and add to the cache if not found
+        print(f"Cache miss or new input. Running scraper.get_estimated_max_pages for: {name}")
+        max_pages = scraper.get_estimated_max_pages(name)  # TODO separate cache for authors and fields?
+        db.add_record(model.MaxPagesCache(name=normalized_name, max_pages=max_pages))
+    else:
+        print(f"Cache hit for {name}: {max_pages}")
 
-            search_results = scraper.identify_input_type_and_search(
-                input_value=input,
-                page_number=page,
-                search_type=search_type,
-                max_pages=max_pages
-            )
+    # perform the search
+    try:
+        search_results = scraper.identify_input_type_and_search(
+            input_value=name,
+            page_number=page,
+            search_type=search_type,
+            max_pages=max_pages
+        )
 
-            response = {
-                "results": search_results["results"],
-                "max_pages": search_results["max_pages"],
-                "no_previous_page": search_results["no_previous_page"],
-                "no_next_page": search_results["no_next_page"],
-                "search_type": search_type
-            }
-            return jsonify(response), 200
+        return jsonify(search_results), 200
 
-        except ValueError as ve:
-            print(f"ValueError during search: {ve}")
-            return jsonify({"error": str(ve)}), 400
-        except KeyError as ke:
-            print(f"KeyError during search: {ke}")
-            return jsonify({"error": "Internal error occurred. Please try again later."}), 500
-        except Exception as e:
-            print(f"An unexpected error occurred: {e}")
-            return jsonify({"error": "Unexpected error occurred. Please try again later."}), 500
+    except Exception as e:
+        msg = f'An unexpected error occurred: {e}'
+        print(msg)
+        return jsonify(error = msg), 500
 
-app.add_url_rule('/search/<search_type>/<input>/<int:page>', view_func=Search.as_view('search'))
+@app.route('/search/author/<name>/<int:page>')
+def search_author(name, page):
+    return _search('author', name, page)
 
-@app.route('/search/<search_type>/<input>/<int:page>', methods=['GET'])
-def search_endpoint(search_type, input, page):
-    print(f"Received request: search_type={search_type}, input={input}, page={page}")
-    if search_type not in ['author', 'field']:
-        return jsonify({"error": "Invalid search type. Must be 'author' or 'field'."}), 400
-    return Search().dispatch_request(search_type, input, page)
+@app.route('/search/field/<name>/<int:page>')
+def search_field(name, page):
+    return _search('field', name, page)
 
 @app.route('/query/<name>/<profile_link>')
 def query(name, profile_link):
@@ -76,18 +57,15 @@ def query(name, profile_link):
 
     update_result, author_details_db = scraper.update_author_if_needed(name, profile_link)
 
+    response = {'author_details': author_details_db}
     if update_result is None:
-        return {
-            "message": "Author details updated, but summary not available yet.",
-            "author_details": author_details_db
-        }, 200
+        response['message'] = "Author details updated, but summary not available yet."
+    else:
+        response |= {'message': "Author summary retrieved successfully.", "summary": update_result}
 
-    return {
-        "message": "Author summary retrieved successfully.",
-        "summary": update_result,
-        "author_details": author_details_db
-    }, 200
+    return jsonify(response), 200
 
+# TODO make this work with the new database
 @app.route('/misc_profiles/<int:number>')
 def misc_profiles(number):
     '''Fetch number of profiles from the database'''
@@ -99,3 +77,5 @@ def misc_profiles(number):
     result = [db.get_author_details_from_db(orcid) for orcid in orcids]
     print(result)
     return result
+
+# TODO convert_to_json, regenerate
