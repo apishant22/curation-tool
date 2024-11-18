@@ -16,8 +16,8 @@ const Logo: React.FC<LogoProps> = ({ src, alt }) => {
       onClick={() => router.push("/")}
       alt={alt || "ACM Logo"}
       src={src || "/images/acm-logo.png"}
-      width={80}
-      height={80}
+      width={100}
+      height={100}
       className="hidden cursor-pointer md:block"
     />
   );

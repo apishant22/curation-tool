@@ -19,7 +19,7 @@ const Navbar = () => {
     });
   }, []);
   return (
-    <div className="fixed z-10 w-full border-b-[1px] shadow-sm dark:bg-zinc-900">
+    <div className="fixed z-10 w-full dark:bg-zinc-900">
       <Container>
         <div className="flex items-center justify-between gap-2 p-4 md:gap-6">
           <Logo />

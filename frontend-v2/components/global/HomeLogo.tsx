@@ -11,8 +11,8 @@ const HomeLogo = () => {
       onClick={() => router.push("/")}
       alt={"ACM Logo"}
       src={"/images/logo-main.png"}
-      width={250}
-      height={250}
+      width={300}
+      height={300}
       className="hidden cursor-pointer md:block"
     />
   );

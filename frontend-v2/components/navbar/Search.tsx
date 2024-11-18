@@ -1,6 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import { useEffect, useRef} from "react"
 import React, { useCallback, useState } from "react";
 import { BiSearch } from "react-icons/bi";
 import { FaUserGraduate } from "react-icons/fa";
@@ -19,7 +20,8 @@ const Search = () => {
   const router = useRouter();
   const [isOpen, setIsOpen] = useState(false);
   const [category, setCategory] = useState("Author");
-  const [placeholder, setPlaceholder] = useState("Search any scholar!");
+  const [placeholder, setPlaceholder] = useState("Search");
+  const dropdownRef = useRef<HTMLDivElement>(null);
 
   // get the value from the search bar
   // fetch data from API using the value
@@ -64,7 +66,7 @@ const Search = () => {
     }
   };
 
-  const handleSubmit = async (e: React.KeyboardEvent<HTMLInputElement>) => {
+  const handleSubmit = async (e: React.FormEvent | React.KeyboardEvent<HTMLInputElement>) => {
     e.preventDefault();
     if (!input.trim()) {
       return;
@@ -93,6 +95,18 @@ const Search = () => {
       handleSubmit(e);
     }
   };
+  
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) =>{
+      if(dropdownRef.current && !dropdownRef.current.contains(e.target as Node)){
+        setIsOpen(false);
+      }
+    };
+    document.addEventListener("mousedown",handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown",handleClickOutside);
+    };
+  },[]);
 
   const toggleOpen = useCallback(() => {
     setIsOpen((value) => !value);
@@ -105,14 +119,15 @@ const Search = () => {
     toggleOpen();
     setCategory(categoryName); // Use the display name here
     setPlaceholder(placeholderName);
+    setIsOpen(false);
   };
 
   return (
-    <div className=" flex w-full cursor-pointer items-center justify-between rounded-full border-[1px] p-1 shadow-sm transition hover:shadow-md md:max-w-[1200px] md:min-w-[600px] dark:bg-zinc-800">
+    <div className=" flex w-full cursor-pointer items-center justify-between border-[1px] p-1 shadow-sm transition md:max-w-[1200px] md:min-w-[600px] dark:bg-zinc-800">
       <div className="pl-2 text-sm">
-        <div className="relative">
+        <div ref={dropdownRef} className="relative">
           <div
-            className="flex items-center rounded-md border dark:bg-zinc-900 hover:bg-zinc-100 dark:hover:bg-zinc-950 transition duration-100"
+            className="flex items-center dark:bg-zinc-900 hover:bg-zinc-100 dark:hover:bg-zinc-950 transition duration-100"
             onClick={toggleOpen}>
             <div className="p-1">{category}</div>
             <div>
@@ -121,13 +136,13 @@ const Search = () => {
           </div>
           {isOpen && (
             <div
-              className={`absolute left-0 dark:bg-zinc-900 top-9 w-40 border-[1px] shadow-lg rounded-md`}>
+              className={`absolute left-0 dark:bg-zinc-900 top-9 w-40 border-[1px] shadow-lg`}>
               <div
                 className="p-1"
                 onClick={() =>
-                  handleCategoryClick("Author", "Search any scholar!")
+                  handleCategoryClick("Author", "Search author ...")
                 }>
-                <div className="flex items-center p-1 transition duration-200 hover:bg-zinc-100 dark:hover:bg-zinc-950 rounded-md">
+                <div className="flex items-center p-1 transition duration-200 bg-white hover:bg-zinc-100 dark:hover:bg-zinc-950">
                   <div className="p-1">
                     <FaUserGraduate />
                   </div>
@@ -140,10 +155,10 @@ const Search = () => {
                 onClick={() =>
                   handleCategoryClick(
                     "Research Field", // Displayed as "Research Field"
-                    "Search any research fields!"
+                    "Search research field ..."
                   )
                 }>
-                <div className="flex items-center p-1 transition duration-200 hover:bg-zinc-100 dark:hover:bg-zinc-950 rounded-md">
+                <div className="flex items-center p-1 transition duration-200 bg-white hover:bg-zinc-100 dark:hover:bg-zinc-950">
                   <div className="p-1">
                     <IoBookSharp />
                   </div>
@@ -165,13 +180,13 @@ const Search = () => {
         required
       />
       <button
-        onClick={() => handleSubmit}
+        onClick={(e) => handleSubmit(e)}
         disabled={loading}
-        className="flex items-center justify-center">
+        className="pr-2 flex items-center justify-center hover:text-blue-500">
         {loading ? (
-          <div className="animate-spin h-5 w-5 border-2 border-gray-500 border-t-transparent rounded-full" />
+          <div className="animate-spin h-5 w-5 border-2 border-gray-500" />
         ) : (
-          <BiSearch size={18} />
+          <BiSearch size={25} />
         )}
       </button>
     </div>

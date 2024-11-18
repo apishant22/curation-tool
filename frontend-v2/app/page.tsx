@@ -35,10 +35,10 @@ const page = () => {
     <div className="pt-36 flex justify-center items-center">
       <ClientOnly>
         <Container>
-          <div className="flex flex-col items-center gap-4">
+          <div className="border-b-[1px] flex flex-col items-center gap-10">
             <HomeLogo />
             <Search />
-            <div className="text-neutral-400 text-sm flex gap-2">
+            <div className="text-neutral-400 text-sm flex gap-2 pb-10">
               <span>
                 <MdOutlineInsights size={20} />
               </span>
