@@ -136,10 +136,10 @@ const PublicationCard: React.FC<PublicationCardProps> = ({ publications }) => {
                 </p>
                 {pub["Co-Authors"].length > 0 && (
                   <div>
-                    <p className="text-sm font-medium text-gray-700 mt-3">
+                    <p className="text-sm font-medium text-neutral-400 mt-3">
                       Co-Authors:
                     </p>
-                    <ul className="list-disc list-inside text-xs text-gray-600">
+                    <ul className="list-disc list-inside text-xs text-gray-500">
                       {pub["Co-Authors"].map((coAuthor, idx) => (
                         <li key={idx}>
                           <a href={coAuthor["Profile Link"]} target="_blank">

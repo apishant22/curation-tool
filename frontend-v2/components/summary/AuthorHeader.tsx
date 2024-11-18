@@ -7,9 +7,9 @@ interface AuthorHeaderProps {
 
 const AuthorHeader: React.FC<AuthorHeaderProps> = ({ name }) => {
   return (
-    <div className="relative py-6 mb-8 bg-white">
+    <div className="relative py-6 mb-8 ">
       <div className="max-w-2xl mx-auto px-4">
-        <div className=" p-2 rounded-lg border border-gray-100">
+        <div className=" p-2 rounded-lg border ">
           <h1 className="text-center text-3xl font-bold">
             {name.toUpperCase()}
           </h1>

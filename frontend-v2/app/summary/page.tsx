@@ -4,6 +4,7 @@ import Container from "@/components/global/Container";
 import AuthorHeader from "@/components/summary/AuthorHeader";
 import Loading from "@/components/summary/Loading";
 import MarkdownContent from "@/components/summary/MarkdownContent";
+// import MarkdownContent from "@/components/summary/MarkdownContent";
 import PublicationCard from "@/components/summary/PublicationCard";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { AlertCircle } from "lucide-react";
@@ -58,6 +59,8 @@ interface AuthorResponse {
   message: string;
   summary: string;
 }
+
+const testContent = `Lorem, ipsum dolor sit amet consectetur adipisicing elit. Iure expedita consequatur quam. Sint rem exercitationem sequi cupiditate blanditiis obcaecati consequatur quos, veritatis, harum libero vel quaerat natus numquam eligendi provident?`;
 
 function Page() {
   const searchParams = useSearchParams();
@@ -116,6 +119,52 @@ function Page() {
         });
     }
   }, [searchParams, router, name, profileId]);
+
+  // const handleRegeneratePart = async (
+  //   selectedText: string,
+  //   startIndex: number,
+  //   endIndex: number
+  // ) => {
+  //   try {
+  //     if (!data) return; // Guard clause to handle null case
+
+  //     const response = await fetch("http://localhost:3002/regenerate", {
+  //       method: "POST",
+  //       headers: {
+  //         "Content-Type": "application/json",
+  //       },
+  //       body: JSON.stringify({
+  //         originalText: data.summary,
+  //         selectedText,
+  //         startIndex,
+  //         endIndex,
+  //       }),
+  //     });
+
+  //     if (!response.ok) {
+  //       throw new Error(`HTTP error! Status: ${response.status}`);
+  //     }
+
+  //     const result = await response.json();
+
+  //     // Update the summary with the regenerated text while maintaining the type structure
+  //     setData((prevData): AuthorResponse => {
+  //       if (!prevData) throw new Error("Previous data is null");
+
+  //       return {
+  //         ...prevData,
+  //         summary:
+  //           prevData.summary.substring(0, startIndex) +
+  //           result.regeneratedText +
+  //           prevData.summary.substring(endIndex),
+  //         author_details: prevData.author_details, // Maintain the existing author_details
+  //         message: prevData.message, // Maintain the existing message
+  //       };
+  //     });
+  //   } catch (error) {
+  //     console.error("Error regenerating text:", error);
+  //   }
+  // };
 
   if (loading) {
     return (
@@ -191,16 +240,15 @@ function Page() {
           <Loading />
         ) : (
           <>
-            <div className="flex flex-grow bg-white shadow-2xl">
+            <div className="flex flex-grow shadow-2xl dark:bg-zinc-900">
               <div className="w-[70%] p-4 flex flex-col">
-                {/* TODO: YUQING TO REMOVE THIS PART */}
                 <div className="p-4">
                   <AuthorHeader
                     name={data?.author_details?.Name || "No name available"}
                   />
                 </div>
                 <div className="p-6 ">
-                  <div className="flex-grow flex items-stretch bg-gray-100 rounded-lg">
+                  <div className="flex-grow flex items-stretch bg-gray-100 dark:bg-zinc-800 rounded-lg">
                     {/* Added bg color to see the expansion */}
                     <div className="w-full">
                       <div className="mt-4 flex justify-center">
@@ -208,13 +256,15 @@ function Page() {
                           AI-Generated Summary
                         </span>
                       </div>
-                      {!data.summary && (
+                      {/* {!data.summary && (
                         <div className="flex justify-center items-center min-h-80">
                           <p>No summary available.</p>
                         </div>
-                      )}
+                      )} */}
                       <div className="p-6">
-                        <MarkdownContent content={data?.summary} />
+                        <MarkdownContent
+                          content={testContent} // Use test content for now
+                        />
                       </div>
                     </div>
                   </div>

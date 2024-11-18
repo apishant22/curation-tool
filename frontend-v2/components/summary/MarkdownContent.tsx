@@ -9,7 +9,7 @@ interface MarkdownContentProps {
 const MarkdownContent: React.FC<MarkdownContentProps> = ({ content }) => {
   const components: Components = {
     h1: ({ children }) => (
-      <h1 className="text-2xl font-bold mb-4 text-gray-800">{children}</h1>
+      <h1 className="text-2xl font-bold mb-4 text-gray-800 ">{children}</h1>
     ),
     h2: ({ children }) => (
       <h2 className="text-xl font-semibold mt-6 mb-3 text-gray-700">
@@ -22,7 +22,9 @@ const MarkdownContent: React.FC<MarkdownContentProps> = ({ content }) => {
       </h3>
     ),
     p: ({ children }) => (
-      <p className="mb-3 text-gray-600 leading-relaxed">{children}</p>
+      <p className="mb-3 text-gray-600 leading-relaxed dark:text-neutral-300">
+        {children}
+      </p>
     ),
     a: ({ href, children }) => (
       <a

@@ -55,7 +55,7 @@ const Modal: React.FC<ModalProps> = ({
             } ${showModal ? "opacity-100" : "opacity-0"}`}>
             {/* postioning of content inside */}
 
-            <div className="translate relative flex h-full w-full flex-col rounded-lg border-0 bg-white shadow-lg outline-none focus:outline-none md:h-auto lg:h-auto">
+            <div className="translate relative flex h-full w-full flex-col rounded-lg border-0 bg-white dark:bg-zinc-800 shadow-lg outline-none focus:outline-none md:h-auto lg:h-auto">
               {/* HEADER */}
               <div className="relative flex items-center justify-center rounded-t border-b-[1px] p-6">
                 <button
