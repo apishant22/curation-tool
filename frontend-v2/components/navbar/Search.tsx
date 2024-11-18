@@ -123,11 +123,11 @@ const Search = () => {
   };
 
   return (
-    <div className=" flex w-full cursor-pointer items-center justify-between border-[1px] p-1 shadow-sm transition md:max-w-[1200px] md:min-w-[600px] dark:bg-zinc-800">
+    <div className=" flex w-full cursor-pointer items-center justify-between border-[1px] p-1 shadow-sm transition md:max-w-[1200px] md:min-w-[600px] dark:bg-zinc-800 rounded-lg">
       <div className="pl-2 text-sm">
         <div ref={dropdownRef} className="relative">
           <div
-            className="flex items-center dark:bg-zinc-900 hover:bg-zinc-100 dark:hover:bg-zinc-950 transition duration-100"
+            className="flex items-center dark:bg-zinc-900 hover:bg-zinc-100 dark:hover:bg-zinc-950 transition duration-100 rounded-lg"
             onClick={toggleOpen}>
             <div className="p-1">{category}</div>
             <div>
@@ -136,13 +136,13 @@ const Search = () => {
           </div>
           {isOpen && (
             <div
-              className={`absolute left-0 dark:bg-zinc-900 top-9 w-40 border-[1px] shadow-lg`}>
+              className={`absolute bg-white dark:bg-zinc-900 top-10 w-40 border-[1px] shadow-lg rounded-lg`}>
               <div
                 className="p-1"
                 onClick={() =>
                   handleCategoryClick("Author", "Search author ...")
                 }>
-                <div className="flex items-center p-1 transition duration-200 bg-white hover:bg-zinc-100 dark:hover:bg-zinc-950">
+                <div className="flex items-center p-1 transition duration-200 bg-white hover:bg-zinc-100 dark:hover:bg-zinc-950 rounded-lg">
                   <div className="p-1">
                     <FaUserGraduate />
                   </div>
@@ -158,7 +158,7 @@ const Search = () => {
                     "Search research field ..."
                   )
                 }>
-                <div className="flex items-center p-1 transition duration-200 bg-white hover:bg-zinc-100 dark:hover:bg-zinc-950">
+                <div className="flex items-center p-1 transition duration-200 bg-white hover:bg-zinc-100 dark:hover:bg-zinc-950 rounded-lg">
                   <div className="p-1">
                     <IoBookSharp />
                   </div>
@@ -170,7 +170,7 @@ const Search = () => {
         </div>
       </div>
       <input
-        className="ml-2 flex-1 bg-transparent font-sans text-xs outline-none md:text-base border-none focus:ring-0"
+        className="ml-2 flex-1 font-sans text-xs outline-none md:text-base border-none focus:ring-0"
         type="search"
         placeholder={placeholder}
         value={input}
