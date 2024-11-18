@@ -1,127 +1,37 @@
 import requests
 from bs4 import BeautifulSoup
-import re
 import math
 import json
 from backend.db.db_helper import *
+from backend.app.acm_author_searcher import ACMAuthorSearcher
+
 
 # from backend.llm import llmNew
-
-# Function to search ACM DL for an author and get search results
-def search_acm_author(author_name, page_number, max_pages):
-    formatted_name = author_name.replace(' ', '+')
-    headers = {
-        'User-Agent': 'Mozilla/5.0',
-        'Accept': 'text/html'
-    }
-
-    search_url = f"https://dl.acm.org/action/doSearch?AllField={formatted_name}&startPage={page_number}&content=people&target=people-tab&sortBy=relevancy&groupByField=ContribIdSingleValued"
-    print(f"Searching URL: {search_url}")
-
-    response = requests.get(search_url, headers=headers)
-    if response.status_code != 200:
-        print(f"Failed to retrieve author data for {author_name} on page {page_number}")
-        return {"authors": [], "no_previous_page": page_number == 0, "no_next_page": page_number >= (max_pages - 1)}
-
-    soup = BeautifulSoup(response.content, 'html.parser')
-    author_items = soup.find_all('li', class_='people__people-list')
-    author_list = []
-
-    for item in author_items:
-        name_tag = item.find('div', class_='name')
-        name = name_tag.text.strip() if name_tag else 'Unknown'
-        location_tag = item.find('div', class_='location')
-        location = location_tag.text.strip() if location_tag else 'Unknown location'
-        profile_link_tag = item.find('a', href=True, title="View Profile")
-        profile_link = f"https://dl.acm.org{profile_link_tag['href']}" if profile_link_tag else 'No profile link'
-
-        author_list.append({
-            'Name': name,
-            'Location': location,
-            'Profile Link': profile_link
-        })
-
-    print(f"Total authors found on page {page_number}: {len(author_list)}")
-    return {
-        "results": author_list,
-        "no_previous_page": page_number == 0,
-        "no_next_page": page_number >= (max_pages - 1)
-    }
-
-unique_authors = set()
-
-# Function to search ACM DL for authors in a specific field
-def search_acm_field(field_name, page_number, max_pages):
-    formatted_field = field_name.replace(' ', '+')
-    headers = {
-        'User-Agent': 'Mozilla/5.0',
-        'Accept': 'text/html'
-    }
-
-    search_url = f"https://dl.acm.org/action/doSearch?AllField={formatted_field}&startPage={page_number}&content=standard&target=default&sortBy="
-    print(f"Searching URL: {search_url}")
-
-    response = requests.get(search_url, headers=headers)
-    if response.status_code != 200:
-        print(f"Failed to retrieve field data for {field_name} on page {page_number}")
-        return {"results": [], "no_previous_page": page_number == 0, "no_next_page": page_number >= (max_pages - 1)}
-
-    soup = BeautifulSoup(response.content, 'html.parser')
-    items = soup.find_all('li', class_='search__item')
-
-    author_list = []
-
-    profile_url_pattern = re.compile(r"^https://dl\.acm\.org/profile/\d+$")
-
-    for item in items:
-        author_elements = item.find_all('a', title=True)
-
-        for author in author_elements:
-            author_name = author['title'].strip()
-            author_link = f"https://dl.acm.org{author['href']}"
-
-            if profile_url_pattern.match(author_link) and author_name not in unique_authors:
-                unique_authors.add(author_name)
-                author_list.append({
-                    "Name": author_name,
-                    'Location': None,
-                    "Profile Link": author_link,
-                })
-
-    print(f"Total unique authors found for field '{field_name}' on page {page_number}: {len(author_list)}")
-    return {
-        "results": author_list,
-        "no_previous_page": page_number == 0,
-        "no_next_page": page_number >= (max_pages - 1)
-    }
-
-
 
 def identify_input_type_and_search(input_value, page_number, search_type, max_pages=None):
     if page_number < 0:
         page_number = 0
+
+    searcher = ACMAuthorSearcher()
 
     if max_pages is None:
         max_pages = get_estimated_max_pages(input_value)
 
     if search_type == "author":
         print(f"Recognised input as author name: {input_value}")
-        acm_results = search_acm_author(input_value, page_number, max_pages)
+        acm_results = searcher.search_acm_author(input_value, page_number, max_pages)
 
     elif search_type == "field":
         print(f"Recognised input as field: {input_value}")
-        acm_results = search_acm_field(input_value, page_number, max_pages)
+        acm_results = searcher.search_acm_field(input_value, page_number)
 
     else:
         raise ValueError("Invalid search type. Please use 'author' or 'field'.")
 
-    no_previous_page = page_number == 0
-    no_next_page = page_number >= (max_pages - 1)
-
     return {
         "results": acm_results["results"],
-        "no_previous_page": no_previous_page,
-        "no_next_page": no_next_page,
+        "no_previous_page": acm_results["no_previous_page"],
+        "no_next_page": acm_results["no_next_page"],
         "max_pages": max_pages,
         "search_type": search_type
     }
@@ -144,11 +54,12 @@ def get_estimated_max_pages(input_value):
     result_count_tag = soup.find('span', class_='result__count')
     total_authors = int(result_count_tag.text.replace(',', '').split()[0]) if result_count_tag else 0
 
-    page_size = 20
+    page_size = 21
     max_pages = math.ceil(total_authors / page_size)
     print(f"Estimated Authors: {total_authors}, Max Pages: {max_pages}")
 
     return max_pages
+
 
 # Function to scrape detailed information of an author from ACM profile link
 def scrape_author_details(author_name, profile_link):
@@ -163,13 +74,12 @@ def scrape_author_details(author_name, profile_link):
     publications = scrape_author_publications(profile_link, author_name)
     subject_fields = extract_subject_fields(soup)
 
-
     author_details = {
-            "Name": author_name,
-            "Profile Link": profile_link,
-            "Fields of Study": subject_fields,
-            "Publications": publications
-        }
+        "Name": author_name,
+        "Profile Link": profile_link,
+        "Fields of Study": subject_fields,
+        "Publications": publications
+    }
 
     return json.dumps(author_details, indent=4)
 
@@ -201,7 +111,9 @@ def scrape_author_publications(profile_link, author):
         title = title_tag.text.strip() if title_tag else 'Unknown title'
 
         doi_tag = item.find('div', class_='issue-item__detail').find_all('a', href=True)
-        doi = next((link['href'].replace("https://doi.org/", "") for link in doi_tag if "https://doi.org/" in link['href']), 'No DOI')
+        doi = next(
+            (link['href'].replace("https://doi.org/", "") for link in doi_tag if "https://doi.org/" in link['href']),
+            'No DOI')
 
         co_authors = []
         author_list = item.find_all('a', title=True)
@@ -213,7 +125,7 @@ def scrape_author_publications(profile_link, author):
                 co_authors.append({"Name": co_author_name, "Profile Link": co_author_link})
 
         if doi != 'No DOI':
-            abstract, publication_date, citation_count = get_metadata_from_doi(doi, author)
+            abstract, publication_date, citation_count = get_metadata_from_doi(doi)
         else:
             abstract, publication_date, citation_count = 'N/A', 'Unknown', 0
 
@@ -228,7 +140,8 @@ def scrape_author_publications(profile_link, author):
 
     return publications
 
-def get_metadata_from_doi(doi, target_author_name):
+
+def get_metadata_from_doi(doi):
     semantic_scholar_url = f"https://api.semanticscholar.org/graph/v1/paper/{doi}?fields=title,abstract,publicationDate,citationCount"
 
     try:
@@ -248,7 +161,8 @@ def get_metadata_from_doi(doi, target_author_name):
 
     return "No abstract available.", "Unknown", 0
 
-def scrape_latest_publication(profile_link, author):
+
+def scrape_latest_publication(profile_link):
     publications_url = f"{profile_link}/publications?Role=author&startPage=0&pageSize=1"
     headers = {'User-Agent': 'Mozilla/5.0', 'Accept': 'text/html'}
 
@@ -266,10 +180,11 @@ def scrape_latest_publication(profile_link, author):
     title = title_tag.text.strip() if title_tag else 'Unknown title'
 
     doi_tag = latest_item.find('div', class_='issue-item__detail').find_all('a', href=True)
-    doi = next((link['href'].replace("https://doi.org/", "") for link in doi_tag if "https://doi.org/" in link['href']), 'No DOI')
+    doi = next((link['href'].replace("https://doi.org/", "") for link in doi_tag if "https://doi.org/" in link['href']),
+               'No DOI')
 
     if doi != 'No DOI':
-        abstract, publication_date, citation_count = get_metadata_from_doi(doi, author)
+        abstract, publication_date, citation_count = get_metadata_from_doi(doi)
     else:
         abstract, publication_date, citation_count = 'N/A', 'Unknown', 0
 
@@ -299,7 +214,7 @@ def get_latest_publication(publications):
 
 def update_author_if_needed(author_name, profile_link):
     try:
-        latest_scraped_publication = scrape_latest_publication(profile_link, author_name)
+        latest_scraped_publication = scrape_latest_publication(profile_link)
         if not latest_scraped_publication:
             print("No latest publication found.")
             return None, None
@@ -328,7 +243,8 @@ def update_author_if_needed(author_name, profile_link):
         db_pub_date = latest_db_publication.get("Publication Date") if latest_db_publication else None
         scraped_pub_date = latest_scraped_publication.get("Publication Date")
 
-        print("Latest Publication in Database:", json.dumps(latest_db_publication, indent=4) if latest_db_publication else "None")
+        print("Latest Publication in Database:",
+              json.dumps(latest_db_publication, indent=4) if latest_db_publication else "None")
         print("Latest Scraped Publication:", json.dumps(latest_scraped_publication, indent=4))
 
         if db_pub_date and scraped_pub_date:
@@ -387,4 +303,30 @@ author_details_json = update_author_if_needed(author_name, profile_link)
 
 print("\nDetailed Author Information:")
 print(author_details_json)
+
+searcher = ACMAuthorSearcher()
+
+result_page_0 = searcher.search_acm_author("Adriana", 0, 5)
+print(result_page_0)
+
+result_page_1 = searcher.search_acm_author("Adriana", 1, 5)
+print(result_page_1)
+
+result_new_query = searcher. search_acm_author("John", 0, 5)
+print(result_new_query)
+
+result_page_0 = searcher.search_acm_field("Network", 0, 5)
+print(result_page_0)
+
+result_page_1 = searcher.search_acm_field("Network", 1, 5)
+print(result_page_1)
+
+result_page_2 = searcher.search_acm_field("Network", 2, 5)
+print(result_page_2)
+
+result_page_3 = searcher.search_acm_field("Network", 3, 5)
+print(result_page_3)
+
+result_new_query = searcher. search_acm_field("Artificial Intelligence", 0, 5)
+print(result_new_query)
 '''
