@@ -16,6 +16,7 @@ const NetworkModal = () => {
   const [loading] = useState(false);
   const networkModal = useNetworkModal();
   const forceGraphRef = useRef();
+
   const [graphData] = useState({
     nodes: [
       { id: "adriana", name: "Adriana Dapena", group: 1 },
@@ -66,7 +67,6 @@ const NetworkModal = () => {
           ctx.fillStyle = node.color || "blue";
           ctx.fill();
           ctx.font = "5px Arial";
-          ctx.fillStyle = "black";
           ctx.textAlign = "center";
           ctx.fillText(node.name, node.x, node.y - 10);
         }}

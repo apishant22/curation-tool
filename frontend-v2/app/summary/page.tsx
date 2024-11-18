@@ -3,12 +3,12 @@ import Button from "@/components/global/Button";
 import Container from "@/components/global/Container";
 import AuthorHeader from "@/components/summary/AuthorHeader";
 import Loading from "@/components/summary/Loading";
-import MarkdownContent from "@/components/summary/MarkdownContent";
 import PublicationCard from "@/components/summary/PublicationCard";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { AlertCircle } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import React, { useEffect, useState } from "react";
+import Tiptap from "@/components/tiptap/Tiptap";
 
 interface Biography {
   Biography: string;
@@ -58,6 +58,8 @@ interface AuthorResponse {
   message: string;
   summary: string;
 }
+
+const testContent = `Lorem, ipsum dolor sit amet consectetur adipisicing elit. Iure expedita consequatur quam. Sint rem exercitationem sequi cupiditate blanditiis obcaecati consequatur quos, veritatis, harum libero vel quaerat natus numquam eligendi provident?`;
 
 function Page() {
   const searchParams = useSearchParams();
@@ -191,34 +193,16 @@ function Page() {
           <Loading />
         ) : (
           <>
-            <div className="flex flex-grow bg-white shadow-2xl">
+            <div className="flex flex-grow shadow-2xl dark:bg-zinc-900">
               <div className="w-[70%] p-4 flex flex-col">
-                {/* TODO: YUQING TO REMOVE THIS PART */}
                 <div className="p-4">
                   <AuthorHeader
                     name={data?.author_details?.Name || "No name available"}
                   />
                 </div>
-                <div className="p-6 ">
-                  <div className="flex-grow flex items-stretch bg-gray-100 rounded-lg">
-                    {/* Added bg color to see the expansion */}
-                    <div className="w-full">
-                      <div className="mt-4 flex justify-center">
-                        <span className="text-xs bg-gradient-to-r from-blue-500 to-purple-500 text-white px-3 py-1 rounded-full font-medium">
-                          AI-Generated Summary
-                        </span>
-                      </div>
-                      {!data.summary && (
-                        <div className="flex justify-center items-center min-h-80">
-                          <p>No summary available.</p>
-                        </div>
-                      )}
-                      <div className="p-6">
-                        <MarkdownContent content={data?.summary} />
-                      </div>
-                    </div>
-                  </div>
-                </div>
+
+                <Tiptap contentHere={testContent} />
+
                 <div className="flex gap-4 justify-center p-2 mb-6">
                   <Button label={"Accept"} onClick={() => {}} />
                   <Button label={"Regenerate"} onClick={() => {}} />

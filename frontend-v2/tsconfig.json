@@ -29,7 +29,8 @@
     ".next/types/**/*.ts",
     "components/modal/NetworkModal.jsx",
     "components/editor/EditorContext.jsx",
-    "components/modal/EditorModal.jsx"
+    "components/modal/EditorModal.jsx",
+    "components/summary/SelectableSummary.tsx"
   ],
   "exclude": ["node_modules"]
 }
