@@ -104,11 +104,11 @@ def create_regeneration_prompt(author_name, json_change_list):
 #     reconstructed_summary = summary.replace(text_to_change, new_text)
 #     return reconstructed_summary
 
-def regenerate_request (author_name, text_to_change, reason_for_change):
+def regenerate_request (author_name, json_change_list):
     conversation = Conversation(conversation=[])
     system_message = Message(role='system', content=load_prompt('regenerate_system_prompt.txt'))
     conversation.conversation.insert(0, system_message)
-    prompt_message = Message(role='user', content=create_regeneration_prompt(author_name, text_to_change, reason_for_change))
+    prompt_message = Message(role='user', content=create_regeneration_prompt(author_name, json_change_list))
     conversation.conversation.insert(1, prompt_message)
     conversation_dict = [message.model_dump() for message in conversation.conversation]
     response = assistant.ask(conversation_dict)
