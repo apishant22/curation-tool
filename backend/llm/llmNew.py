@@ -79,19 +79,30 @@ def request(author_name):
     db_helper.update_researcher_summary(author_name, summary)
     #print(f"{RED}{db_helper.get_researcher_summary(orcid_id, session=None)}")
 
-def create_regeneration_prompt(author_name, text_to_change, reason_for_change):
+    
+def create_regeneration_prompt(author_name, json_change_list):
     author = db_helper.get_author_details_from_db(author_name)
-    summary = db_helper.get_researcher_summary(author_name)        
-    prompt = "Author: " + str(author) + "\n\nCurrent summary: " + str(summary) + "\n\nText to regenerate: " + text_to_change + "\n\nReason for change: " + reason_for_change
+    summary = db_helper.get_researcher_summary(author_name)
+    prompt = "Author: " + str(author) + "\n\nCurrent summary: " + str(summary) + "\n\n"
+    for change in json_change_list:
+        text_to_change = change['text']
+        reason_for_change = change['reason']
+        prompt += "Text to regenerate: " + text_to_change + "\n\nReason for change: " + reason_for_change + "\n\n"
     return prompt
 
-def reconstruct_summary(author_name, text_to_change, new_text):
-    summary = db_helper.get_researcher_summary(author_name)
-    # remove text to change from new text if present
-    if text_to_change in new_text:
-        new_text = new_text.replace(text_to_change, "")
-    reconstructed_summary = summary.replace(text_to_change, new_text)
-    return reconstructed_summary
+# def create_regeneration_prompt(author_name, text_to_change, reason_for_change):
+#     author = db_helper.get_author_details_from_db(author_name)
+#     summary = db_helper.get_researcher_summary(author_name)        
+#     prompt = "Author: " + str(author) + "\n\nCurrent summary: " + str(summary) + "\n\nText to regenerate: " + text_to_change + "\n\nReason for change: " + reason_for_change
+#     return prompt
+
+# def reconstruct_summary(author_name, text_to_change, new_text):
+#     summary = db_helper.get_researcher_summary(author_name)
+#     # remove text to change from new text if present
+#     if text_to_change in new_text:
+#         new_text = new_text.replace(text_to_change, "")
+#     reconstructed_summary = summary.replace(text_to_change, new_text)
+#     return reconstructed_summary
 
 def regenerate_request (author_name, text_to_change, reason_for_change):
     conversation = Conversation(conversation=[])
@@ -102,7 +113,7 @@ def regenerate_request (author_name, text_to_change, reason_for_change):
     conversation_dict = [message.model_dump() for message in conversation.conversation]
     response = assistant.ask(conversation_dict)
     regenerated_text = response.choices[0].message.content
-    reconstructed_summary = reconstruct_summary(author_name, text_to_change, regenerated_text)
+    #reconstructed_summary = reconstruct_summary(author_name, text_to_change, regenerated_text)
     log(response)
     # RED = '\033[91m'
     # GREEN = '\033[92m'
@@ -111,5 +122,5 @@ def regenerate_request (author_name, text_to_change, reason_for_change):
     # print(f"{GREEN}Reply: {reconstructed_summary}{ENDC}\n")
     # print(f"{RED}\nOutput: {response} {ENDC}\n")
     #return {"reply": response.choices[0].message.content}
-    db_helper.update_researcher_summary(author_name, reconstructed_summary)
+    db_helper.update_researcher_summary(author_name, regenerated_text)
     #print(f"{RED}{db_helper.get_researcher_summary(author_name, session=None)}")
