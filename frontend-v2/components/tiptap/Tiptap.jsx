@@ -33,10 +33,13 @@ const Tiptap = ({ contentHere }) => {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const handleSubmit = (e) => {
     e.preventDefault();
+    console.log("before", contentVal);
+
     setContentVal((prevContent) => [
       ...prevContent,
       { text: input, reason: reason },
     ]);
+    console.log("after", contentVal);
     setCounter(counter + 1);
     setInput("");
     setReason("");
@@ -143,6 +146,8 @@ const Tiptap = ({ contentHere }) => {
               input={input}
               reason={reason}
               counter={counter}
+              setContentVal={setContentVal}
+              setCounter={setCounter}
             />
           </div>
           <div className="flex justify-end p-4">
