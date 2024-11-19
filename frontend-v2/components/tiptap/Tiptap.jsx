@@ -14,7 +14,6 @@ import { IoMdRefreshCircle } from "react-icons/io";
 const Tiptap = ({ contentHere }) => {
   const [content, setContent] = useState(contentHere);
   const [isEdit, setIsEdit] = useState(false);
-  const [clicked, setClicked] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
   const [contentVal, setContentVal] = useState([]);
   const [input, setInput] = useState("");
@@ -71,7 +70,6 @@ const Tiptap = ({ contentHere }) => {
 
   const toggleEdit = useCallback(() => {
     setIsEdit((value) => !value);
-    setClicked((value) => !value);
   }, []);
 
   const handleEdit = () => {
@@ -107,17 +105,19 @@ const Tiptap = ({ contentHere }) => {
             <button onClick={handleEdit}>
               <FaEdit
                 size={20}
-                className={`${
-                  clicked ? "text-blue-400" : ""
-                } hover:text-neutral-400`}
+                className={`hover:scale-105 transition duration-200 ${
+                  isEdit ? "text-blue-400" : ""
+                } hover:text-neutral-500`}
               />
             </button>
           </div>
           <div>
             <button onClick={toggleOpen}>
               <IoMdRefreshCircle
-                size={22}
-                className="text-green-500 hover:text-green-600"
+                size={25}
+                className={` hover:text-green-600 hover:scale-105 transition duration-200 ${
+                  isOpen ? "text-green-600" : "text-green-500"
+                }`}
               />
             </button>
           </div>
