@@ -201,13 +201,17 @@ function Page() {
           <>
             <div className="flex flex-grow shadow-2xl dark:bg-zinc-900">
               <div className="w-[70%] p-4 flex flex-col">
-                <div className="p-4">
+                <div className="p-2">
                   <AuthorHeader
                     name={data?.author_details?.Name || "No name available"}
                   />
                 </div>
 
-                <Tiptap contentHere={testContent} name={name} />
+                <Tiptap
+                  contentHere={testContent}
+                  name={name}
+                  summary={data?.summary}
+                />
 
                 <div className="flex gap-4 justify-center p-2 mb-6">
                   <Button className="bg-green-400 hover:bg-green-600">
