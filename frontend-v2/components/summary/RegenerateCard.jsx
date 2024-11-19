@@ -32,7 +32,7 @@ const RegenerateCard = ({
     }
     setIsCardOpen((value) => !value);
   }, [counter]);
-  //   TODO: allow user to delete item
+
   const deleteItemById = (text) => {
     const newContent = contentVal.filter((v) => v.text !== text);
     console.log(newContent);
