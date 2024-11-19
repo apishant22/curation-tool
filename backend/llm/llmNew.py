@@ -84,7 +84,7 @@ def create_regeneration_prompt(author_name, json_change_list):
     author = db_helper.get_author_details_from_db(author_name)
     summary = db_helper.get_researcher_summary(author_name)
     prompt = "Author: " + str(author) + "\n\nCurrent summary: " + str(summary) + "\n\n"
-    for change in json_change_list:
+    for change in json_change_list['contentVal']:
         text_to_change = change['text']
         reason_for_change = change['reason']
         prompt += "Text to regenerate: " + text_to_change + "\n\nReason for change: " + reason_for_change + "\n\n"
@@ -104,10 +104,11 @@ def create_regeneration_prompt(author_name, json_change_list):
 #     reconstructed_summary = summary.replace(text_to_change, new_text)
 #     return reconstructed_summary
 
-def regenerate_request (author_name, json_change_list):
+def regenerate_request (author_name, json):
     conversation = Conversation(conversation=[])
     system_message = Message(role='system', content=load_prompt('regenerate_system_prompt.txt'))
     conversation.conversation.insert(0, system_message)
+    json_change_list = json['contentVal'][0]
     prompt_message = Message(role='user', content=create_regeneration_prompt(author_name, json_change_list))
     conversation.conversation.insert(1, prompt_message)
     conversation_dict = [message.model_dump() for message in conversation.conversation]
