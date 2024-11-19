@@ -1,11 +1,11 @@
-from flask import Flask, jsonify
+from flask import Flask, jsonify, request
 from flask.views import View
 from flask_cors import CORS
 
 import backend.app.author_scraper as scraper
 import backend.db.db_helper as db
 import backend.db.models as model
-import backend.llm.llm as llm
+import backend.llm.llmNew as llm
 
 app = Flask(__name__)
 CORS(app)
@@ -78,10 +78,13 @@ def misc_profiles(number):
     print(result)
     return result
 
-@app.route('/regenerate_request/<author_name>/<json_change_list>')
-def regenerate_request(author_name, json_change_list):
+@app.route('/regenerate_request/<author_name>', methods=['POST'])
+def regenerate_request(author_name):
+    content_type = request.headers.get('Content-Type')
+    if (content_type == 'application/json'):
+        json = request.json
+    print(author_name, json)
     # regenerate the researcher summary
-    llm.regenerate_request(author_name, json_change_list)
-
+    llm.regenerate_request(author_name, json)
     # get the new summary from the database
     return db.get_researcher_summary(author_name)

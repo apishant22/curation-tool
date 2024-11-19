@@ -10,8 +10,9 @@ import { FaEdit } from "react-icons/fa";
 import RegenerateCard from "../summary/RegenerateCard";
 import { Button } from "../ui/button";
 import { IoMdRefreshCircle } from "react-icons/io";
+import axios from "axios";
 
-const Tiptap = ({ contentHere }) => {
+const Tiptap = ({ contentHere, name }) => {
   const [content, setContent] = useState(contentHere);
   const [isEdit, setIsEdit] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
@@ -45,7 +46,12 @@ const Tiptap = ({ contentHere }) => {
   };
 
   const handleRegenerate = () => {
-    console.log(JSON.stringify(contentVal));
+    axios
+      .post(`http://localhost:3002/regenerate_request/${name}`, {
+        contentVal,
+      })
+      .then((res) => console.log(res))
+      .catch((err) => console.log(err));
   };
 
   const toggleOpen = useCallback(() => {

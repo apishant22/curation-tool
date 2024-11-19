@@ -207,7 +207,7 @@ function Page() {
                   />
                 </div>
 
-                <Tiptap contentHere={testContent} />
+                <Tiptap contentHere={testContent} name={name} />
 
                 <div className="flex gap-4 justify-center p-2 mb-6">
                   <Button className="bg-green-400 hover:bg-green-600">
