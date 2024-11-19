@@ -78,4 +78,10 @@ def misc_profiles(number):
     print(result)
     return result
 
-# TODO convert_to_json, regenerate
+@app.route('/regenerate_request/<author_name>/<json_change_list>')
+def regenerate_request(author_name, json_change_list):
+    # regenerate the researcher summary
+    llm.regenerate_request(author_name, json_change_list)
+
+    # get the new summary from the database
+    return db.get_researcher_summary(author_name)
