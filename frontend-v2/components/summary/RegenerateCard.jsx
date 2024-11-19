@@ -17,7 +17,6 @@ const RegenerateCard = () => {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const handleSubmit = (e) => {
     e.preventDefault();
-    const newContent = { ...contentVal, text: input, reason: reason };
     setContentVal((prevContent) => [
       ...prevContent,
       { text: input, reason: reason },
