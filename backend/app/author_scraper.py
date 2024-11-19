@@ -28,13 +28,20 @@ def identify_input_type_and_search(input_value, page_number, search_type, max_pa
     else:
         raise ValueError("Invalid search type. Please use 'author' or 'field'.")
 
+    unique_results = {}
+    for result in acm_results["results"]:
+        profile_link = result.get("Profile Link")
+        if profile_link and profile_link not in unique_results:
+            unique_results[profile_link] = result
+
     return {
-        "results": acm_results["results"],
+        "results": list(unique_results.values()),
         "no_previous_page": acm_results["no_previous_page"],
         "no_next_page": acm_results["no_next_page"],
         "max_pages": max_pages,
         "search_type": search_type
     }
+
 
 def get_estimated_max_pages(input_value):
     formatted_name = input_value.replace(' ', '+')
@@ -105,7 +112,9 @@ def scrape_author_publications(profile_link, author):
     soup = BeautifulSoup(response.content, 'html.parser')
     publication_items = soup.find_all('li', class_='search__item')
 
+    unique_publications = set()
     publications = []
+
     for item in publication_items:
         title_tag = item.find('h5', class_='issue-item__title')
         title = title_tag.text.strip() if title_tag else 'Unknown title'
@@ -113,7 +122,13 @@ def scrape_author_publications(profile_link, author):
         doi_tag = item.find('div', class_='issue-item__detail').find_all('a', href=True)
         doi = next(
             (link['href'].replace("https://doi.org/", "") for link in doi_tag if "https://doi.org/" in link['href']),
-            'No DOI')
+            'No DOI'
+        )
+
+        if doi in unique_publications:
+            continue
+
+        unique_publications.add(doi)
 
         co_authors = []
         author_list = item.find_all('a', title=True)
@@ -139,6 +154,7 @@ def scrape_author_publications(profile_link, author):
         })
 
     return publications
+
 
 
 def get_metadata_from_doi(doi):
