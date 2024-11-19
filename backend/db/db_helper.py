@@ -147,7 +147,7 @@ def store_author_details_in_db(author_details, session=None):
 
         researcher = session.query(Researcher).filter(func.lower(Researcher.name) == func.lower(author_name)).first()
 
-        if not researcher:
+        if not researcher or researcher.profile_link != profile_link:
             researcher = Researcher(name=author_name, profile_link=profile_link)
             session.add(researcher)
             session.commit()
@@ -190,31 +190,13 @@ def store_author_details_in_db(author_details, session=None):
                 session.add(new_paper_author)
                 session.commit()
 
-            for co_author in pub.get('Co-Authors', []):
-                co_author_name = co_author.get("Name")
-                co_author_profile_link = co_author.get("Profile Link")
-
-                if not co_author_name:
-                    continue
-
-                co_author_record = session.query(Researcher).filter(func.lower(Researcher.name) == func.lower(co_author_name)).first()
-                if not co_author_record:
-                    co_author_record = Researcher(name=co_author_name, profile_link=co_author_profile_link)
-                    session.add(co_author_record)
-                    session.commit()
-
-                paper_co_author_assoc = session.query(PaperAuthors).filter_by(doi=doi, id=co_author_record.id).first()
-                if not paper_co_author_assoc:
-                    new_paper_co_author = PaperAuthors(doi=doi, id=co_author_record.id)
-                    session.add(new_paper_co_author)
-                    session.commit()
-
     except SQLAlchemyError as e:
         session.rollback()
         print(f"Error storing author details: {e}")
     finally:
         if session is not None:
             session.close()
+
 
 # Function to get author details from the database
 def get_author_details_from_db(author_name, session=None):
