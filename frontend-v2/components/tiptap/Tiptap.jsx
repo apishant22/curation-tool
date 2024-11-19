@@ -9,7 +9,6 @@ import Typography from "@tiptap/extension-typography";
 import { FaEdit } from "react-icons/fa";
 import RegenerateCard from "../summary/RegenerateCard";
 import { Button } from "../ui/button";
-import { LucideRefreshCw } from "lucide-react";
 import { IoMdRefreshCircle } from "react-icons/io";
 
 const Tiptap = ({ contentHere }) => {
@@ -17,6 +16,35 @@ const Tiptap = ({ contentHere }) => {
   const [isEdit, setIsEdit] = useState(false);
   const [clicked, setClicked] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
+  const [contentVal, setContentVal] = useState([]);
+  const [input, setInput] = useState("");
+  const [reason, setReason] = useState("");
+  const [counter, setCounter] = useState(0);
+
+  const handleChange = (value) => {
+    setInput(value);
+    console.log(value);
+  };
+
+  const handleReasonChange = (value) => {
+    setReason(value);
+  };
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    setContentVal((prevContent) => [
+      ...prevContent,
+      { text: input, reason: reason },
+    ]);
+    setCounter(counter + 1);
+    setInput("");
+    setReason("");
+  };
+
+  const handleRegenerate = () => {
+    console.log(JSON.stringify(contentVal));
+  };
 
   const toggleOpen = useCallback(() => {
     setIsOpen((value) => !value);
@@ -84,7 +112,10 @@ const Tiptap = ({ contentHere }) => {
           </div>
           <div>
             <button onClick={toggleOpen}>
-              <IoMdRefreshCircle size={22} />
+              <IoMdRefreshCircle
+                size={22}
+                className="text-green-500 hover:text-green-600"
+              />
             </button>
           </div>
         </div>
@@ -104,10 +135,20 @@ const Tiptap = ({ contentHere }) => {
           <div
             className="overflow-y-auto flex justify-center max-h-[800px] p-4
       ">
-            <RegenerateCard />
+            <RegenerateCard
+              contentVal={contentVal}
+              handleSubmit={handleSubmit}
+              handleChange={handleChange}
+              handleReasonChange={handleReasonChange}
+              input={input}
+              reason={reason}
+              counter={counter}
+            />
           </div>
           <div className="flex justify-end p-4">
-            <Button className="bg-blue-500 hover:bg-blue-700 dark:text-white">
+            <Button
+              className="bg-blue-500 hover:bg-blue-700 dark:text-white"
+              onClick={handleRegenerate}>
               Regenerate
             </Button>
           </div>
