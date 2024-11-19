@@ -149,37 +149,37 @@ const Tiptap = ({ name, summary }) => {
             </button>
           </div>
         </div>
-        {isOpen && (
-          <div className="bg-zinc-100/75 dark:bg-zinc-800 rounded-md mt-6">
-            <h1 className="text-center font-bold p-4 font-sans">
-              Regenerate your summary!
-            </h1>
-
-            <div
-              className="overflow-y-auto flex justify-center max-h-[800px] p-4
-      ">
-              <RegenerateCard
-                contentVal={contentVal}
-                handleSubmit={handleSubmit}
-                handleChange={handleChange}
-                handleReasonChange={handleReasonChange}
-                input={input}
-                reason={reason}
-                counter={counter}
-                setContentVal={setContentVal}
-                setCounter={setCounter}
-              />
-            </div>
-            <div className="flex justify-end p-4">
-              <Button
-                className="bg-blue-500 hover:bg-blue-700 dark:text-white"
-                onClick={handleRegenerate}>
-                Regenerate
-              </Button>
-            </div>
-          </div>
-        )}
       </div>
+      {isOpen && (
+        <div className="bg-zinc-100/75 dark:bg-zinc-800 rounded-md mt-6">
+          <h1 className="text-center font-bold p-4 font-sans">
+            Regenerate your summary!
+          </h1>
+
+          <div
+            className="overflow-y-auto flex justify-center max-h-[800px] p-4
+      ">
+            <RegenerateCard
+              contentVal={contentVal}
+              handleSubmit={handleSubmit}
+              handleChange={handleChange}
+              handleReasonChange={handleReasonChange}
+              input={input}
+              reason={reason}
+              counter={counter}
+              setContentVal={setContentVal}
+              setCounter={setCounter}
+            />
+          </div>
+          <div className="flex justify-end p-4">
+            <Button
+              className="bg-blue-500 hover:bg-blue-700 dark:text-white"
+              onClick={handleRegenerate}>
+              Regenerate
+            </Button>
+          </div>
+        </div>
+      )}
     </>
   );
 };
