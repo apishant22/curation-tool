@@ -48,15 +48,15 @@ const Tiptap = ({ name, summary }) => {
     try {
       setLoading(true);
       toast.success("Regenerating your summary!");
-      //   const response = await axios.post(
-      //     `http://localhost:3002/regenerate_request/${name}`,
-      //     {
-      //       contentVal,
-      //     }
-      //   );
-      const response = await axios.get(
-        "https://dummyjson.com/RESOURCE/?delay=5000"
+      const response = await axios.post(
+        `http://localhost:3002/regenerate_request/${name}`,
+        {
+          contentVal,
+        }
       );
+      //   const response = await axios.get(
+      //     "https://dummyjson.com/RESOURCE/?delay=5000"
+      //   );
       setContent(response.data);
       toast.success("Summary has been updated!");
     } catch (error) {
