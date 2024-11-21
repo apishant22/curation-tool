@@ -85,7 +85,7 @@ def regenerate_request(author_name):
         json = request.json
     print(author_name, json)
     # regenerate the researcher summary
-    # llm.regenerate_request(author_name, json)
+    llm.regenerate_request(author_name, json)
     # get the new summary from the database
     res = db.get_researcher_summary(author_name)
     print(res)
