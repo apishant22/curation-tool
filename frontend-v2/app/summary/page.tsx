@@ -139,9 +139,9 @@ function Page() {
       </div>
     );
   }
+  const cachedData = sessionStorage.getItem(`currentPagePath`);
 
   if (data.author_details == null) {
-    const cachedData = sessionStorage.getItem(`currentPagePath`);
     sessionStorage.removeItem(`author_${name}_${profileId}`);
 
     return (
@@ -208,7 +208,16 @@ function Page() {
                   <Button className="bg-green-400 hover:bg-green-600">
                     <IoMdCheckmark size={30} />
                   </Button>
-                  <Button>
+                  <Button
+                    onClick={() => {
+                      // Check if cachedData exists
+                      if (cachedData) {
+                        router.push(cachedData); // Push to cached URL
+                      } else {
+                        console.warn("No cached URL found in sessionStorage");
+                        router.back();
+                      }
+                    }}>
                     <IoMdArrowBack />
                   </Button>
                 </div>
