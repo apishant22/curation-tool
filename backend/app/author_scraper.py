@@ -4,9 +4,7 @@ import math
 import json
 from backend.db.db_helper import *
 from backend.app.acm_author_searcher import ACMAuthorSearcher
-
-
-# from backend.llm import llmNew
+from backend.llm import llmNew
 
 def identify_input_type_and_search(input_value, page_number, search_type, max_pages=None):
     if page_number < 0:
@@ -253,7 +251,9 @@ def update_author_if_needed(author_name, profile_link):
                 return None, None
 
             print("New Author Details:", json.dumps(author_details_db, indent=4))
-            return None, author_details_db
+            llmNew.request(author_name)
+            summary = get_researcher_summary(author_name)
+            return summary, author_details_db
 
         latest_db_publication = get_latest_publication(author_details_db["Publications"])
         db_pub_date = latest_db_publication.get("Publication Date") if latest_db_publication else None
@@ -274,7 +274,9 @@ def update_author_if_needed(author_name, profile_link):
                     return summary, author_details_db
                 else:
                     print("Summary missing. Generating summary...")
-                    return None, author_details_db
+                    llmNew.request(author_name)
+                    summary = get_researcher_summary(author_name)
+                    return summary, author_details_db
 
         print("New publication found or mismatch in data. Performing full scrape and updating database.")
         scraped_author_details_json = scrape_author_details(author_name, profile_link)
@@ -287,7 +289,9 @@ def update_author_if_needed(author_name, profile_link):
 
         author_details_db_after_update = get_author_details_from_db(author_name)
         print("Author Details After Update:", json.dumps(author_details_db_after_update, indent=4))
-        return None, author_details_db_after_update
+        llmNew.request(author_name)
+        summary = get_researcher_summary(author_name)
+        return summary, author_details_db_after_update
 
     except KeyError as e:
         print(f"KeyError during update: {e}")
