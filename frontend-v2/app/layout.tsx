@@ -5,6 +5,7 @@ import Footer from "@/components/global/Footer";
 import NetworkModal from "@/components/modal/NetworkModal";
 import ToasterProvider from "@/components/providers/ToasterProvider";
 import RegenerateModal from "@/components/modal/RegenerateModal";
+import { Suspense } from "react";
 
 export const metadata: Metadata = {
   title: "ACM Curation Tool",
@@ -25,8 +26,9 @@ export default function RootLayout({
         <RegenerateModal />
         <NetworkModal />
         <Navbar />
-
-        <main className="flex-grow">{children}</main>
+        <Suspense>
+          <main className="flex-grow">{children}</main>
+        </Suspense>
 
         <Footer />
       </body>

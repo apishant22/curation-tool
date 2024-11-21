@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect, useState } from "react";
+import React, { Suspense, useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import PaginationControls from "@/components/results/PaginationControls";
 import { MdOutlineWork } from "react-icons/md";
@@ -97,20 +97,18 @@ function ResultsPage() {
     return (
       <Container>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 pt-12"></div>
-          <Container>
-            <div className="p-6 pt-12 pb-6 flex flex-row justify-between">
-              <div className="text-2xl mt-4 font-semibold text-gray-400">
-                No Result Found
-              </div>
-              <div className="items-end">
-                <Search />
-              </div>
+        <Container>
+          <div className="p-6 pt-12 pb-6 flex flex-row justify-between">
+            <div className="text-2xl mt-4 font-semibold text-gray-400">
+              No Result Found
             </div>
-          </Container>
-    <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-
-    </div>
-    </Container>
+            <div className="items-end">
+              <Search />
+            </div>
+          </div>
+        </Container>
+        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3"></div>
+      </Container>
     );
   }
 
@@ -131,65 +129,67 @@ function ResultsPage() {
   };
 
   return (
-    <Container>
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 pt-12">
-        <Container>
-          <div className="pt-12 pb-6 flex flex-row justify-between">
-            <div className="text-2xl mt-4 font-semibold text-gray-400">
-              Search Results
-            </div>
-            <div className="items-end">
-              <Search />
-            </div>
-          </div>
-        </Container>
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-          {searchData.results.map((result, index) => (
-            <div
-              key={index}
-              className="p-6 border rounded-lg shadow-sm hover:shadow-md transition dark:bg-zinc-800">
-              <div className="space-y-2">
-                <div>
-                  <h2 className="text-xl font-semibold text-blue-600 dark:text-white hover:text-blue-800 dark:hover:text-neutral-500">
-                    <p
-                      className="cursor-pointer"
-                      onClick={() =>
-                        handleNameClick(result.Name, result["Profile Link"])
-                      }>
-                      {result.Name}
-                    </p>
-                  </h2>
-                  {searchData.search_type === "author" && result.Location && (
-                    <p className="text-gray-600 dark:text-neutral-400 flex gap-2 items-center">
-                      <MdOutlineWork size={16} />
-                      {result.Location}
-                    </p>
-                  )}
-                </div>
-                <div className="text-sm text-gray-500">
-                  <p className="flex items-center space-x-1">
-                    <span className="font-medium">ACM DL:</span>
-                    <a
-                      href={result["Profile Link"]}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="hover:text-blue-600">
-                      {result["Profile Link"]}
-                    </a>
-                  </p>
-                </div>
+    <Suspense>
+      <Container>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 pt-12">
+          <Container>
+            <div className="pt-12 pb-6 flex flex-row justify-between">
+              <div className="text-2xl mt-4 font-semibold text-gray-400">
+                Search Results
+              </div>
+              <div className="items-end">
+                <Search />
               </div>
             </div>
-          ))}
+          </Container>
+          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+            {searchData.results.map((result, index) => (
+              <div
+                key={index}
+                className="p-6 border rounded-lg shadow-sm hover:shadow-md transition dark:bg-zinc-800">
+                <div className="space-y-2">
+                  <div>
+                    <h2 className="text-xl font-semibold text-blue-600 dark:text-white hover:text-blue-800 dark:hover:text-neutral-500">
+                      <p
+                        className="cursor-pointer"
+                        onClick={() =>
+                          handleNameClick(result.Name, result["Profile Link"])
+                        }>
+                        {result.Name}
+                      </p>
+                    </h2>
+                    {searchData.search_type === "author" && result.Location && (
+                      <p className="text-gray-600 dark:text-neutral-400 flex gap-2 items-center">
+                        <MdOutlineWork size={16} />
+                        {result.Location}
+                      </p>
+                    )}
+                  </div>
+                  <div className="text-sm text-gray-500">
+                    <p className="flex items-center space-x-1">
+                      <span className="font-medium">ACM DL:</span>
+                      <a
+                        href={result["Profile Link"]}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="hover:text-blue-600">
+                        {result["Profile Link"]}
+                      </a>
+                    </p>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <PaginationControls
+            currentPage={Number(searchParams.get("page") || "1")}
+            hasNext={!searchData.no_next_page}
+            hasPrevious={!searchData.no_previous_page}
+          />
         </div>
-        <PaginationControls
-          currentPage={Number(searchParams.get("page") || "1")}
-          maxPages={searchData.max_pages}
-          hasNext={!searchData.no_next_page}
-          hasPrevious={!searchData.no_previous_page}
-        />
-      </div>
-    </Container>
+      </Container>
+    </Suspense>
   );
 }
 

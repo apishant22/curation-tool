@@ -4,11 +4,8 @@ import { useEditor, EditorContent } from "@tiptap/react";
 import { useState, useCallback } from "react";
 import StarterKit from "@tiptap/starter-kit";
 import MarkdownContent from "@/components/summary/MarkdownContent";
-import Highlight from "@tiptap/extension-highlight";
-import Typography from "@tiptap/extension-typography";
 import { FaEdit } from "react-icons/fa";
 import RegenerateCard from "../summary/RegenerateCard";
-import { Button } from "../ui/button";
 import { IoMdRefreshCircle } from "react-icons/io";
 import axios from "axios";
 import { Markdown } from "tiptap-markdown";
@@ -22,10 +19,10 @@ const Tiptap = ({ name, summary }) => {
   const [input, setInput] = useState("");
   const [reason, setReason] = useState("");
   const [counter, setCounter] = useState(0);
+  const [loading, setLoading] = useState(false);
 
   const handleChange = (value) => {
     setInput(value);
-    console.log(value);
   };
 
   const handleReasonChange = (value) => {
@@ -47,13 +44,27 @@ const Tiptap = ({ name, summary }) => {
     setReason("");
   };
 
-  const handleRegenerate = () => {
-    axios
-      .post(`http://localhost:3002/regenerate_request/${name}`, {
-        contentVal,
-      })
-      .then((res) => console.log(res))
-      .catch((err) => console.log(err));
+  const handleRegenerate = async () => {
+    try {
+      setLoading(true);
+      toast.success("Regenerating your summary!");
+      //   const response = await axios.post(
+      //     `http://localhost:3002/regenerate_request/${name}`,
+      //     {
+      //       contentVal,
+      //     }
+      //   );
+      const response = await axios.get(
+        "https://dummyjson.com/RESOURCE/?delay=5000"
+      );
+      setContent(response.data);
+      toast.success("Summary has been updated!");
+    } catch (error) {
+      console.error("Regenerate summary failed:", error);
+      throw error;
+    } finally {
+      setLoading(false);
+    }
   };
 
   const toggleOpen = useCallback(() => {
@@ -101,13 +112,17 @@ const Tiptap = ({ name, summary }) => {
                   <p>No summary available.</p>
                 </div>
               )}
-
-              <div className="p-6">
-                {" "}
-                <MarkdownContent
-                  content={content} // Use test content for now
-                />
-              </div>
+              {loading ? (
+                <div className="flex justify-center items-center min-h-screen">
+                  <div className="animate-spin h-8 w-8 border-4 border-gray-500 border-t-transparent rounded-full" />
+                </div>
+              ) : (
+                <div className="p-6">
+                  <MarkdownContent
+                    content={content} // Use test content for now
+                  />
+                </div>
+              )}
             </div>
           </div>
         )}
@@ -139,19 +154,23 @@ const Tiptap = ({ name, summary }) => {
             </button>
           </div>
           <div>
-            <button onClick={toggleOpen}>
-              <IoMdRefreshCircle
-                size={25}
-                className={` hover:text-green-600 hover:scale-105 transition duration-200 ${
-                  isOpen ? "text-green-600" : "text-green-500"
-                }`}
-              />
-            </button>
+            <a href="#regenerate">
+              <button onClick={toggleOpen}>
+                <IoMdRefreshCircle
+                  size={25}
+                  className={` hover:text-green-600 hover:scale-105 transition duration-200 ${
+                    isOpen ? "text-green-600" : "text-green-500"
+                  }`}
+                />
+              </button>
+            </a>
           </div>
         </div>
       </div>
-      {isOpen && (
-        <div className="bg-zinc-100/75 dark:bg-zinc-800 rounded-md mt-6">
+      {!loading && isOpen && (
+        <div
+          id="regenerate"
+          className="bg-white dark:bg-zinc-800 rounded-md mt-6">
           <h1 className="text-center font-bold p-4 font-sans">
             Regenerate your summary!
           </h1>
@@ -169,14 +188,9 @@ const Tiptap = ({ name, summary }) => {
               counter={counter}
               setContentVal={setContentVal}
               setCounter={setCounter}
+              name={name}
+              handleRegenerate={handleRegenerate}
             />
-          </div>
-          <div className="flex justify-end p-4">
-            <Button
-              className="bg-blue-500 hover:bg-blue-700 dark:text-white"
-              onClick={handleRegenerate}>
-              Regenerate
-            </Button>
           </div>
         </div>
       )}
