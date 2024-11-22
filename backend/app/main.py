@@ -80,10 +80,10 @@ def misc_profiles(number):
 
 @app.route('/regenerate_request/<author_name>', methods=['POST'])
 def regenerate_request(author_name):
-    content_type = request.headers.get('Content-Type')
-    if (content_type == 'application/json'):
+    if (request.headers.get('Content-Type') == 'application/json'):
         json = request.json
     print(author_name, json)
+
     # regenerate the researcher summary
     llm.regenerate_request(author_name, json)
     # get the new summary from the database
