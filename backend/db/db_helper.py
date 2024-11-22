@@ -1,6 +1,6 @@
 import os
 from datetime import datetime
-from sqlalchemy import create_engine, func, text
+from sqlalchemy import create_engine, func
 from sqlalchemy.orm import sessionmaker, scoped_session
 from sqlalchemy.exc import SQLAlchemyError
 from dotenv import load_dotenv
@@ -136,66 +136,68 @@ def convert_date_string(date_str):
 
 # Function to store author details from JSON
 def store_author_details_in_db(author_details, session=None):
-    if session is None:
+    if not session:
         session = get_session()
 
     try:
-        author_name = author_details['Name']
-        profile_link = author_details.get('Profile Link', None)
+        primary_author_name = author_details['Name']
+        primary_author_profile_link = author_details.get('Profile Link', None)
         fields_of_study = author_details.get('Fields of Study', [])
         publications = author_details.get('Publications', [])
 
-        researcher = session.query(Researcher).filter(func.lower(Researcher.name) == func.lower(author_name)).first()
-
-        if not researcher or researcher.profile_link != profile_link:
-            researcher = Researcher(name=author_name, profile_link=profile_link)
-            session.add(researcher)
+        primary_author = session.query(Researcher).filter_by(name=primary_author_name).first()
+        if not primary_author:
+            primary_author = Researcher(name=primary_author_name, profile_link=primary_author_profile_link)
+            session.add(primary_author)
             session.commit()
 
-        for field in fields_of_study:
-            field_record = session.query(Fields_of_Study).filter(func.lower(Fields_of_Study.field_name) == func.lower(field)).first()
-            if not field_record:
-                field_record = Fields_of_Study(field_name=field)
-                session.add(field_record)
+        for field_name in fields_of_study:
+            field = session.query(Fields_of_Study).filter_by(field_name=field_name).first()
+            if not field:
+                field = Fields_of_Study(field_name=field_name)
+                session.add(field)
                 session.commit()
-
-            researcher_field_assoc = session.query(ResearcherFieldsOfStudy).filter_by(id=researcher.id, field_id=field_record.field_id).first()
-            if not researcher_field_assoc:
-                new_researcher_field = ResearcherFieldsOfStudy(id=researcher.id, field_id=field_record.field_id)
-                session.add(new_researcher_field)
-                session.commit()
+            if field not in primary_author.fields_of_study:
+                primary_author.fields_of_study.append(field)
 
         for pub in publications:
-            doi = pub['DOI']
-            title = pub['Title']
-            pub_date = convert_date_string(pub.get('Publication Date'))
-            abstract = pub.get('Abstract', 'No abstract available.')
-            citation_count = pub.get('Citation Count', 0)
-
-            publication = session.query(Paper).filter_by(doi=doi).first()
-            if publication:
-                publication.title = title
-                publication.publication_date = pub_date
-                publication.abstract = abstract
-                publication.citations = citation_count
-                session.commit()
-            else:
-                new_paper = Paper(doi=doi, title=title, publication_date=pub_date, abstract=abstract, citations=citation_count)
-                session.add(new_paper)
+            publication = session.query(Paper).filter_by(doi=pub['DOI']).first()
+            if not publication:
+                publication = Paper(
+                    doi=pub['DOI'],
+                    title=pub['Title'],
+                    abstract=pub.get('Abstract', None),
+                    publication_date=convert_date_string(pub.get('Publication Date')),
+                    citations=pub.get('Citation Count', 0),
+                )
+                session.add(publication)
                 session.commit()
 
-            paper_author_assoc = session.query(PaperAuthors).filter_by(doi=doi, id=researcher.id).first()
-            if not paper_author_assoc:
-                new_paper_author = PaperAuthors(doi=doi, id=researcher.id)
-                session.add(new_paper_author)
-                session.commit()
+            if primary_author not in publication.researchers:
+                publication.researchers.append(primary_author)
 
-    except SQLAlchemyError as e:
+            co_authors = pub.get('Co-Authors', [])
+            for co_author in co_authors:
+                co_author_name = co_author['Name']
+                co_author_profile_link = co_author.get('Profile Link', None)
+
+                co_author_entry = session.query(Researcher).filter_by(name=co_author_name).first()
+                if not co_author_entry:
+                    co_author_entry = Researcher(name=co_author_name, profile_link=co_author_profile_link)
+                    session.add(co_author_entry)
+                    session.commit()
+
+                if co_author_entry not in publication.researchers:
+                    publication.researchers.append(co_author_entry)
+
+        session.commit()
+
+    except Exception as e:
         session.rollback()
-        print(f"Error storing author details: {e}")
+        raise e
     finally:
-        if session is not None:
-            session.close()
+        session.close()
+
 
 
 # Function to get author details from the database
@@ -388,6 +390,16 @@ def update_researcher_summary(author_name, new_summary, session=None):
     finally:
         if session is not None:
             session.close()
+
+def get_researcher_by_profile_link(profile_link, session=None):
+    if session is None:
+        session = get_session()
+    try:
+        return session.query(Researcher).filter(Researcher.profile_link.like(profile_link)).first()
+    except Exception as e:
+        print(f"Error while querying researcher by profile link: {e}")
+        return None
+
 
 # Function to remove rows from max_pages_cache if they are too old
 def delete_stale_cache_entries(delta, session=None):

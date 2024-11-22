@@ -1,8 +1,6 @@
 import pytest
-from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
 from backend.db.clear_db import clear_all_tables
-from backend.db.models import Base, Researcher, Paper, PaperAuthors, Fields_of_Study
+from backend.db.models import Base
 from backend.db.db_helper import *
 
 DATABASE_URL = "sqlite:///:memory:"
@@ -220,3 +218,51 @@ def test_delete_author_details_from_db(setup_database, session):
     retrieved_details = get_author_details_from_db('John Doe')
 
     assert retrieved_details is None
+
+def test_store_and_retrieve_co_authors(setup_database, session):
+    clear_all_tables()
+
+    author_details = {
+        'Name': 'John Doe',
+        'Profile Link': "https://dl.acm.org/profile/1234",
+        'Fields of Study': ['Artificial Intelligence'],
+        'Publications': [
+            {
+                'Title': 'AI Revolution',
+                'DOI': '10.1234/airevolution2023',
+                'Abstract': 'A groundbreaking paper on AI.',
+                'Publication Date': '2023-05-01',
+                'Citation Count': 10,
+                'Co-Authors': [
+                    {'Name': 'Jane Smith', 'Profile Link': "https://dl.acm.org/profile/5678"},
+                    {'Name': 'Alice Johnson', 'Profile Link': "https://dl.acm.org/profile/9101"}
+                ]
+            }
+        ]
+    }
+
+    store_author_details_in_db(author_details, session=session)
+    session.commit()
+
+    primary_author = session.query(Researcher).filter_by(name='John Doe').first()
+    assert primary_author is not None, "Primary author 'John Doe' should exist in the database."
+    assert primary_author.profile_link == "https://dl.acm.org/profile/1234"
+
+    co_author1 = session.query(Researcher).filter_by(name='Jane Smith').first()
+    co_author2 = session.query(Researcher).filter_by(name='Alice Johnson').first()
+    assert co_author1 is not None, "Co-author 'Jane Smith' should exist in the database."
+    assert co_author2 is not None, "Co-author 'Alice Johnson' should exist in the database."
+    assert co_author1.profile_link == "https://dl.acm.org/profile/5678", "Co-author 'Jane Smith' should have the correct profile link."
+    assert co_author2.profile_link == "https://dl.acm.org/profile/9101", "Co-author 'Alice Johnson' should have the correct profile link."
+
+    publication = session.query(Paper).filter_by(doi='10.1234/airevolution2023').first()
+    assert publication is not None, "Publication 'AI Revolution' should exist in the database."
+    assert publication.title == 'AI Revolution'
+    assert publication.citations == 10
+
+    primary_author_assoc = session.query(PaperAuthors).filter_by(doi='10.1234/airevolution2023', id=primary_author.id).first()
+    co_author1_assoc = session.query(PaperAuthors).filter_by(doi='10.1234/airevolution2023', id=co_author1.id).first()
+    co_author2_assoc = session.query(PaperAuthors).filter_by(doi='10.1234/airevolution2023', id=co_author2.id).first()
+    assert primary_author_assoc is not None, "Primary author should be associated with the publication."
+    assert co_author1_assoc is not None, "Co-author 'Jane Smith' should be associated with the publication."
+    assert co_author2_assoc is not None, "Co-author 'Alice Johnson' should be associated with the publication."

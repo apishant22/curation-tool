@@ -40,8 +40,7 @@ def identify_input_type_and_search(input_value, page_number, search_type, max_pa
         "search_type": search_type
     }
 
-# TODO estimate max pages for fields too
-def get_estimated_max_pages(input_value, search_type=None):
+def get_estimated_max_pages(input_value):
     formatted_name = input_value.replace(' ', '+')
     headers = {
         'User-Agent': 'Mozilla/5.0',
@@ -98,7 +97,7 @@ def extract_subject_fields(soup):
     return []
 
 # Function to scrape author's publications
-def scrape_author_publications(profile_link, author):
+def scrape_author_publications(profile_link, author_name):
     publications_url = f"{profile_link}/publications?Role=author&startPage=0&pageSize=50"
     headers = {'User-Agent': 'Mozilla/5.0', 'Accept': 'text/html'}
 
@@ -122,10 +121,8 @@ def scrape_author_publications(profile_link, author):
             (link['href'].replace("https://doi.org/", "") for link in doi_tag if "https://doi.org/" in link['href']),
             'No DOI'
         )
-
         if doi in unique_publications:
             continue
-
         unique_publications.add(doi)
 
         co_authors = []
@@ -134,7 +131,7 @@ def scrape_author_publications(profile_link, author):
             co_author_name = co_author['title'].strip()
             co_author_link = f"https://dl.acm.org{co_author['href']}"
 
-            if co_author_name != author and co_author_name != "Get Access":
+            if co_author_link != profile_link and co_author_name != author_name and co_author_name != "Get Access":
                 co_authors.append({"Name": co_author_name, "Profile Link": co_author_link})
 
         if doi != 'No DOI':
@@ -152,6 +149,7 @@ def scrape_author_publications(profile_link, author):
         })
 
     return publications
+
 
 
 
@@ -228,6 +226,14 @@ def get_latest_publication(publications):
 
 def update_author_if_needed(author_name, profile_link):
     try:
+        existing_researcher =get_researcher_by_profile_link(profile_link)
+
+        if existing_researcher:
+            author_name = existing_researcher.name
+            print(f"Profile link {profile_link} found in database. Using associated name: {author_name}")
+        else:
+            print(f"Profile link {profile_link} not found in database. Proceeding with provided name: {author_name}")
+
         latest_scraped_publication = scrape_latest_publication(profile_link)
         if not latest_scraped_publication:
             print("No latest publication found.")
@@ -299,6 +305,7 @@ def update_author_if_needed(author_name, profile_link):
         print(f"An error occurred: {e}")
         return None, None
 
+
 '''
 # Example usage of the refactored functions
 input = "Adriana Wilde"
@@ -349,4 +356,13 @@ print(result_page_3)
 
 result_new_query = searcher. search_acm_field("Artificial Intelligence", 0, 5)
 print(result_new_query)
+
+
+author_name = "Les Carr"
+profile_link = "https://dl.acm.org/profile/81100072950"
+
+author_details_json = update_author_if_needed(author_name, profile_link)
+
+print("\nDetailed Author Information:")
+print(json.dumps(author_details_json, indent=4))
 '''
