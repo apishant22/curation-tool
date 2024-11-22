@@ -40,8 +40,8 @@ def identify_input_type_and_search(input_value, page_number, search_type, max_pa
         "search_type": search_type
     }
 
-
-def get_estimated_max_pages(input_value):
+# TODO estimate max pages for fields too
+def get_estimated_max_pages(input_value, search_type=None):
     formatted_name = input_value.replace(' ', '+')
     headers = {
         'User-Agent': 'Mozilla/5.0',

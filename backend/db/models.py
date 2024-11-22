@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from sqlalchemy import Column, String, Integer, ForeignKey, Date
 from sqlalchemy.orm import relationship, declarative_base
 
@@ -43,4 +45,6 @@ class ResearcherFieldsOfStudy(Base):
 class MaxPagesCache(Base):
     __tablename__ = 'Max_Pages_Cache'
     name = Column(String, primary_key=True)
+    search_type = Column(Integer, default=0)
+    date_created = Column(Date, default=datetime.utcnow)
     max_pages = Column(Integer, nullable=True)

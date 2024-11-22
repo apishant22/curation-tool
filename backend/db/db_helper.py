@@ -4,7 +4,7 @@ from sqlalchemy import create_engine, func, text
 from sqlalchemy.orm import sessionmaker, scoped_session
 from sqlalchemy.exc import SQLAlchemyError
 from dotenv import load_dotenv
-from backend.db.models import Researcher, Paper, PaperAuthors, Fields_of_Study, ResearcherFieldsOfStudy
+from backend.db.models import Researcher, Paper, PaperAuthors, Fields_of_Study, ResearcherFieldsOfStudy, MaxPagesCache
 
 # Load environment variables
 base_dir = os.path.dirname(os.path.abspath(__file__))
@@ -385,6 +385,36 @@ def update_researcher_summary(author_name, new_summary, session=None):
     except SQLAlchemyError as e:
         session.rollback()
         print(f"Error updating researcher summary: {e}")
+    finally:
+        if session is not None:
+            session.close()
+
+# Function to remove rows from max_pages_cache if they are too old
+def delete_stale_cache_entries(delta, session=None):
+    if session is None:
+        session = get_session()
+
+    try:
+        cutoff = datetime.utcnow() - delta
+        # result = session.delete(MaxPagesCache).where(MaxPagesCache.date_created <= cutoff).rowcount
+        stale_entries = session.query(MaxPagesCache).filter(MaxPagesCache.date_created <= cutoff)
+        result = stale_entries.delete()
+        session.commit()
+
+        if result > 0:
+            print(f"Successfully removed {result} stale cache entries")
+        elif result == 0:
+            print("No stale cache entries to remove")
+        else:
+            print(f"Unexpected output while removing stale cache entries: {result}")
+
+        return result
+
+    except SQLAlchemyError as e:
+        session.rollback()
+        print(f"Error deleting stale cache entries: {e}")
+        return None
+
     finally:
         if session is not None:
             session.close()

@@ -1,3 +1,5 @@
+from datetime import timedelta
+
 from flask import Flask, jsonify, request
 from flask.views import View
 from flask_cors import CORS
@@ -7,6 +9,8 @@ import backend.db.db_helper as db
 import backend.db.models as model
 import backend.llm.llmNew as llm
 
+CACHE_LIFETIME = timedelta(weeks=4)
+
 app = Flask(__name__)
 CORS(app)
 
@@ -15,16 +19,19 @@ def _search(search_type, name, page):
 
     normalized_name = name.lower()
 
+    db.delete_stale_cache_entries(CACHE_LIFETIME)
+
     # try to get the estimated max pages from the database
+    typ = 0 if search_type == 'author' else 1
     try:
-        max_pages = db.get_records(model.MaxPagesCache.max_pages, {'name': normalized_name})[0][0]
+        max_pages = db.get_records(model.MaxPagesCache.max_pages, {'name': normalized_name, 'search_type': typ})[0][0]
     except IndexError:
         # scrape it and add to the cache if not found
-        print(f"Cache miss or new input. Running scraper.get_estimated_max_pages for: {name}")
-        max_pages = scraper.get_estimated_max_pages(name)  # TODO separate cache for authors and fields?
-        db.add_record(model.MaxPagesCache(name=normalized_name, max_pages=max_pages))
+        print(f"Cache miss or new input. Running scraper.get_estimated_max_pages for: {search_type} {name}")
+        max_pages = scraper.get_estimated_max_pages(name, search_type)  # TODO function needs updating to work for fields too
+        db.add_record(model.MaxPagesCache(name=normalized_name, max_pages=max_pages, search_type=typ))
     else:
-        print(f"Cache hit for {name}: {max_pages}")
+        print(f"Cache hit for {search_type} {name}: {max_pages}")
 
     # perform the search
     try:
