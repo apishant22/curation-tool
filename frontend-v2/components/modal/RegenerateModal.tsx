@@ -2,7 +2,6 @@
 import React from "react";
 import Modal from "./Modal";
 import useRegenerateModal from "@/app/hooks/useRegenerateModal";
-import RegenerateCard from "../summary/RegenerateCard";
 
 const RegenerateModal = ({}) => {
   const regenerateModal = useRegenerateModal();

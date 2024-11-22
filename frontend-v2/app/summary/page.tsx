@@ -7,13 +7,11 @@ import PublicationCard from "@/components/summary/PublicationCard";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { AlertCircle } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import Tiptap from "@/components/tiptap/Tiptap";
-import useRegenerateModal from "../hooks/useRegenerateModal";
-import RegenerateCard from "@/components/summary/RegenerateCard";
+
 import { Button } from "@/components/ui/button";
 import { IoMdArrowBack, IoMdCheckmark } from "react-icons/io";
-import { FaBackspace } from "react-icons/fa";
 
 interface Biography {
   Biography: string;
@@ -64,8 +62,6 @@ interface AuthorResponse {
   summary: string;
 }
 
-const testContent = `Lorem, ipsum dolor sit amet consectetur adipisicing elit. Iure expedita consequatur quam. Sint rem exercitationem sequi cupiditate blanditiis obcaecati consequatur quos, veritatis, harum libero vel quaerat natus numquam eligendi provident?`;
-
 function Page() {
   const searchParams = useSearchParams();
   const [loading, setLoading] = useState(true);
@@ -74,7 +70,6 @@ function Page() {
   const [error, setError] = useState<string | null>(null);
   const name = searchParams.get("name") || "";
   const profileId = parseInt(searchParams.get("profileId") || "0", 10);
-  const regenerateModal = useRegenerateModal();
 
   const fetchAuthor = async (name: string, profileId: number) => {
     try {
@@ -144,9 +139,9 @@ function Page() {
       </div>
     );
   }
+  const cachedData = sessionStorage.getItem(`currentPagePath`);
 
   if (data.author_details == null) {
-    const cachedData = sessionStorage.getItem(`currentPagePath`);
     sessionStorage.removeItem(`author_${name}_${profileId}`);
 
     return (
@@ -201,19 +196,28 @@ function Page() {
           <>
             <div className="flex flex-grow shadow-2xl dark:bg-zinc-900">
               <div className="w-[70%] p-4 flex flex-col">
-                <div className="p-4">
+                <div className="p-2">
                   <AuthorHeader
                     name={data?.author_details?.Name || "No name available"}
                   />
                 </div>
 
-                <Tiptap contentHere={testContent} name={name} />
+                <Tiptap name={name} summary={data?.summary} />
 
                 <div className="flex gap-4 justify-center p-2 mb-6">
                   <Button className="bg-green-400 hover:bg-green-600">
                     <IoMdCheckmark size={30} />
                   </Button>
-                  <Button>
+                  <Button
+                    onClick={() => {
+                      // Check if cachedData exists
+                      if (cachedData) {
+                        router.push(cachedData); // Push to cached URL
+                      } else {
+                        console.warn("No cached URL found in sessionStorage");
+                        router.back();
+                      }
+                    }}>
                     <IoMdArrowBack />
                   </Button>
                 </div>

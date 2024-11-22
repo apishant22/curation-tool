@@ -13,6 +13,7 @@ const RegenerateCard = ({
   counter,
   setContentVal,
   setCounter,
+  handleRegenerate,
 }) => {
   const [isCardOpen, setIsCardOpen] = useState(false);
 
@@ -46,16 +47,16 @@ const RegenerateCard = ({
     <div
       className="w-[560px]
     ">
-      <div className="dark:bg-zinc-900 p-2 bg-blue-200/50 border rounded-md">
+      <div className="dark:bg-zinc-900 p-3 bg-blue-500 border rounded-md">
         <form onSubmit={handleSubmit}>
-          <div className="p-2 text-sm">Text to change</div>
+          <div className="p-2 text-sm font-bold text-white">Text to change</div>
           <textarea
-            className="text-black w-full h-32 rounded-md dark:bg-zinc-800 dark:text-white"
+            className="text-black w-full h-32 rounded-md dark:bg-zinc-800 dark:text-white "
             value={input}
             onChange={(e) => handleChange(e.target.value)}
             onKeyDown={handleKeyDown}
           />
-          <div className="p-2 text-sm">Reason</div>
+          <div className="p-2 text-sm font-bold text-white">Reason</div>
           <textarea
             className="text-black w-full h-32 rounded-md dark:bg-zinc-800 dark:text-white"
             value={reason}
@@ -66,21 +67,29 @@ const RegenerateCard = ({
             <button type="submit">
               <IoMdAddCircleOutline
                 size={25}
-                className="text-neutral-500 hover:text-black"
+                className="text-green-400 hover:text-black"
               />
             </button>
           </div>
         </form>
       </div>
-      <button
-        type="button"
-        onClick={toggleOpen}
-        className="inline-flex items-center px-5 py-2.5 text-sm font-medium text-center text-white bg-violet-500 rounded-lg hover:bg-violet-700 focus:ring-4 focus:outline-none focus:ring-blue-300 dark:bg-violet-500 dark:hover:bg-violet-700 dark:focus:ring-violet-800 mt-5">
-        Text to regenerate!
-        <span className="inline-flex items-center justify-center w-4 h-4 ms-2 text-xs font-semibold text-blue-800 bg-blue-200 rounded-full">
-          {counter}
-        </span>
-      </button>
+      <div className="flex justify-between pt-4">
+        <button
+          type="button"
+          onClick={toggleOpen}
+          className="inline-flex items-center px-5 py-2.5 text-sm font-medium text-center text-white bg-violet-500 rounded-lg hover:bg-violet-700 focus:ring-4 focus:outline-none focus:ring-blue-300 dark:bg-violet-500 dark:hover:bg-violet-700 dark:focus:ring-violet-800">
+          Text to regenerate!
+          <span className="inline-flex items-center justify-center w-4 h-4 ms-2 text-xs font-semibold text-blue-800 bg-blue-200 rounded-full">
+            {counter}
+          </span>
+        </button>
+        <Button
+          className="bg-blue-500 hover:bg-blue-700 dark:text-white"
+          onClick={handleRegenerate}>
+          Regenerate
+        </Button>
+      </div>
+
       {isCardOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto overflow-x-hidden bg-neutral-800/70 outline-none focus:outline-none">
           <div className="relative mx-auto h-full w-full md:h-auto md:w-4/6 lg:h-auto lg:w-3/6 xl:w-2/5">

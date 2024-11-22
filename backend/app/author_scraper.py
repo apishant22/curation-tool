@@ -4,9 +4,7 @@ import math
 import json
 from backend.db.db_helper import *
 from backend.app.acm_author_searcher import ACMAuthorSearcher
-
-
-# from backend.llm import llmNew
+from backend.llm import llmNew
 
 def identify_input_type_and_search(input_value, page_number, search_type, max_pages=None):
     if page_number < 0:
@@ -28,13 +26,20 @@ def identify_input_type_and_search(input_value, page_number, search_type, max_pa
     else:
         raise ValueError("Invalid search type. Please use 'author' or 'field'.")
 
+    unique_results = {}
+    for result in acm_results["results"]:
+        profile_link = result.get("Profile Link")
+        if profile_link and profile_link not in unique_results:
+            unique_results[profile_link] = result
+
     return {
-        "results": acm_results["results"],
+        "results": list(unique_results.values()),
         "no_previous_page": acm_results["no_previous_page"],
         "no_next_page": acm_results["no_next_page"],
         "max_pages": max_pages,
         "search_type": search_type
     }
+
 
 def get_estimated_max_pages(input_value):
     formatted_name = input_value.replace(' ', '+')
@@ -105,7 +110,9 @@ def scrape_author_publications(profile_link, author):
     soup = BeautifulSoup(response.content, 'html.parser')
     publication_items = soup.find_all('li', class_='search__item')
 
+    unique_publications = set()
     publications = []
+
     for item in publication_items:
         title_tag = item.find('h5', class_='issue-item__title')
         title = title_tag.text.strip() if title_tag else 'Unknown title'
@@ -113,7 +120,13 @@ def scrape_author_publications(profile_link, author):
         doi_tag = item.find('div', class_='issue-item__detail').find_all('a', href=True)
         doi = next(
             (link['href'].replace("https://doi.org/", "") for link in doi_tag if "https://doi.org/" in link['href']),
-            'No DOI')
+            'No DOI'
+        )
+
+        if doi in unique_publications:
+            continue
+
+        unique_publications.add(doi)
 
         co_authors = []
         author_list = item.find_all('a', title=True)
@@ -139,6 +152,7 @@ def scrape_author_publications(profile_link, author):
         })
 
     return publications
+
 
 
 def get_metadata_from_doi(doi):
@@ -237,7 +251,9 @@ def update_author_if_needed(author_name, profile_link):
                 return None, None
 
             print("New Author Details:", json.dumps(author_details_db, indent=4))
-            return None, author_details_db
+            llmNew.request(author_name)
+            summary = get_researcher_summary(author_name)
+            return summary, author_details_db
 
         latest_db_publication = get_latest_publication(author_details_db["Publications"])
         db_pub_date = latest_db_publication.get("Publication Date") if latest_db_publication else None
@@ -258,7 +274,9 @@ def update_author_if_needed(author_name, profile_link):
                     return summary, author_details_db
                 else:
                     print("Summary missing. Generating summary...")
-                    return None, author_details_db
+                    llmNew.request(author_name)
+                    summary = get_researcher_summary(author_name)
+                    return summary, author_details_db
 
         print("New publication found or mismatch in data. Performing full scrape and updating database.")
         scraped_author_details_json = scrape_author_details(author_name, profile_link)
@@ -271,7 +289,9 @@ def update_author_if_needed(author_name, profile_link):
 
         author_details_db_after_update = get_author_details_from_db(author_name)
         print("Author Details After Update:", json.dumps(author_details_db_after_update, indent=4))
-        return None, author_details_db_after_update
+        llmNew.request(author_name)
+        summary = get_researcher_summary(author_name)
+        return summary, author_details_db_after_update
 
     except KeyError as e:
         print(f"KeyError during update: {e}")
