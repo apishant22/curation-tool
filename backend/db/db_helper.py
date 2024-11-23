@@ -162,7 +162,12 @@ def store_author_details_in_db(author_details, session=None):
 
         for pub in publications:
             publication = session.query(Paper).filter_by(doi=pub['DOI']).first()
-            if not publication:
+            if publication:
+                publication.title = pub['Title']
+                publication.abstract = pub.get('Abstract', publication.abstract)
+                publication.publication_date = convert_date_string(pub.get('Publication Date')) or publication.publication_date
+                publication.citations = pub.get('Citation Count', publication.citations)
+            else:
                 publication = Paper(
                     doi=pub['DOI'],
                     title=pub['Title'],
@@ -197,6 +202,8 @@ def store_author_details_in_db(author_details, session=None):
         raise e
     finally:
         session.close()
+
+
 
 
 
