@@ -77,23 +77,15 @@ body,
   }
 }
 
-input[type="search"].dark {
-  background: #222;
-  color: #fff;
-}
-
-input[type="search"].light {
-  background: #fff;
-  color: #222;
-}
-
 input[type="search"]::-webkit-search-cancel-button {
   -webkit-appearance: none;
-  height: 1em;
-  width: 1em;
+  height: 18px;
+  width: 18px;
   border-radius: 50em;
   background: url(https://pro.fontawesome.com/releases/v5.10.0/svgs/solid/times-circle.svg)
     no-repeat 50% 50%;
+  color: white;
+  background-color: white;
   background-size: contain;
   opacity: 0;
   pointer-events: none;
@@ -102,8 +94,4 @@ input[type="search"]::-webkit-search-cancel-button {
 input[type="search"]:focus::-webkit-search-cancel-button {
   opacity: 0.3;
   pointer-events: all;
-}
-
-input[type="search"].dark::-webkit-search-cancel-button {
-  filter: invert(1);
 }
