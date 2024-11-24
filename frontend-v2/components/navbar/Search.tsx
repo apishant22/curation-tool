@@ -132,7 +132,7 @@ const Search = () => {
       <div className="pl-2 text-sm">
         <div ref={dropdownRef} className="relative">
           <div
-            className="flex items-center dark:bg-zinc-900 hover:bg-zinc-100 dark:hover:bg-zinc-950 transition duration-100 rounded-lg"
+            className="flex items-center dark:bg-zinc-800 hover:bg-zinc-100 dark:hover:bg-zinc-900 transition duration-100 rounded-lg"
             onClick={toggleOpen}>
             <div className="p-1">{category}</div>
             <div>
@@ -141,13 +141,13 @@ const Search = () => {
           </div>
           {isOpen && (
             <div
-              className={`absolute bg-white dark:bg-zinc-900 top-10 w-40 border-[1px] shadow-lg rounded-lg`}>
+              className={`absolute bg-white dark:bg-zinc-800 top-10 w-40 border-[1px] shadow-lg rounded-lg`}>
               <div
                 className="p-1"
                 onClick={() =>
                   handleCategoryClick("Author", "Search author ...")
                 }>
-                <div className="flex items-center p-1 transition duration-200 bg-white hover:bg-zinc-100 dark:bg-zinc-900 dark:hover:bg-zinc-950 rounded-lg">
+                <div className="flex items-center p-1 transition duration-200 bg-white hover:bg-zinc-100 dark:bg-zinc-800 dark:hover:bg-zinc-900 rounded-lg">
                   <div className="p-1">
                     <FaUserGraduate />
                   </div>
@@ -163,7 +163,7 @@ const Search = () => {
                     "Search research field ..."
                   )
                 }>
-                <div className="flex items-center p-1 transition duration-200 bg-white hover:bg-zinc-100 dark:bg-zinc-900 dark:hover:bg-zinc-950 rounded-lg">
+                <div className="flex items-center p-1 transition duration-200 bg-white hover:bg-zinc-100 dark:bg-zinc-900 dark:hover:bg-zinc-900 rounded-lg">
                   <div className="p-1">
                     <IoBookSharp />
                   </div>
