@@ -28,7 +28,9 @@ def _search(search_type, name, page):
     except IndexError:
         # scrape it and add to the cache if not found
         print(f"Cache miss or new input. Running scraper.get_estimated_max_pages for: {search_type} {name}")
-        max_pages = scraper.get_estimated_max_pages(name, search_type)  # TODO function needs updating to work for fields too
+        # commenting this function out since it is not complete yet, use one parameter meanwhile it is getting done
+        # max_pages = scraper.get_estimated_max_pages(name, search_type)  # TODO function needs updating to work for fields too
+        max_pages = scraper.get_estimated_max_pages(search_type)
         db.add_record(model.MaxPagesCache(name=normalized_name, max_pages=max_pages, search_type=typ))
     else:
         print(f"Cache hit for {search_type} {name}: {max_pages}")

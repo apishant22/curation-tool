@@ -175,7 +175,8 @@ const Search = () => {
         </div>
       </div>
       <input
-        className="ml-2 flex-1 font-sans text-xs outline-none md:text-base border-none focus:ring-0 dark:bg-zinc-800"
+        id="search"
+        className=" ml-2 flex-1 font-sans text-xs outline-none md:text-base border-none focus:ring-0 dark:bg-zinc-800"
         type="search"
         placeholder={placeholder}
         value={input}

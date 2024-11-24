@@ -51,14 +51,14 @@ const RegenerateCard = ({
         <form onSubmit={handleSubmit}>
           <div className="p-2 text-sm font-bold text-white">Text to change</div>
           <textarea
-            className="text-black w-full h-32 rounded-md dark:bg-zinc-800 dark:text-white "
+            className="text-black w-full h-72 rounded-md dark:bg-zinc-800 dark:text-white "
             value={input}
             onChange={(e) => handleChange(e.target.value)}
             onKeyDown={handleKeyDown}
           />
           <div className="p-2 text-sm font-bold text-white">Reason</div>
           <textarea
-            className="text-black w-full h-32 rounded-md dark:bg-zinc-800 dark:text-white"
+            className="text-black w-full h-10 rounded-md dark:bg-zinc-800 dark:text-white"
             value={reason}
             onChange={(e) => handleReasonChange(e.target.value)}
             onKeyDown={handleKeyDown}
@@ -67,7 +67,7 @@ const RegenerateCard = ({
             <button type="submit">
               <IoMdAddCircleOutline
                 size={25}
-                className="text-green-400 hover:text-black"
+                className="text-white dark:text-green-400 dark:hover:text-black"
               />
             </button>
           </div>
@@ -78,7 +78,7 @@ const RegenerateCard = ({
           type="button"
           onClick={toggleOpen}
           className="inline-flex items-center px-5 py-2.5 text-sm font-medium text-center text-white bg-violet-500 rounded-lg hover:bg-violet-700 focus:ring-4 focus:outline-none focus:ring-blue-300 dark:bg-violet-500 dark:hover:bg-violet-700 dark:focus:ring-violet-800">
-          Text to regenerate!
+          List of regenerated text:
           <span className="inline-flex items-center justify-center w-4 h-4 ms-2 text-xs font-semibold text-blue-800 bg-blue-200 rounded-full">
             {counter}
           </span>
