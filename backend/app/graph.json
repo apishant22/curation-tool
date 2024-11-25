@@ -561,7 +561,7 @@
             "link": "https://dl.acm.org/profile/81309498182"
         }
     ],
-    "edges": [
+    "links": [
         {
             "source": "881",
             "target": "867"

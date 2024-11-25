@@ -3,7 +3,8 @@ from datetime import timedelta
 from flask import Flask, jsonify, request
 from flask.views import View
 from flask_cors import CORS
-
+import os
+import json
 import backend.app.author_scraper as scraper
 import backend.db.db_helper as db
 import backend.db.models as model
@@ -55,6 +56,17 @@ def _search(search_type, name, page):
 def search_author(name, page):
     return _search('author', name, page)
 
+# Expose graph.json data at http://localhost:3002/graph
+@app.route('/graph', methods=['GET'])
+def get_graph():
+    try:
+        graph_path = os.path.join(os.path.dirname(__file__), "graph.json")
+        with open(graph_path,"r") as f:
+            graph_data = json.load(f)
+        return jsonify(graph_data), 200
+    except FileNotFoundError:
+        return jsonify({"error": "Graph data not found"}), 404
+
 @app.route('/search/field/<name>/<int:page>')
 def search_field(name, page):
     return _search('field', name, page)
@@ -99,3 +111,6 @@ def regenerate_request(author_name):
     res = db.get_researcher_summary(author_name)
     print(res)
     return db.get_researcher_summary(author_name), 200
+
+if __name__=="__main__":
+    app.run(debug=True)

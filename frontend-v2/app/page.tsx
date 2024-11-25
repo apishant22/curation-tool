@@ -1,10 +1,15 @@
+"use client";
+
 import ClientOnly from "@/components/global/ClientOnly";
 import Container from "@/components/global/Container";
 import HomeLogo from "@/components/global/HomeLogo";
-
+import ContentCard from "@/components/homepage/ContentCard";
 import Search from "@/components/navbar/Search";
-import React from "react";
+import AuthorNetwork from "@/components/modal/Network";
+import React, { useEffect, useState } from "react";
 import { MdOutlineInsights } from "react-icons/md";
+import dynamic from "next/link";
+import { Network } from "lucide-react";
 
 const Page = () => {
   return (
@@ -22,7 +27,26 @@ const Page = () => {
             </div>
           </div>
 
-          <div className="flex flex-grow flex-col gap-10 items-center justify-center pt-12 pb-12"></div>
+          {/* AuthorNetwork */}
+          <div className="text-center pt-10">
+            <AuthorNetwork />
+            <h1 className="text-2xl font-bold mb-5 ">
+              Author Collaboration Network
+            </h1>
+          </div>
+          {/*
+          <div className="flex flex-grow flex-col gap-10 items-center justify-center pt-12 pb-12">
+            { response &&
+              response.map((res) => {
+                return (
+                  <ContentCard
+                    key={res.id}
+                    name={res.name}
+                    summary={res.summary}
+                    orcid={res.orcid}></ContentCard>
+                );
+              })}
+            </div> */}
         </Container>
       </ClientOnly>
     </div>

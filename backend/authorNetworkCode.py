@@ -17,8 +17,6 @@ def retrieve_formatted_records(model, filters=None):
     return [{key: str(value) for key, value in result.__dict__.items() if not key.startswith('_')}
                 for result in results]
 
-
-
 def generatesNodesAndEdges(id):
     var = retrieve_formatted_records(PaperAuthors,{'id': id})
     nodes = []
@@ -59,9 +57,43 @@ def generatesNodesAndEdges(id):
         for person1 in lists:
             edges.append({"source": temp.get("id"), "target": person1})
 
-
     return nodes, edges
+'''
+def generate_all_authors_network():
+   session = db_helper.get_session()
 
+   # Query all researchers
+   researchers = session.query(Researcher).all()
+   nodes = []
+   edges = []
+
+   # Build nodes
+   for researcher in researchers:
+       nodes.append({
+               "id": researcher.id,
+               "name": researcher.name,
+               "link": researcher.profile_link,
+        })
+   # Fetch all co-authorship relationships
+   coauthorships = session.query(PaperAuthors).all()
+   coauthor_map = {}
+    
+   for coauthorship in coauthorships:
+       doi = coauthorship.doi
+       researcher_id = coauthorship.id
+
+       if doi not in coauthor_map:
+           coauthor_map[doi] = []
+       coauthor_map[doi].append(researcher_id)
+    
+    # Build edges based on coauthorship
+   for doi, researcher_ids in coauthor_map.items():
+       for i, source in enumerate(researcher_ids):
+           for target in researcher_ids[i+1:]:
+               # Avoid duplicate edges
+               if{"source": source, "target": target} not in edges and {"source": target, "target": source} not in edges:
+                   edges.append({"source": source, "target": target})
+   return {"nodes": nodes, "edges": edges}
 
 
 def convert_to_json(name):
@@ -80,7 +112,7 @@ def convert_to_json(name):
 
     return json_string
 
-convert_to_json("Leslie Anthony Carr")
+convert_to_json("Leslie Anthony Carr")'''
 
 
 
