@@ -7,14 +7,16 @@ from bs4 import BeautifulSoup
 import re
 import networkx as nx
 import datetime
+from gender_guesser.detector import Detector
 
 
 class ACMAuthorSearcher:
-    def __init__(self, crawl_delay=1):
+    def __init__(self, crawl_delay=1, filter_by_gender=False):
         self.seen_authors = set()
         self.field_cache = {}
         self.ua = UserAgent()
         self.crawl_delay = crawl_delay
+        self.filter_by_gender = filter_by_gender
 
     def search_acm_field(self, field_name, page_number=1):
         formatted_field = field_name.replace(' ', '+')
@@ -46,13 +48,24 @@ class ACMAuthorSearcher:
                     author_link = f"https://dl.acm.org{author['href']}"
                     if profile_url_pattern.match(author_link) and author_name not in self.seen_authors:
                         self.seen_authors.add(author_name)
-                        authors.append({
-                            "Name": author_name,
-                            "Profile Link": author_link
-                        })
+
+                        if self.filter_by_gender:
+                            first_name = author_name.split()[0]
+                            gender = self.get_gender(first_name)
+                            if gender != "male":
+                                authors.append({
+                                    "Name": author_name,
+                                    "Profile Link": author_link
+                                })
+                        else:
+                            authors.append({
+                                "Name": author_name,
+                                "Profile Link": author_link
+                            })
 
             return authors
-        except Exception:
+        except Exception as e:
+            print(f"Error in search_acm_field: {e}")
             return []
 
     def retry_search_acm_field(self, field_name, max_retries=3, required_minimum=0):
@@ -65,6 +78,12 @@ class ACMAuthorSearcher:
         for attempt in range(max_retries):
             authors = self.search_acm_field(field_name, page_number=random.randint(1, 3))
             if authors:
+                if self.filter_by_gender:
+                    authors = [
+                        author for author in authors
+                        if self.get_gender(author['Name'].split()[0]) != "male"
+                    ]
+
                 self.field_cache[field_name] = authors
                 if len(authors) >= required_minimum:
                     return authors
@@ -74,7 +93,9 @@ class ACMAuthorSearcher:
         self.field_cache[field_name] = self.field_cache.get(field_name, [])
         return self.field_cache[field_name]
 
-
+    def get_gender(self, first_name):
+        detector = Detector()
+        return detector.get_gender(first_name)
 
 class RecommendationsCache:
     def __init__(self):
@@ -186,9 +207,9 @@ class ACMRecommender:
         return [{"Name": rec[0], "Profile Link": rec[1]} for rec in unique_recommendations.values()][:max_recommendations]
 
 global_cache = RecommendationsCache()
-def get_acm_recommendations_and_field_authors(authors, max_recommendations=5, max_results_per_field=5):
+def get_acm_recommendations_and_field_authors(context, authors, max_recommendations=5, max_results_per_field=5):
     print("Getting Recommendations...")
-    acm_searcher = ACMAuthorSearcher(crawl_delay=1)
+    acm_searcher = ACMAuthorSearcher(context.should_filter_gender())
     recommender = ACMRecommender(acm_searcher, global_cache)
 
     if not authors:
@@ -270,24 +291,12 @@ def get_acm_recommendations_and_field_authors(authors, max_recommendations=5, ma
 
 '''
 if __name__ == "__main__":
-    authors = []
-    results = get_acm_recommendations_and_field_authors(authors, max_recommendations=5, max_results_per_field=5)
-    print("Part 1 (Default Fields)")
-    print(results)
-
-    time.sleep(5)
-
     authors = [
         {"Name": "Jane Doe", "Fields of Study": ["Artificial Intelligence", "Machine Learning"]},
         {"Name": "John Smith", "Fields of Study": ["Cybersecurity", "Data Science"]}
     ]
-    results = get_acm_recommendations_and_field_authors(authors, max_recommendations=5, max_results_per_field=5)
-    print("Part 2 (Specific Authors)")
-    print(results)
-
-    time.sleep(5)
 
     results = get_acm_recommendations_and_field_authors(authors, max_recommendations=5, max_results_per_field=5)
-    print("Part 3 (Cached Recommendations)")
+    print("Part 1 (Default Fields)")
     print(results)
 '''

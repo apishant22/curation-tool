@@ -12,11 +12,11 @@ def delayed_request(url, headers=None, params=None, timeout=10):
     response = requests.get(url, headers=headers, params=params, timeout=timeout)
     return response
 
-def identify_input_type_and_search(input_value, page_number, search_type, max_pages=None):
+def identify_input_type_and_search(context, input_value, page_number, search_type, max_pages=None):
     if page_number < 0:
         page_number = 0
 
-    searcher = ACMAuthorSearcher()
+    searcher = ACMAuthorSearcher(context.should_filter_gender())
 
     if max_pages is None:
         max_pages = get_estimated_max_pages(input_value)
@@ -109,8 +109,7 @@ def extract_subject_fields(soup):
             return [tag['label'] for tag in tags if 'label' in tag]
     return []
 
-# Function to scrape author's publications
-def scrape_author_publications(profile_link, author_name):
+def scrape_author_publications(context, profile_link, author_name):
     publications_url = f"{profile_link}/publications?Role=author&startPage=0&pageSize=50"
     headers = {'User-Agent': 'Mozilla/5.0', 'Accept': 'text/html'}
 
@@ -142,11 +141,25 @@ def scrape_author_publications(profile_link, author_name):
         co_authors = []
         author_list = item.find_all('a', title=True)
         for co_author in author_list:
-            co_author_name = co_author['title'].strip()
-            co_author_link = f"https://dl.acm.org{co_author['href']}"
+            try:
+                co_author_name = co_author['title'].strip()
+                co_author_link = f"https://dl.acm.org{co_author['href']}"
 
-            if co_author_link != profile_link and co_author_name != author_name and co_author_name != "Get Access":
-                co_authors.append({"Name": co_author_name, "Profile Link": co_author_link})
+                if (
+                        co_author_link != profile_link and
+                        co_author_name != author_name and
+                        co_author_name != "Get Access"
+                ):
+                    if context.should_filter_gender():
+                        gender = context.get_gender(co_author_name)
+                        if gender != "male":
+                            co_authors.append({"Name": co_author_name, "Profile Link": co_author_link})
+                        else:
+                            print(f"Skipped co-author '{co_author_name}' (Gender: {gender})")
+                    else:
+                        co_authors.append({"Name": co_author_name, "Profile Link": co_author_link})
+            except Exception as e:
+                print(f"Error processing co-author '{co_author.get('title', 'Unknown')}': {e}")
 
         if doi != 'No DOI':
             abstract, publication_date, citation_count = get_metadata_from_doi(doi)
@@ -163,8 +176,6 @@ def scrape_author_publications(profile_link, author_name):
         })
 
     return publications
-
-
 
 
 def get_metadata_from_doi(doi):

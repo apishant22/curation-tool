@@ -435,18 +435,21 @@ def delete_stale_cache_entries(delta, session=None):
         if session is not None:
             session.close()
 
-def get_latest_authors_with_summaries(limit=6, session=None):
+def get_latest_authors_with_summaries(context, limit=6, session=None):
     if session is None:
         session = get_session()
 
     try:
-        authors = (
+        query = (
             session.query(Researcher)
             .filter(Researcher.summary.isnot(None))
             .order_by(Researcher.id.desc())
-            .limit(limit)
-            .all()
         )
+
+        if context.should_filter_gender():
+            query = query.filter(Researcher.gender != "male")
+
+        authors = query.limit(limit).all()
 
         author_list = [
             {
@@ -465,5 +468,3 @@ def get_latest_authors_with_summaries(limit=6, session=None):
     finally:
         if session is not None:
             session.close()
-
-print(get_latest_authors_with_summaries())

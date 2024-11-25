@@ -1,7 +1,7 @@
 from datetime import timedelta
 
 import requests
-from flask import Flask, jsonify, request
+from flask import Flask, jsonify, request, g
 from flask_cors import CORS
 
 import backend.app.author_scraper as scraper
@@ -9,18 +9,28 @@ import backend.db.db_helper as db
 import backend.db.models as model
 import backend.llm.llmNew as llm
 from backend.app.author_recommender import get_acm_recommendations_and_field_authors
+from backend.app.search_scrape_context import SearchScrapeContext
 
 CACHE_LIFETIME = timedelta(weeks=4)
 
 app = Flask(__name__)
 CORS(app)
 
-def _search(search_type, name, page):
+def get_request_context(filter_gender=None):
+    if not hasattr(g, 'search_context'):
+        g.search_context = SearchScrapeContext(filter_gender=filter_gender or False)
+    elif filter_gender is not None:
+        g.search_context.set_filter_gender(filter_gender)
+    return g.search_context
+
+def _search(search_type, name, page, filter_gender):
     assert(search_type in ('author', 'field'))
 
     normalized_name = name.lower()
 
     db.delete_stale_cache_entries(CACHE_LIFETIME)
+
+    context = get_request_context(filter_gender)
 
     # try to get the estimated max pages from the database
     typ = 0 if search_type == 'author' else 1
@@ -50,6 +60,7 @@ def _search(search_type, name, page):
         print(f"Max pages from cache: {max_pages}")
 
         search_results = scraper.identify_input_type_and_search(
+            context=context,
             input_value=name,
             page_number=page,
             search_type=search_type
@@ -129,7 +140,10 @@ def get_recommendations():
         max_recommendations = data.get('max_recommendations', 5)
         max_results_per_field = data.get('max_results_per_field', 5)
 
+        context = get_request_context()
+
         results = get_acm_recommendations_and_field_authors(
+            context=context,
             authors=authors,
             max_recommendations=max_recommendations,
             max_results_per_field=max_results_per_field
@@ -145,8 +159,8 @@ def get_recommendations():
 def get_authors_with_summaries():
     try:
         limit = request.args.get('limit', default=6, type=int)
-
-        authors = db.get_latest_authors_with_summaries(limit=limit)
+        context = get_request_context()
+        authors = db.get_latest_authors_with_summaries(context, limit=limit)
 
         if not authors:
             return jsonify({"message": "No authors with summaries found."}), 404
