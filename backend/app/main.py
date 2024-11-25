@@ -1,13 +1,14 @@
 from datetime import timedelta
 
+import requests
 from flask import Flask, jsonify, request
-from flask.views import View
 from flask_cors import CORS
 
 import backend.app.author_scraper as scraper
 import backend.db.db_helper as db
 import backend.db.models as model
 import backend.llm.llmNew as llm
+from backend.app.author_recommender import get_acm_recommendations_and_field_authors
 
 CACHE_LIFETIME = timedelta(weeks=4)
 
@@ -28,28 +29,44 @@ def _search(search_type, name, page):
     except IndexError:
         # scrape it and add to the cache if not found
         print(f"Cache miss or new input. Running scraper.get_estimated_max_pages for: {search_type} {name}")
-        # commenting this function out since it is not complete yet, use one parameter meanwhile it is getting done
-        # max_pages = scraper.get_estimated_max_pages(name, search_type)  # TODO function needs updating to work for fields too
-        max_pages = scraper.get_estimated_max_pages(search_type)
-        db.add_record(model.MaxPagesCache(name=normalized_name, max_pages=max_pages, search_type=typ))
+        try:
+            max_pages = scraper.get_estimated_max_pages(name)  # Pass the timeout to scraper
+            db.add_record(model.MaxPagesCache(name=normalized_name, max_pages=max_pages, search_type=typ))
+        except requests.Timeout:
+            msg = "The request to the external scraper timed out. Please try again later."
+            print(msg)
+            return jsonify(error=msg), 504
+        except Exception as e:
+            msg = f"An unexpected error occurred during scraping: {e}"
+            print(msg)
+            return jsonify(error=msg), 500
     else:
         print(f"Cache hit for {search_type} {name}: {max_pages}")
 
     # perform the search
     try:
+        print(f"Searching: type={search_type}, name={name}, page={page}")
+        print(f"Normalized name: {normalized_name}")
+        print(f"Max pages from cache: {max_pages}")
+
         search_results = scraper.identify_input_type_and_search(
             input_value=name,
             page_number=page,
-            search_type=search_type,
-            max_pages=max_pages
+            search_type=search_type
         )
+        print(f"Search results: {search_results}")
 
         return jsonify(search_results), 200
 
+    except requests.Timeout:
+        msg = "The request to the external scraper timed out. Please try again later."
+        print(msg)
+        return jsonify(error=msg), 504
     except Exception as e:
         msg = f'An unexpected error occurred: {e}'
         print(msg)
-        return jsonify(error = msg), 500
+        return jsonify(error=msg), 500
+
 
 @app.route('/search/author/<name>/<int:page>')
 def search_author(name, page):
@@ -99,3 +116,43 @@ def regenerate_request(author_name):
     res = db.get_researcher_summary(author_name)
     print(res)
     return db.get_researcher_summary(author_name), 200
+
+@app.route('/recommendations', methods=['POST'])
+def get_recommendations():
+    try:
+        data = request.get_json()
+
+        if not isinstance(data, dict) or 'authors' not in data:
+            return jsonify({"error": "Invalid input. 'authors' key with a list of authors is required."}), 400
+
+        authors = data.get('authors', [])
+        max_recommendations = data.get('max_recommendations', 5)
+        max_results_per_field = data.get('max_results_per_field', 5)
+
+        results = get_acm_recommendations_and_field_authors(
+            authors=authors,
+            max_recommendations=max_recommendations,
+            max_results_per_field=max_results_per_field
+        )
+
+        return jsonify(results), 200
+
+    except Exception as e:
+        print(f"Error occurred: {e}")
+        return jsonify({"error": f"An unexpected error occurred: {str(e)}"}), 500
+
+@app.route('/authors_with_summaries', methods=['GET'])
+def get_authors_with_summaries():
+    try:
+        limit = request.args.get('limit', default=6, type=int)
+
+        authors = db.get_latest_authors_with_summaries(limit=limit)
+
+        if not authors:
+            return jsonify({"message": "No authors with summaries found."}), 404
+
+        return jsonify(authors), 200
+
+    except Exception as e:
+        print(f"Error fetching authors with summaries: {e}")
+        return jsonify({"error": f"An unexpected error occurred: {str(e)}"}), 500

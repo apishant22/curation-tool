@@ -145,7 +145,7 @@ def store_author_details_in_db(author_details, session=None):
         fields_of_study = author_details.get('Fields of Study', [])
         publications = author_details.get('Publications', [])
 
-        primary_author = session.query(Researcher).filter_by(name=primary_author_name).first()
+        primary_author = session.query(Researcher).filter_by(profile_link=primary_author_profile_link).first()
         if not primary_author:
             primary_author = Researcher(name=primary_author_name, profile_link=primary_author_profile_link)
             session.add(primary_author)
@@ -162,12 +162,7 @@ def store_author_details_in_db(author_details, session=None):
 
         for pub in publications:
             publication = session.query(Paper).filter_by(doi=pub['DOI']).first()
-            if publication:
-                publication.title = pub['Title']
-                publication.abstract = pub.get('Abstract', publication.abstract)
-                publication.publication_date = convert_date_string(pub.get('Publication Date')) or publication.publication_date
-                publication.citations = pub.get('Citation Count', publication.citations)
-            else:
+            if not publication:
                 publication = Paper(
                     doi=pub['DOI'],
                     title=pub['Title'],
@@ -176,6 +171,12 @@ def store_author_details_in_db(author_details, session=None):
                     citations=pub.get('Citation Count', 0),
                 )
                 session.add(publication)
+                session.commit()
+            else:
+                publication.title = pub['Title']
+                publication.abstract = pub.get('Abstract', publication.abstract)
+                publication.publication_date = convert_date_string(pub.get('Publication Date'))
+                publication.citations = pub.get('Citation Count', publication.citations)
                 session.commit()
 
             if primary_author not in publication.researchers:
@@ -186,7 +187,7 @@ def store_author_details_in_db(author_details, session=None):
                 co_author_name = co_author['Name']
                 co_author_profile_link = co_author.get('Profile Link', None)
 
-                co_author_entry = session.query(Researcher).filter_by(name=co_author_name).first()
+                co_author_entry = session.query(Researcher).filter_by(profile_link=co_author_profile_link).first()
                 if not co_author_entry:
                     co_author_entry = Researcher(name=co_author_name, profile_link=co_author_profile_link)
                     session.add(co_author_entry)
@@ -202,10 +203,6 @@ def store_author_details_in_db(author_details, session=None):
         raise e
     finally:
         session.close()
-
-
-
-
 
 # Function to get author details from the database
 def get_author_details_from_db(author_name, session=None):
@@ -437,3 +434,36 @@ def delete_stale_cache_entries(delta, session=None):
     finally:
         if session is not None:
             session.close()
+
+def get_latest_authors_with_summaries(limit=6, session=None):
+    if session is None:
+        session = get_session()
+
+    try:
+        authors = (
+            session.query(Researcher)
+            .filter(Researcher.summary.isnot(None))
+            .order_by(Researcher.id.desc())
+            .limit(limit)
+            .all()
+        )
+
+        author_list = [
+            {
+                "Name": author.name,
+                "Profile Link": author.profile_link,
+                "Summary": author.summary
+            }
+            for author in authors
+        ]
+
+        return author_list
+
+    except SQLAlchemyError as e:
+        print(f"Error retrieving latest authors with summaries: {e}")
+        return []
+    finally:
+        if session is not None:
+            session.close()
+
+print(get_latest_authors_with_summaries())

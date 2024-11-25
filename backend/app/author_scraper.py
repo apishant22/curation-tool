@@ -5,6 +5,12 @@ import json
 from backend.db.db_helper import *
 from backend.app.acm_author_searcher import ACMAuthorSearcher
 from backend.llm import llmNew
+import time
+
+def delayed_request(url, headers=None, params=None, timeout=10):
+    time.sleep(1)
+    response = requests.get(url, headers=headers, params=params, timeout=timeout)
+    return response
 
 def identify_input_type_and_search(input_value, page_number, search_type, max_pages=None):
     if page_number < 0:
@@ -40,7 +46,7 @@ def identify_input_type_and_search(input_value, page_number, search_type, max_pa
         "search_type": search_type
     }
 
-def get_estimated_max_pages(input_value):
+def get_estimated_max_pages(input_value, timeout=None):
     formatted_name = input_value.replace(' ', '+')
     headers = {
         'User-Agent': 'Mozilla/5.0',
@@ -48,33 +54,40 @@ def get_estimated_max_pages(input_value):
     }
 
     initial_url = f"https://dl.acm.org/action/doSearch?AllField={formatted_name}&startPage=0&content=people&target=people-tab&sortBy=relevancy&groupByField=ContribIdSingleValued"
-    response = requests.get(initial_url, headers=headers)
+    try:
+        response = delayed_request(initial_url, headers=headers, timeout=timeout)
 
-    if response.status_code != 200:
-        print(f"Failed to retrieve author data for {input_value}")
+        if response.status_code != 200:
+            print(f"Failed to retrieve author data for {input_value}")
+            return 0
+
+        soup = BeautifulSoup(response.content, 'html.parser')
+        result_count_tag = soup.find('span', class_='result__count')
+        total_authors = int(result_count_tag.text.replace(',', '').split()[0]) if result_count_tag else 0
+
+        page_size = 21
+        max_pages = math.ceil(total_authors / page_size)
+        print(f"Estimated Authors: {total_authors}, Max Pages: {max_pages}")
+
+        return max_pages
+    except requests.Timeout:
+        print(f"Request for {input_value} timed out.")
         return 0
-
-    soup = BeautifulSoup(response.content, 'html.parser')
-    result_count_tag = soup.find('span', class_='result__count')
-    total_authors = int(result_count_tag.text.replace(',', '').split()[0]) if result_count_tag else 0
-
-    page_size = 21
-    max_pages = math.ceil(total_authors / page_size)
-    print(f"Estimated Authors: {total_authors}, Max Pages: {max_pages}")
-
-    return max_pages
+    except Exception as e:
+        print(f"An error occurred: {e}")
+        return 0
 
 
 # Function to scrape detailed information of an author from ACM profile link
 def scrape_author_details(author_name, profile_link):
     headers = {'User-Agent': 'Mozilla/5.0', 'Accept': 'text/html'}
-    response = requests.get(profile_link, headers=headers)
+    response = delayed_request(profile_link, headers=headers)
+
     if response.status_code != 200:
         print(f"Failed to retrieve author profile for {author_name}")
         return {}
 
     soup = BeautifulSoup(response.content, 'html.parser')
-
     publications = scrape_author_publications(profile_link, author_name)
     subject_fields = extract_subject_fields(soup)
 
@@ -101,7 +114,8 @@ def scrape_author_publications(profile_link, author_name):
     publications_url = f"{profile_link}/publications?Role=author&startPage=0&pageSize=50"
     headers = {'User-Agent': 'Mozilla/5.0', 'Accept': 'text/html'}
 
-    response = requests.get(publications_url, headers=headers)
+    response = delayed_request(publications_url, headers=headers)
+
     if response.status_code != 200:
         print(f"Failed to retrieve publications for {profile_link}")
         return []
