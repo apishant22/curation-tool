@@ -3,13 +3,10 @@
 import ClientOnly from "@/components/global/ClientOnly";
 import Container from "@/components/global/Container";
 import HomeLogo from "@/components/global/HomeLogo";
-import ContentCard from "@/components/homepage/ContentCard";
 import Search from "@/components/navbar/Search";
 import AuthorNetwork from "@/components/modal/Network";
-import React, { useEffect, useState } from "react";
+import React from "react";
 import { MdOutlineInsights } from "react-icons/md";
-import dynamic from "next/link";
-import { Network } from "lucide-react";
 
 const Page = () => {
   return (

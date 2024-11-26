@@ -9,6 +9,7 @@ import backend.app.author_scraper as scraper
 import backend.db.db_helper as db
 import backend.db.models as model
 import backend.llm.llmNew as llm
+import backend.authorNetworkCode as nw
 
 CACHE_LIFETIME = timedelta(weeks=4)
 
@@ -66,6 +67,13 @@ def get_graph():
         return jsonify(graph_data), 200
     except FileNotFoundError:
         return jsonify({"error": "Graph data not found"}), 404
+    
+@app.route('/network/<name>')
+def generate_network(name):
+    author_networks = nw.convert_to_json(name)
+    print(author_networks)
+    return author_networks
+
 
 @app.route('/search/field/<name>/<int:page>')
 def search_field(name, page):

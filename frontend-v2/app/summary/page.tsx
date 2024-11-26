@@ -226,6 +226,7 @@ function Page() {
               <div className="flex max-w-[600px] p-3 flex-col gap-4 mt-6 overflow-auto">
                 <PublicationCard
                   publications={data?.author_details?.Publications || []}
+                  name={data?.author_details?.Name}
                 />
               </div>
             </div>

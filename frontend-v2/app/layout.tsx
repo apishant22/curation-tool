@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 import Navbar from "@/components/navbar/Navbar";
 import Footer from "@/components/global/Footer";
-import NetworkModal from "@/components/modal/NetworkModal";
+
 import ToasterProvider from "@/components/providers/ToasterProvider";
 import RegenerateModal from "@/components/modal/RegenerateModal";
 import { Suspense } from "react";
@@ -24,7 +24,7 @@ export default function RootLayout({
         suppressHydrationWarning={true}>
         <ToasterProvider />
         <RegenerateModal />
-        <NetworkModal />
+        {/* <NetworkModal /> */}
         <Navbar />
         <Suspense>
           <main className="flex-grow">{children}</main>

@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { Timeline } from "flowbite-react";
 import {
   Select,
@@ -8,7 +8,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import useNetworkModal from "@/app/hooks/useNetworkModal";
+import dynamic from "next/dynamic";
 
 interface CoAuthor {
   Name: string;
@@ -26,11 +26,23 @@ interface Publication {
 
 interface PublicationCardProps {
   publications: Publication[];
+  name: string;
 }
 
-const PublicationCard: React.FC<PublicationCardProps> = ({ publications }) => {
+const PublicationCard: React.FC<PublicationCardProps> = ({
+  publications,
+  name,
+}) => {
+  const ForceGraph3D = dynamic(
+    () => import("react-force-graph").then((mod) => mod.ForceGraph3D),
+    {
+      ssr: false,
+    }
+  );
   const [sortBy, setSortBy] = useState<"date" | "citations">("date");
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
+  const [isCardOpen, setIsCardOpen] = useState(false);
+  const [network, setNetwork] = useState("");
 
   const sortedPublications = [...publications].sort((a, b) => {
     if (sortBy === "date") {
@@ -67,13 +79,80 @@ const PublicationCard: React.FC<PublicationCardProps> = ({ publications }) => {
     }
   });
 
-  const networkModal = useNetworkModal();
+  const toggle = useCallback(() => {
+    setIsCardOpen((value) => !value);
+  }, []);
+
+  // Custom node object with color configuration
+  const graphConfig = {
+    nodeColor: "#2196F3", // Default node color (blue)
+    nodeActiveColor: "#4CAF50", // Hover node color (green)
+    linkColor: "#9E9E9E", // Default link color (gray)
+    nodeDiameter: 8, // Size of the nodes
+  };
+
+  const fetchAuthorNetwork = async (name: string) => {
+    try {
+      const response = await fetch(`http://localhost:3002/network/${name}`);
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
+      }
+      const data = await response.json();
+      setNetwork(data);
+
+      return data;
+    } catch (error) {
+      console.error("Search failed:", error);
+      throw error;
+    }
+  };
+  useEffect(() => {
+    fetchAuthorNetwork(name);
+  }, [name]);
 
   return (
     <div className="flex flex-col">
+      {isCardOpen && (
+        <>
+          <div
+            className="fixed top-0 right-0 z-60 bg-white cursor-pointer"
+            onClick={toggle}>
+            close button
+          </div>
+          <div className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto overflow-x-hidden bg-neutral-800/70 outline-none focus:outline-none">
+            {/* WHOLE CONTENT */}
+
+            <div>
+              {/*Main body*/}
+              <ForceGraph3D
+                graphData={network}
+                nodeLabel={(node) => `
+                    <div style="color: white; font-weight: bold;">
+                        ${node.name || node.id}
+                    </div>
+                `}
+                // Node styling
+                nodeColor={(node) => node.color || graphConfig.nodeColor}
+                //nodeRelSize={graphConfig.nodeDiameter}
+                // Link styling
+                linkColor={graphConfig.linkColor}
+                linkWidth={1.5}
+                // Node interaction
+                //onNodeHover={handleNodeHover}
+                // nodeAutoColorBy="id"
+                onNodeClick={(node) => {
+                  if (node?.link) window.open(node.link, "_blank");
+                }}
+                backgroundColor="rgba(0,0,0,0)"
+              />
+            </div>
+          </div>
+        </>
+      )}
+
       <div
         className="mx-auto flex items-center justify-center text-sm border-[1px] p-2 rounded-lg text-center max-w-[160px] cursor-pointer bg-green-500 transition duration-200 hover:scale-110"
-        onClick={networkModal.onOpen}>
+        onClick={toggle}>
         <p className="text-white">Network of Authors</p>
       </div>
       <div className="flex justify-center gap-4 p-4">
