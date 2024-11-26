@@ -21,6 +21,7 @@ const Search = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [category, setCategory] = useState("Author");
   const [placeholder, setPlaceholder] = useState("Search an author ...");
+  const [gender, setGender] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   // get the value from the search bar
@@ -40,7 +41,7 @@ const Search = () => {
       setLoading(true);
 
       const categoryPath = categoryMapping[category] || "author"; // Map display name to API value
-      const url = `http://localhost:3002/search/${categoryPath}/${searchTerm}/${page}`;
+      const url = `http://localhost:3002/search/${categoryPath}/${searchTerm}/${page}/${gender}`;
       console.log(`Fetching: ${url}`);
 
       const response = await fetch(url);
@@ -127,6 +128,10 @@ const Search = () => {
     setIsOpen(false);
   };
 
+  const handleGenderClick = () => {
+    setGender((value) => !value);
+  };
+
   return (
     <div className=" flex w-full cursor-pointer items-center justify-between border-[1px] p-1 shadow-sm transition md:max-w-[1200px] md:min-w-[600px] dark:bg-zinc-800 rounded-lg">
       <div className="pl-2 text-sm">
@@ -174,6 +179,7 @@ const Search = () => {
           )}
         </div>
       </div>
+
       <input
         id="search"
         className=" ml-2 flex-1 font-sans text-xs outline-none md:text-base border-none focus:ring-0 dark:bg-zinc-800"
@@ -185,6 +191,15 @@ const Search = () => {
         disabled={loading}
         required
       />
+      <div className="pr-3">
+        <div
+          className={` p-2 rounded-lg text-sm cursor-pointer border-[1px] transition duration-300 hover:text-neutral-600 dark:border-zinc-600 dark:hover:text-zinc-400 ${
+            gender ? "bg-blue-300 dark:bg-zinc-900" : ""
+          }`}
+          onClick={handleGenderClick}>
+          Woman Only
+        </div>
+      </div>
       <button
         onClick={(e) => handleSubmit(e)}
         disabled={loading}

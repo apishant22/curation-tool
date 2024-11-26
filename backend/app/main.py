@@ -79,13 +79,13 @@ def _search(search_type, name, page, filter_gender):
         return jsonify(error=msg), 500
 
 
-@app.route('/search/author/<name>/<int:page>')
-def search_author(name, page):
-    return _search('author', name, page)
+@app.route('/search/author/<name>/<int:page>/<gender>')
+def search_author(name, page,gender):
+    return _search('author', name, page, gender)
 
-@app.route('/search/field/<name>/<int:page>')
-def search_field(name, page):
-    return _search('field', name, page)
+@app.route('/search/field/<name>/<int:page>/<gender>')
+def search_field(name, page, gender):
+    return _search('field', name, page, gender)
 
 @app.route('/query/<name>/<profile_link>')
 def query(name, profile_link):
