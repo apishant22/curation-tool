@@ -1,5 +1,5 @@
 "use client";
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useEffect, useState, useRef} from "react";
 import { Timeline } from "flowbite-react";
 import {
   Select,
@@ -9,6 +9,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import dynamic from "next/dynamic";
+import { Container } from "postcss";
 
 interface CoAuthor {
   Name: string;
@@ -41,8 +42,7 @@ const PublicationCard: React.FC<PublicationCardProps> = ({
   );
   const [sortBy, setSortBy] = useState<"date" | "citations">("date");
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
-  const [isCardOpen, setIsCardOpen] = useState(false);
-  const [network, setNetwork] = useState("");
+  const [network, setNetwork] = useState(null);
 
   const sortedPublications = [...publications].sort((a, b) => {
     if (sortBy === "date") {
@@ -78,11 +78,6 @@ const PublicationCard: React.FC<PublicationCardProps> = ({
         : a["Citation Count"] - b["Citation Count"];
     }
   });
-
-  const toggle = useCallback(() => {
-    setIsCardOpen((value) => !value);
-  }, []);
-
   // Custom node object with color configuration
   const graphConfig = {
     nodeColor: "#2196F3", // Default node color (blue)
@@ -91,38 +86,37 @@ const PublicationCard: React.FC<PublicationCardProps> = ({
     nodeDiameter: 8, // Size of the nodes
   };
 
-  const fetchAuthorNetwork = async (name: string) => {
-    try {
-      const response = await fetch(`http://localhost:3002/network/${name}`);
-      if (!response.ok) {
-        throw new Error(`HTTP error! Status: ${response.status}`);
-      }
-      const data = await response.json();
-      setNetwork(data);
-
-      return data;
-    } catch (error) {
-      console.error("Search failed:", error);
-      throw error;
-    }
-  };
   useEffect(() => {
+    const fetchAuthorNetwork = async (name: string) => {
+      try {
+        const response = await fetch(`http://localhost:3002/network/${name}`);
+        if (!response.ok) {
+          throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+        const data = await response.json();
+        setNetwork(data);
+      } catch (error) {
+        console.error("Search failed:", error);
+        throw error;
+      }
+    };
     fetchAuthorNetwork(name);
   }, [name]);
 
   return (
+    <> { network ? (
     <div className="flex flex-col">
-      {isCardOpen && (
-        <>
-          <div
-            className="fixed top-0 right-0 z-60 bg-white cursor-pointer"
-            onClick={toggle}>
-            close button
-          </div>
-          <div className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto overflow-x-hidden bg-neutral-800/70 outline-none focus:outline-none">
-            {/* WHOLE CONTENT */}
 
-            <div>
+          <div>
+            <div className="flex justify-center items-center"
+              style={{
+              width: "100%",
+              height: "100%",
+              //margin: "0 auto",
+              position: "relative",
+              //border: "1px solid #ccc",
+            }}>
+            
               {/*Main body*/}
               <ForceGraph3D
                 graphData={network}
@@ -143,18 +137,19 @@ const PublicationCard: React.FC<PublicationCardProps> = ({
                 onNodeClick={(node) => {
                   if (node?.link) window.open(node.link, "_blank");
                 }}
+                width={450}
+                height={200}
                 backgroundColor="rgba(0,0,0,0)"
               />
             </div>
           </div>
-        </>
-      )}
-
+      {/*
       <div
         className="mx-auto flex items-center justify-center text-sm border-[1px] p-2 rounded-lg text-center max-w-[160px] cursor-pointer bg-green-500 transition duration-200 hover:scale-110"
         onClick={toggle}>
         <p className="text-white">Network of Authors</p>
-      </div>
+        </div>*/}
+
       <div className="flex justify-center gap-4 p-4">
         <Select
           value={sortBy}
@@ -235,6 +230,10 @@ const PublicationCard: React.FC<PublicationCardProps> = ({
         </Timeline>
       </div>
     </div>
+    ): (
+      <p>Loading network ...</p>
+    )}
+  </>
   );
 };
 

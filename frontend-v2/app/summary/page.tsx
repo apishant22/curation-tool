@@ -203,7 +203,7 @@ function Page() {
                 </div>
 
                 <Tiptap name={name} summary={data?.summary} />
-
+      
                 <div className="flex gap-4 justify-center p-2 mb-6">
                   <Button className="bg-green-400 hover:bg-green-600">
                     <IoMdCheckmark size={30} />
@@ -221,6 +221,8 @@ function Page() {
                     <IoMdArrowBack />
                   </Button>
                 </div>
+        
+
               </div>
 
               <div className="flex max-w-[600px] p-3 flex-col gap-4 mt-6 overflow-auto">

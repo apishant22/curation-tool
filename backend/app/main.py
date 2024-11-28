@@ -70,9 +70,14 @@ def get_graph():
     
 @app.route('/network/<name>')
 def generate_network(name):
-    author_networks = nw.convert_to_json(name)
-    print(author_networks)
-    return author_networks
+    nw.convert_to_json(name)
+    try:
+        network_path = os.path.join(os.path.dirname(__file__), "graph.json")
+        with open(network_path,"r") as f:
+            network_data = json.load(f)
+        return jsonify(network_data), 200
+    except FileNotFoundError:
+        return jsonify({"error": "Network data not found"}), 404
 
 
 @app.route('/search/field/<name>/<int:page>')
