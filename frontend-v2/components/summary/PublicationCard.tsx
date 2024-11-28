@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect, useState, useRef} from "react";
+import React, { useEffect, useState} from "react";
 import { Timeline } from "flowbite-react";
 import {
   Select,
@@ -35,7 +35,7 @@ const PublicationCard: React.FC<PublicationCardProps> = ({
   name,
 }) => {
   const ForceGraph3D = dynamic(
-    () => import("react-force-graph").then((mod) => mod.ForceGraph3D),
+    () => import("react-force-graph").then((mod) => mod.ForceGraph2D),
     {
       ssr: false,
     }
@@ -43,6 +43,7 @@ const PublicationCard: React.FC<PublicationCardProps> = ({
   const [sortBy, setSortBy] = useState<"date" | "citations">("date");
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
   const [network, setNetwork] = useState(null);
+  //const fgRef = useRef<any>(null);
 
   const sortedPublications = [...publications].sort((a, b) => {
     if (sortBy === "date") {
@@ -78,6 +79,7 @@ const PublicationCard: React.FC<PublicationCardProps> = ({
         : a["Citation Count"] - b["Citation Count"];
     }
   });
+
   // Custom node object with color configuration
   const graphConfig = {
     nodeColor: "#2196F3", // Default node color (blue)
@@ -106,7 +108,6 @@ const PublicationCard: React.FC<PublicationCardProps> = ({
   return (
     <> { network ? (
     <div className="flex flex-col">
-
           <div>
             <div className="flex justify-center items-center"
               style={{
@@ -119,20 +120,21 @@ const PublicationCard: React.FC<PublicationCardProps> = ({
             
               {/*Main body*/}
               <ForceGraph3D
+                //ref={fgRef}
                 graphData={network}
                 nodeLabel={(node) => `
-                    <div style="color: white; font-weight: bold;">
+                    <div style="color: gray; font-weight: bold;">
                         ${node.name || node.id}
                     </div>
                 `}
                 // Node styling
                 nodeColor={(node) => node.color || graphConfig.nodeColor}
-                //nodeRelSize={graphConfig.nodeDiameter}
+                //nodeRelSize={12}
                 // Link styling
                 linkColor={graphConfig.linkColor}
                 linkWidth={1.5}
                 // Node interaction
-                //onNodeHover={handleNodeHover}
+                // onNodeHover={handleNodeHover}
                 // nodeAutoColorBy="id"
                 onNodeClick={(node) => {
                   if (node?.link) window.open(node.link, "_blank");
@@ -140,6 +142,9 @@ const PublicationCard: React.FC<PublicationCardProps> = ({
                 width={450}
                 height={200}
                 backgroundColor="rgba(0,0,0,0)"
+                //enableNodeDrag={true}
+                enablePointerInteraction={true}
+                //onEngineStop={() => fgRef.current?.zoomToFit(1000)}
               />
             </div>
           </div>
@@ -231,7 +236,7 @@ const PublicationCard: React.FC<PublicationCardProps> = ({
       </div>
     </div>
     ): (
-      <p>Loading network ...</p>
+      <p>Loading Network and Timeline ...</p>
     )}
   </>
   );
