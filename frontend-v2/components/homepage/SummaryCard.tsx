@@ -9,10 +9,10 @@ interface SummaryCardProps {
 }
 
 const SummaryCard: React.FC<SummaryCardProps> = ({
-                                                     name,
-                                                     profileLink,
-                                                     summary,
-                                                 }) => {
+     name,
+     profileLink,
+     summary,
+ }) => {
     const [isHovered, setIsHovered] = useState(false);
     const router = useRouter();
 
@@ -135,7 +135,10 @@ const SummaryCard: React.FC<SummaryCardProps> = ({
                         WebkitLineClamp: 4,
                     }}
                 >
-                    {truncateWithEllipsis(extractMainBody(summary), 25)}
+                    <p>
+                        <strong>Summary:</strong>{" "}
+                        {truncateWithEllipsis(extractMainBody(summary), 25)}
+                    </p>
                 </div>
             )}
         </div>

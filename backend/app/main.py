@@ -1,7 +1,7 @@
 from datetime import timedelta
 
 import requests
-from flask import Flask, jsonify, request, g
+from flask import Flask, jsonify, request
 from flask_cors import CORS
 
 import backend.app.author_scraper as scraper
@@ -9,19 +9,13 @@ import backend.db.db_helper as db
 import backend.db.models as model
 import backend.llm.llmNew as llm
 from backend.app.author_recommender import get_acm_recommendations_and_field_authors
+from backend.app.context_manager import get_request_context
 from backend.app.search_scrape_context import SearchScrapeContext
 
 CACHE_LIFETIME = timedelta(weeks=4)
 
 app = Flask(__name__)
 CORS(app)
-
-def get_request_context(filter_gender=None):
-    if not hasattr(g, 'search_context'):
-        g.search_context = SearchScrapeContext(filter_gender=filter_gender or False)
-    elif filter_gender is not None:
-        g.search_context.set_filter_gender(filter_gender)
-    return g.search_context
 
 def _search(search_type, name, page, filter_gender):
     assert(search_type in ('author', 'field'))

@@ -2,6 +2,7 @@ import requests
 from bs4 import BeautifulSoup
 import math
 import json
+from backend.app.context_manager import get_request_context
 from backend.db.db_helper import *
 from backend.app.acm_author_searcher import ACMAuthorSearcher
 from backend.llm import llmNew
@@ -82,13 +83,14 @@ def get_estimated_max_pages(input_value, timeout=None):
 def scrape_author_details(author_name, profile_link):
     headers = {'User-Agent': 'Mozilla/5.0', 'Accept': 'text/html'}
     response = delayed_request(profile_link, headers=headers)
+    context = get_request_context()
 
     if response.status_code != 200:
         print(f"Failed to retrieve author profile for {author_name}")
         return {}
 
     soup = BeautifulSoup(response.content, 'html.parser')
-    publications = scrape_author_publications(profile_link, author_name)
+    publications = scrape_author_publications(context, profile_link, author_name)
     subject_fields = extract_subject_fields(soup)
 
     author_details = {

@@ -210,80 +210,75 @@ const Homepage: React.FC = () => {
           {/* Recommendations */}
           <div className="flex flex-col gap-10 items-center justify-center pt-12 pb-12">
             {data ? (
-              <>
-                {[
-                  ...(data["Recommended Authors"] || []),
-                  ...(data["Authors by Weighted Fields"] || []),
-                ]
-                  .filter(
-                    (recommendation: any) => recommendation.Authors?.length > 0
-                  ) // Filter out empty author lists
-                  .map((recommendation: any, sectionIndex: number) => (
-                    <div key={sectionIndex} className="w-full group relative">
-                      <h2 className="text-xl font-bold text-gray-800 dark:text-white mb-4">
-                        {recommendation.Subheading}
-                      </h2>
-                      <div className="relative">
-                        {/* Left Arrow */}
-                        {currentIndex[sectionIndex] > 0 && (
-                          <button
-                            onClick={() => handlePrev(sectionIndex)}
-                            className="absolute left-[-50px] top-1/2 transform -translate-y-1/2 bg-gray-800 text-white p-2 rounded-full shadow-md transition-opacity duration-300 opacity-0 group-hover:opacity-100 hover:scale-105 z-10">
-                            <IoIosArrowBack size={20} />
-                          </button>
-                        )}
+                <>
+                  {[
+                    ...(data["Recommended Authors"] || []),
+                    ...(data["Authors by Weighted Fields"] || []),
+                  ]
+                      .filter((recommendation) => recommendation.Authors?.length > 0)
+                      .map((recommendation, sectionIndex) => (
+                          <div key={sectionIndex} className="w-full group relative">
+                            <h2 className="text-xl font-bold text-gray-800 dark:text-white mb-4">
+                              {recommendation.Subheading}
+                            </h2>
+                            <div className="relative">
+                              {currentIndex[sectionIndex] > 0 && (
+                                  <button
+                                      onClick={() => handlePrev(sectionIndex)}
+                                      className="absolute left-[-50px] top-1/2 transform -translate-y-1/2 bg-gray-800 text-white p-2 rounded-full shadow-md transition-opacity duration-300 opacity-0 group-hover:opacity-100 hover:scale-105 z-10"
+                                  >
+                                    <IoIosArrowBack size={20} />
+                                  </button>
+                              )}
 
-                        {/* Carousel */}
-                        <div className="overflow-hidden relative">
-                          <div
-                            className="flex transition-transform duration-500"
-                            style={{
-                              transform: `translateX(-${
-                                currentIndex[sectionIndex] * 100
-                              }%)`,
-                            }}>
-                            {recommendation.Authors.map(
-                              (author: any, authorIndex: number) => (
+                              <div className="overflow-hidden relative">
                                 <div
-                                  key={authorIndex}
-                                  className={`min-w-[33.3%] flex-shrink-0 p-2`}>
-                                  <ContentCard
-                                    name={author.Name}
-                                    profileLink={author["Profile Link"]}
-                                  />
+                                    className="flex transition-transform duration-500"
+                                    style={{
+                                      transform: `translateX(-${currentIndex[sectionIndex] * 100}%)`,
+                                    }}
+                                >
+                                  {recommendation.Authors.map((author, authorIndex) => (
+                                      <div
+                                          key={authorIndex}
+                                          className={`min-w-[33.3%] flex-shrink-0 p-2`}
+                                      >
+                                        <ContentCard
+                                            name={author.Name || author["Recommended Author"]}
+                                            profileLink={author["Profile Link"]}
+                                            summary={author.Summary || ""}
+                                            reason={author.Reason || ""}
+                                        />
+                                      </div>
+                                  ))}
                                 </div>
-                              )
-                            )}
-                          </div>
-                        </div>
+                              </div>
 
-                        {/* Right Arrow */}
-                        {currentIndex[sectionIndex] <
-                          Math.ceil(recommendation.Authors.length / 3) - 1 && (
-                          <button
-                            onClick={() =>
-                              handleNext(
-                                sectionIndex,
-                                recommendation.Authors.length
-                              )
-                            }
-                            className="absolute right-[-50px] top-1/2 transform -translate-y-1/2 bg-gray-800 text-white p-2 rounded-full shadow-md transition-opacity duration-300 opacity-0 group-hover:opacity-100 hover:scale-105 z-10">
-                            <IoIosArrowForward size={20} />
-                          </button>
-                        )}
-                      </div>
-                    </div>
-                  ))}
-              </>
+                              {currentIndex[sectionIndex] <
+                                  Math.ceil(recommendation.Authors.length / 3) - 1 && (
+                                      <button
+                                          onClick={() =>
+                                              handleNext(sectionIndex, recommendation.Authors.length)
+                                          }
+                                          className="absolute right-[-50px] top-1/2 transform -translate-y-1/2 bg-gray-800 text-white p-2 rounded-full shadow-md transition-opacity duration-300 opacity-0 group-hover:opacity-100 hover:scale-105 z-10"
+                                      >
+                                        <IoIosArrowForward size={20} />
+                                      </button>
+                                  )}
+                            </div>
+                          </div>
+                      ))}
+                </>
             ) : (
-              <div className="flex items-center justify-center h-20 space-x-2">
-                <div className="w-5 h-5 border-4 border-gray-400 border-t-transparent rounded-full animate-spin"></div>
-                <span className="text-gray-600 dark:text-neutral-400 text-lg">
-                  Loading recommendations
-                </span>
-              </div>
+                <div className="flex items-center justify-center h-20 space-x-2">
+                  <div className="w-5 h-5 border-4 border-gray-400 border-t-transparent rounded-full animate-spin"></div>
+                  <span className="text-gray-600 dark:text-neutral-400 text-lg">
+                         Loading recommendations
+                  </span>
+                </div>
             )}
-          </div>
+          </div>;
+
         </Container>
       </ClientOnly>
     </div>
