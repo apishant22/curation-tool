@@ -5,13 +5,20 @@ import { useState, useCallback } from "react";
 import StarterKit from "@tiptap/starter-kit";
 import MarkdownContent from "@/components/summary/MarkdownContent";
 import { FaEdit } from "react-icons/fa";
-import RegenerateCard from "../summary/RegenerateCard";
+//import RegenerateCard from "../summary/RegenerateCard";
+import RegenerateModal from "../modal/RegenerateModal";
+import useRegenerateModal from "@/app/hooks/useRegenerateModal";
 import { IoMdRefreshCircle } from "react-icons/io";
 import axios from "axios";
 import { Markdown } from "tiptap-markdown";
 import toast from "react-hot-toast";
+import Draggable from "react-draggable"
+import Container from "../global/Container";
 
-const Tiptap = ({ name, summary }) => {
+const Tiptap = ({ 
+  name, 
+  summary,
+}) => {
   const [content, setContent] = useState(summary);
   const [isEdit, setIsEdit] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
@@ -20,6 +27,12 @@ const Tiptap = ({ name, summary }) => {
   const [reason, setReason] = useState("");
   const [counter, setCounter] = useState(0);
   const [loading, setLoading] = useState(false);
+  const RegenerateModal = useRegenerateModal();
+
+  const toggleModal = useCallback(() => {
+    // Open the modal when the icon is clicked
+    RegenerateModal.onOpen();
+  },[RegenerateModal]);
 
   const handleChange = (value) => {
     setInput(value);
@@ -66,11 +79,11 @@ const Tiptap = ({ name, summary }) => {
       setLoading(false);
     }
   };
-
+/*
   const toggleOpen = useCallback(() => {
     setIsOpen((value) => !value);
   }, []);
-
+*/
   const acceptEdit = () => {
     setContent(editor.storage.markdown.getMarkdown());
     toast.success("Successfully edited your summary!");
@@ -155,7 +168,7 @@ const Tiptap = ({ name, summary }) => {
           </div>
           <div>
             <a href="#regenerate">
-              <button onClick={toggleOpen}>
+              <button onClick={toggleModal}>
                 <IoMdRefreshCircle
                   size={25}
                   className={` hover:text-green-600 hover:scale-105 transition duration-200 ${
@@ -168,6 +181,7 @@ const Tiptap = ({ name, summary }) => {
         </div>
       </div>
       {!loading && isOpen && (
+       <Container>
         <div
           id="regenerate"
           className="bg-white dark:bg-zinc-800 rounded-md mt-6">
@@ -178,7 +192,7 @@ const Tiptap = ({ name, summary }) => {
           <div
             className="overflow-y-auto flex justify-center max-h-[800px] p-4
       ">
-            <RegenerateCard
+            <RegenerateModal
               contentVal={contentVal}
               handleSubmit={handleSubmit}
               handleChange={handleChange}
@@ -193,6 +207,7 @@ const Tiptap = ({ name, summary }) => {
             />
           </div>
         </div>
+        </Container>
       )}
     </>
   );

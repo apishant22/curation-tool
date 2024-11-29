@@ -34,7 +34,7 @@ const PublicationCard: React.FC<PublicationCardProps> = ({
   name,
 }) => {
   const ForceGraph3D = dynamic(
-    () => import("react-force-graph").then((mod) => mod.ForceGraph3D),
+    () => import("react-force-graph").then((mod) => mod.ForceGraph2D),
     {
       ssr: false,
     }
@@ -241,7 +241,9 @@ const PublicationCard: React.FC<PublicationCardProps> = ({
           </div>
         </div>
       ) : (
-        <p>Loading Network and Timeline ...</p>
+        <div className="text-center text-gray-600 max-w-md animate-typing overflow-hidden whitespace-nowrap dark:text-neutral-400">
+            Loading network and timeline for author ...
+      </div>
       )}
     </>
   );
