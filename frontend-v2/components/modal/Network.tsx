@@ -68,9 +68,11 @@ const AuthorNetwork = () => {
       ref={containerRef}
       style={{
         width: "100%",
-        height: "600px",
+        height: "100vh",
         margin: "0 auto",
         position: "relative",
+        borderRadius: "10px",
+        overflow: "hidden",
         //border: "1px solid #ccc",
       }}>
       {/*Main body*/}
@@ -95,9 +97,9 @@ const AuthorNetwork = () => {
         onNodeClick={(node) => {
           if (node?.link) window.open(node.link, "_blank");
         }}
-        width={800}
+        width={600}
         height={600}
-        backgroundColor="rgba(0,0,0,0)"
+        backgroundColor="rgba(250,250,250,1)"
       />
     </div>
   );

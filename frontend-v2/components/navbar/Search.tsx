@@ -20,7 +20,7 @@ const Search = () => {
   const router = useRouter();
   const [isOpen, setIsOpen] = useState(false);
   const [category, setCategory] = useState("Author");
-  const [placeholder, setPlaceholder] = useState("Search an author ...");
+  const [placeholder, setPlaceholder] = useState("Search author ...");
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   // get the value from the search bar
@@ -128,7 +128,7 @@ const Search = () => {
   };
 
   return (
-    <div className=" flex w-full cursor-pointer items-center justify-between border-[1px] p-1 shadow-sm transition md:max-w-[1200px] md:min-w-[600px] dark:bg-zinc-800 rounded-lg">
+    <div className=" relative flex w-full cursor-pointer items-center justify-between border-[1px] p-1 shadow-sm transition md:max-w-[1200px] md:min-w-[600px] dark:bg-zinc-800 rounded-lg">
       <div className="pl-2 text-sm">
         <div ref={dropdownRef} className="relative">
           <div
