@@ -447,9 +447,12 @@ def get_latest_authors_with_summaries(context, limit=6, session=None):
         )
 
         if context.should_filter_gender():
-            query = query.filter(Researcher.gender != "male")
-
-        authors = query.limit(limit).all()
+            filtered_authors = [
+                author for author in query.all()
+                if context.get_gender(author.name) != "male"
+            ]
+        else:
+            filtered_authors = query.limit(limit).all()
 
         author_list = [
             {
@@ -457,7 +460,7 @@ def get_latest_authors_with_summaries(context, limit=6, session=None):
                 "Profile Link": author.profile_link,
                 "Summary": author.summary
             }
-            for author in authors
+            for author in filtered_authors[:limit]
         ]
 
         return author_list

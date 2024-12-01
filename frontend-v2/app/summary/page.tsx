@@ -54,7 +54,7 @@ function Page() {
         const { Name, "Fields of Study": fieldsOfStudy } = fetchedData.author_details;
         const updatedAuthors = updateStoredAuthors({ Name, "Fields of Study": fieldsOfStudy });
 
-        setTimeout(async () => {
+        const fetchAndStoreRecommendations = async (updatedAuthors) => {
           try {
             const recommendations = await fetchRecommendations(updatedAuthors, 6, 6);
             if (recommendations) {
@@ -63,7 +63,9 @@ function Page() {
           } catch (error) {
             console.error("Failed to fetch recommendations:", error);
           }
-        }, 2000);
+        };
+        fetchAndStoreRecommendations(updatedAuthors);
+
       }
 
       return fetchedData;
@@ -118,7 +120,7 @@ function Page() {
   }
   const cachedData = sessionStorage.getItem(`currentPagePath`);
 
-  if (data.author_details == null) {
+  if (!data?.author_details) {
     sessionStorage.removeItem(`author_${name}_${profileId}`);
 
     return (

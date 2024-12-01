@@ -1,3 +1,4 @@
+import asyncio
 from datetime import timedelta
 
 import requests
@@ -127,6 +128,8 @@ def get_recommendations():
     try:
         data = request.get_json()
 
+        print(f"[DEBUG] Raw input data: {data}")
+
         if not isinstance(data, dict) or 'authors' not in data:
             return jsonify({"error": "Invalid input. 'authors' key with a list of authors is required."}), 400
 
@@ -134,19 +137,25 @@ def get_recommendations():
         max_recommendations = data.get('max_recommendations', 5)
         max_results_per_field = data.get('max_results_per_field', 5)
 
+        try:
+            max_recommendations = int(max_recommendations)
+            max_results_per_field = int(max_results_per_field)
+        except ValueError:
+            return jsonify({"error": "Invalid input: max_recommendations and max_results_per_field must be integers."}), 400
+
         context = get_request_context()
 
-        results = get_acm_recommendations_and_field_authors(
+        results = asyncio.run(get_acm_recommendations_and_field_authors(
             context=context,
             authors=authors,
             max_recommendations=max_recommendations,
             max_results_per_field=max_results_per_field
-        )
+        ))
 
         return jsonify(results), 200
 
     except Exception as e:
-        print(f"Error occurred: {e}")
+        print(f"[ERROR] Exception occurred: {e} ")
         return jsonify({"error": f"An unexpected error occurred: {str(e)}"}), 500
 
 @app.route('/authors_with_summaries', methods=['GET'])

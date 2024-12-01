@@ -38,7 +38,7 @@ const Homepage: React.FC = () => {
     console.log("Authors in sessionStorage:", authors);
 
     const cacheKey = `recommendations_${JSON.stringify(
-      authors
+        authors
     )}_${maxRecommendations}_${maxResultsPerField}`;
     const cachedData = getStoredRecommendations(cacheKey);
 
@@ -49,24 +49,30 @@ const Homepage: React.FC = () => {
       console.log("Fetching fresh recommendations...");
       try {
         const recommendations = await fetchRecommendations(
-          authors,
-          maxRecommendations,
-          maxResultsPerField
+            authors,
+            maxRecommendations,
+            maxResultsPerField
         );
         if (recommendations) {
           console.log("Fetched recommendations:", recommendations);
-          setData(recommendations);
-          setStoredRecommendations(cacheKey, recommendations);
+          if (
+              recommendations["Recommended Authors"] &&
+              recommendations["Authors by Weighted Fields"]
+          ) {
+            setData(recommendations);
+            setStoredRecommendations(cacheKey, recommendations);
+          } else {
+            console.warn("Unexpected data structure:", recommendations);
+          }
         } else {
-          console.warn(
-            "No recommendations fetched. Empty list may have been passed."
-          );
+          console.warn("No recommendations fetched. Empty list may have been passed.");
         }
       } catch (error) {
         console.error("Error fetching recommendations:", error);
       }
     }
   };
+
 
   const loadRecentAuthors = async () => {
     try {
@@ -247,7 +253,7 @@ const Homepage: React.FC = () => {
                                             name={author.Name || author["Recommended Author"]}
                                             profileLink={author["Profile Link"]}
                                             summary={author.Summary || ""}
-                                            reason={author.Reason || ""}
+                                            reason={author.Reason || "No reason provided."}
                                         />
                                       </div>
                                   ))}
