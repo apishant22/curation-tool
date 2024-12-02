@@ -8,23 +8,23 @@ const ForceGraph3D = dynamic(
   { ssr: false }
 );
 
-// Define types for our node and link structures
-// interface NodeData {
-//     id: string;
-//     name: string;
-//     color?: string;
-//     link?: string;
-// }
+/* Define types for our node and link structures
+ interface NodeData {
+     id: string;
+     name: string;
+     color?: string;
+     link?: string;
+ }
 
-// interface LinkData {
-//     source: string;
-//     target: string;
-// }
+ interface LinkData {
+     source: string;
+     target: string;
+ }
 
-// interface GraphData {
-//     nodes: NodeData[];
-//     links: LinkData[];
-// }
+ interface GraphData {
+     nodes: NodeData[];
+     links: LinkData[];
+ } */
 
 const AuthorNetwork = () => {
   const [graphData, setGraphData] = useState(null);

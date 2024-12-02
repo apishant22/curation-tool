@@ -1,5 +1,5 @@
 "use client";
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Timeline } from "flowbite-react";
 import {
   Select,
@@ -41,8 +41,8 @@ const PublicationCard: React.FC<PublicationCardProps> = ({
   );
   const [sortBy, setSortBy] = useState<"date" | "citations">("date");
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
-  const [isCardOpen, setIsCardOpen] = useState(false);
-  const [network, setNetwork] = useState("");
+  const [network, setNetwork] = useState(null);
+  //const fgRef = useRef<any>(null);
 
   const sortedPublications = [...publications].sort((a, b) => {
     if (sortBy === "date") {
@@ -79,10 +79,6 @@ const PublicationCard: React.FC<PublicationCardProps> = ({
     }
   });
 
-  const toggle = useCallback(() => {
-    setIsCardOpen((value) => !value);
-  }, []);
-
   // Custom node object with color configuration
   const graphConfig = {
     nodeColor: "#2196F3", // Default node color (blue)
@@ -91,150 +87,163 @@ const PublicationCard: React.FC<PublicationCardProps> = ({
     nodeDiameter: 8, // Size of the nodes
   };
 
-  const fetchAuthorNetwork = async (name: string) => {
-    try {
-      const response = await fetch(`http://localhost:3002/network/${name}`);
-      if (!response.ok) {
-        throw new Error(`HTTP error! Status: ${response.status}`);
-      }
-      const data = await response.json();
-      setNetwork(data);
-
-      return data;
-    } catch (error) {
-      console.error("Search failed:", error);
-      throw error;
-    }
-  };
   useEffect(() => {
+    const fetchAuthorNetwork = async (name: string) => {
+      try {
+        const response = await fetch(`http://localhost:3002/network/${name}`);
+        if (!response.ok) {
+          throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+        const data = await response.json();
+        setNetwork(data);
+      } catch (error) {
+        console.error("Search failed:", error);
+        throw error;
+      }
+    };
     fetchAuthorNetwork(name);
   }, [name]);
 
   return (
-    <div className="flex flex-col">
-      {isCardOpen && (
-        <>
-          <div
-            className="fixed top-0 right-0 z-60 bg-white cursor-pointer"
-            onClick={toggle}>
-            close button
-          </div>
-          <div className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto overflow-x-hidden bg-neutral-800/70 outline-none focus:outline-none">
-            {/* WHOLE CONTENT */}
-
-            <div>
+    <>
+      {" "}
+      {network ? (
+        <div className="flex flex-col">
+          <div>
+            <div
+              className="flex justify-center items-center"
+              style={{
+                width: "100%",
+                height: "100%",
+                //margin: "0 auto",
+                position: "relative",
+                //border: "1px solid #ccc",
+              }}>
               {/*Main body*/}
               <ForceGraph3D
+                //ref={fgRef}
                 graphData={network}
                 nodeLabel={(node) => `
-                    <div style="color: white; font-weight: bold;">
+                    <div style="color: gray; font-weight: bold;">
                         ${node.name || node.id}
                     </div>
                 `}
                 // Node styling
                 nodeColor={(node) => node.color || graphConfig.nodeColor}
-                //nodeRelSize={graphConfig.nodeDiameter}
+                //nodeRelSize={12}
                 // Link styling
                 linkColor={graphConfig.linkColor}
                 linkWidth={1.5}
                 // Node interaction
-                //onNodeHover={handleNodeHover}
+                // onNodeHover={handleNodeHover}
                 // nodeAutoColorBy="id"
                 onNodeClick={(node) => {
                   if (node?.link) window.open(node.link, "_blank");
                 }}
+                width={450}
+                height={200}
                 backgroundColor="rgba(0,0,0,0)"
+                //enableNodeDrag={true}
+                enablePointerInteraction={true}
+                //onEngineStop={() => fgRef.current?.zoomToFit(1000)}
               />
             </div>
           </div>
-        </>
-      )}
-
+          {/*
       <div
         className="mx-auto flex items-center justify-center text-sm border-[1px] p-2 rounded-lg text-center max-w-[160px] cursor-pointer bg-green-500 transition duration-200 hover:scale-110"
         onClick={toggle}>
         <p className="text-white">Network of Authors</p>
-      </div>
-      <div className="flex justify-center gap-4 p-4">
-        <Select
-          value={sortBy}
-          onValueChange={(value) => setSortBy(value as "date" | "citations")}>
-          <SelectTrigger className="w-[180px]">
-            <SelectValue placeholder="Sort by..." />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="date">Publication Date</SelectItem>
-            <SelectItem value="citations">Citation Count</SelectItem>
-          </SelectContent>
-        </Select>
+        </div>*/}
 
-        <Select
-          value={sortOrder}
-          onValueChange={(value) => setSortOrder(value as "asc" | "desc")}>
-          <SelectTrigger className="w-[180px]">
-            <SelectValue placeholder="Order..." />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="desc">Descending</SelectItem>
-            <SelectItem value="asc">Ascending</SelectItem>
-          </SelectContent>
-        </Select>
-      </div>
+          <div className="flex justify-center gap-4 p-4">
+            <Select
+              value={sortBy}
+              onValueChange={(value) =>
+                setSortBy(value as "date" | "citations")
+              }>
+              <SelectTrigger className="w-[180px]">
+                <SelectValue placeholder="Sort by..." />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="date">Publication Date</SelectItem>
+                <SelectItem value="citations">Citation Count</SelectItem>
+              </SelectContent>
+            </Select>
 
-      <div className="p-4">
-        <Timeline>
-          {sortedPublications.map((pub, index) => (
-            <Timeline.Item key={index}>
-              <Timeline.Point />
-              <Timeline.Content>
-                <Timeline.Time>
-                  {pub["Publication Date"] || "No time available"}
-                </Timeline.Time>
+            <Select
+              value={sortOrder}
+              onValueChange={(value) => setSortOrder(value as "asc" | "desc")}>
+              <SelectTrigger className="w-[180px]">
+                <SelectValue placeholder="Order..." />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="desc">Descending</SelectItem>
+                <SelectItem value="asc">Ascending</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
 
-                <Timeline.Title className="text-sm hover:cursor-pointer hover:text-gray-400">
-                  <a
-                    href={`https://dl.acm.org/doi/${pub.DOI}`}
-                    target="_blank"
-                    rel="noopener noreferrer">
-                    {pub.Title || "Untitled Publication"}
-                  </a>
-                </Timeline.Title>
+          <div className="p-4">
+            <Timeline>
+              {sortedPublications.map((pub, index) => (
+                <Timeline.Item key={index}>
+                  <Timeline.Point />
+                  <Timeline.Content>
+                    <Timeline.Time>
+                      {pub["Publication Date"] || "No time available"}
+                    </Timeline.Time>
 
-                {pub.DOI && (
-                  <a
-                    href={`https://dl.acm.org/doi/${pub.DOI}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-xs font-normal text-gray-500 hover:cursor-pointer hover:text-black">
-                    DOI: {pub.DOI}
-                  </a>
-                )}
+                    <Timeline.Title className="text-sm hover:cursor-pointer hover:text-gray-400">
+                      <a
+                        href={`https://dl.acm.org/doi/${pub.DOI}`}
+                        target="_blank"
+                        rel="noopener noreferrer">
+                        {pub.Title || "Untitled Publication"}
+                      </a>
+                    </Timeline.Title>
 
-                <p className="text-xs text-gray-500 mt-1">
-                  Citation Count: {pub["Citation Count"]}
-                </p>
-                {pub["Co-Authors"].length > 0 && (
-                  <div>
-                    <p className="text-sm font-medium text-neutral-400 mt-3">
-                      Co-Authors:
+                    {pub.DOI && (
+                      <a
+                        href={`https://dl.acm.org/doi/${pub.DOI}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-xs font-normal text-gray-500 hover:cursor-pointer hover:text-black">
+                        DOI: {pub.DOI}
+                      </a>
+                    )}
+
+                    <p className="text-xs text-gray-500 mt-1">
+                      Citation Count: {pub["Citation Count"]}
                     </p>
-                    <ul className="list-disc list-inside text-xs text-gray-500">
-                      {pub["Co-Authors"].map((coAuthor, idx) => (
-                        <li key={idx}>
-                          <a href={coAuthor["Profile Link"]} target="_blank">
-                            {coAuthor.Name}
-                          </a>{" "}
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                )}
-              </Timeline.Content>
-            </Timeline.Item>
-          ))}
-        </Timeline>
-      </div>
-    </div>
+                    {pub["Co-Authors"].length > 0 && (
+                      <div>
+                        <p className="text-sm font-medium text-neutral-400 mt-3">
+                          Co-Authors:
+                        </p>
+                        <ul className="list-disc list-inside text-xs text-gray-500">
+                          {pub["Co-Authors"].map((coAuthor, idx) => (
+                            <li key={idx}>
+                              <a
+                                href={coAuthor["Profile Link"]}
+                                target="_blank">
+                                {coAuthor.Name}
+                              </a>{" "}
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                  </Timeline.Content>
+                </Timeline.Item>
+              ))}
+            </Timeline>
+          </div>
+        </div>
+      ) : (
+        <p>Loading Network and Timeline ...</p>
+      )}
+    </>
   );
 };
 
