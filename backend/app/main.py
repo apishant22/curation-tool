@@ -59,7 +59,7 @@ def search_author(name, page):
 
 # Expose graph.json data at http://localhost:3002/graph
 @app.route('/graph', methods=['GET'])
-def get_graph():
+def graph():
     try:
         graph_path = os.path.join(os.path.dirname(__file__), "graph.json")
         with open(graph_path,"r") as f:
@@ -69,7 +69,7 @@ def get_graph():
         return jsonify({"error": "Graph data not found"}), 404
     
 @app.route('/network/<name>')
-def generate_network(name):
+def network(name):
     author_networks = nw.convert_to_json(name)
     print(author_networks)
     return author_networks
