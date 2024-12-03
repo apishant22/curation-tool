@@ -9,24 +9,15 @@ from bs4 import BeautifulSoup
 import re
 import networkx as nx
 import datetime
-from gender_guesser.detector import Detector
 from node2vec import Node2Vec
 import numpy as np
 from sklearn.cluster import DBSCAN
-from transformers import pipeline
-from backend.app.search_scrape_context import SearchScrapeContext
 import nest_asyncio
 import traceback
 import asyncio
 import hashlib
 
 nest_asyncio.apply()
-
-sentiment_analyzer = pipeline(
-    "sentiment-analysis",
-    model="distilbert-base-uncased-finetuned-sst-2-english",
-    device=0
-)
 
 def safe_int(value, default=0):
     try:
@@ -42,12 +33,11 @@ def safe_float(value, default=0.0):
 
 
 class ACMAuthorSearcher:
-    def __init__(self, crawl_delay=1, filter_by_gender=False):
+    def __init__(self, crawl_delay=1):
         self.seen_authors = set()
         self.field_cache = {}
         self.ua = UserAgent()
         self.crawl_delay = crawl_delay
-        self.filter_by_gender = filter_by_gender
         self.semaphore = asyncio.Semaphore(1)
 
     async def fetch_page(self, session, field_name, page_number, start_time):
@@ -126,20 +116,10 @@ class ACMAuthorSearcher:
                             author_link = f"https://dl.acm.org{author['href']}"
                             if profile_url_pattern.match(author_link) and author_name not in self.seen_authors:
                                 self.seen_authors.add(author_name)
-
-                                if self.filter_by_gender:
-                                    first_name = author_name.split()[0]
-                                    gender = self.get_gender(first_name)
-                                    if gender != "male":
-                                        authors.append({
-                                            "Name": author_name,
-                                            "Profile Link": author_link
-                                        })
-                                else:
-                                    authors.append({
-                                        "Name": author_name,
-                                        "Profile Link": author_link
-                                    })
+                                authors.append({
+                                    "Name": author_name,
+                                    "Profile Link": author_link
+                                })
             return authors
         except Exception as e:
             print(f"[ERROR] Exception in search_acm_field_async for field '{field_name}': {e}")
@@ -166,11 +146,6 @@ class ACMAuthorSearcher:
 
         self.field_cache[field_name] = self.field_cache.get(field_name, [])
         return self.field_cache[field_name]
-
-    def get_gender(self, first_name):
-        detector = Detector()
-        return detector.get_gender(first_name)
-
 
 class DynamicOntologyManager:
     def __init__(self):
@@ -452,10 +427,10 @@ class ACMRecommender:
 
 recommendations_cache = RecommendationsCache()
 
-async def get_acm_recommendations_and_field_authors(context, authors, max_recommendations=5, max_results_per_field=5):
+async def get_acm_recommendations_and_field_authors(authors, max_recommendations=5, max_results_per_field=5):
     try:
         print("Getting Recommendations...")
-        acm_searcher = ACMAuthorSearcher(filter_by_gender=context.should_filter_gender())
+        acm_searcher = ACMAuthorSearcher()
         recommender = ACMRecommender(acm_searcher, recommendations_cache)
 
         max_recommendations = (
