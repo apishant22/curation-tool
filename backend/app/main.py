@@ -19,7 +19,7 @@ CACHE_LIFETIME = timedelta(weeks=4)
 app = Flask(__name__)
 CORS(app)
 
-def _search(search_type, name, page):
+def _search(search_type, name, page, gender):
     assert(search_type in ('author', 'field'))
 
     normalized_name = name.lower()
@@ -97,11 +97,11 @@ def generate_network(name):
 
 @app.route('/search/author/<name>/<int:page>/<gender>')
 def search_author(name, page,gender):
-    return _search('author', name, page)
+    return _search('author', name, page, gender)
 
 @app.route('/search/field/<name>/<int:page>/<gender>')
 def search_field(name, page, gender):
-    return _search('field', name, page)
+    return _search('field', name, page, gender)
 
 @app.route('/query/<name>/<profile_link>')
 def query(name, profile_link):
