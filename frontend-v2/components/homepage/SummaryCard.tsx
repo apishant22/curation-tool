@@ -1,17 +1,18 @@
-"use client";
-
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "react-hot-toast";
 
-interface ContentCardProps {
+interface SummaryCardProps {
     name: string;
     profileLink: string;
     summary?: string;
-    reason?: string;
 }
 
-const ContentCard: React.FC<ContentCardProps> = ({ name, profileLink, summary, reason }) => {
+const SummaryCard: React.FC<SummaryCardProps> = ({
+     name,
+     profileLink,
+     summary,
+ }) => {
     const [isHovered, setIsHovered] = useState(false);
     const router = useRouter();
 
@@ -22,8 +23,16 @@ const ContentCard: React.FC<ContentCardProps> = ({ name, profileLink, summary, r
             .join(" ");
     };
 
+    const extractMainBody = (summary?: string): string => {
+        if (!summary || typeof summary !== "string") {
+            return "Summary not available.";
+        }
+        const lines = summary.split("\n").filter((line) => !line.startsWith("#"));
+        return lines.join(" ").trim();
+    };
+
     const truncateWithEllipsis = (text: string, maxWords: number): string => {
-        if (!text || typeof text !== "string") return "Details not available.";
+        if (!text || typeof text !== "string") return "Summary not available.";
         const words = text.split(" ");
         if (words.length > maxWords) {
             return words.slice(0, maxWords - 1).join(" ") + " ...";
@@ -112,10 +121,10 @@ const ContentCard: React.FC<ContentCardProps> = ({ name, profileLink, summary, r
                 </div>
             </div>
 
-            {/* Hover Effect - Reason Reveal */}
-            {isHovered && reason && (
+            {/* Hover Effect - Summary Reveal */}
+            {isHovered && summary && (
                 <div
-                    className="mt-4 text-gray-600 dark:text-neutral-400 text-sm italic"
+                    className="mt-4 text-gray-600 dark:text-neutral-400 text-sm"
                     style={{
                         overflow: "hidden",
                         maxHeight: "4.5em",
@@ -126,11 +135,14 @@ const ContentCard: React.FC<ContentCardProps> = ({ name, profileLink, summary, r
                         WebkitLineClamp: 4,
                     }}
                 >
-                    {truncateWithEllipsis(reason, 25)}
+                    <p>
+                        <strong>Summary:</strong>{" "}
+                        {truncateWithEllipsis(extractMainBody(summary), 25)}
+                    </p>
                 </div>
             )}
         </div>
     );
 };
 
-export default ContentCard;
+export default SummaryCard;

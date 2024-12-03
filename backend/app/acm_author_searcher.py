@@ -1,19 +1,42 @@
+import time
 import requests
 from bs4 import BeautifulSoup
 import re
-from concurrent.futures import ThreadPoolExecutor
+from gender_guesser.detector import Detector
 
 
 class ACMAuthorSearcher:
     results_per_page = 21
 
-    def __init__(self):
+    def __init__(self, filter_by_gender=False):
         self.seen_authors = set()
         self.current_query = None
         self.next_page_cache = []
+        self.gender_detector = Detector()
+        self.filter_by_gender = filter_by_gender
+
+    def filter_authors_by_gender(self, authors):
+        if not self.filter_by_gender:
+            return authors
+
+        filtered_authors = []
+        for author in authors:
+            try:
+                name = author["Name"]
+                first_name = name.split()[0]
+                gender = self.gender_detector.get_gender(first_name)
+                if gender != "male":
+                    filtered_authors.append(author)
+                else:
+                    print(f"Skipped '{name}' (Gender: {gender})")
+            except Exception as e:
+                print(f"Error processing name '{author.get('Name', 'Unknown')}': {e}")
+        return filtered_authors
 
     def scrape_page(self, url, headers, profile_url_pattern, is_field):
         try:
+            time.sleep(1)
+
             response = requests.get(url, headers=headers)
             if response.status_code != 200:
                 print(f"Failed to retrieve data from URL: {url}")
@@ -51,23 +74,22 @@ class ACMAuthorSearcher:
                             "Location": location,
                             "Profile Link": profile_link
                         })
-            return results
+
+            return self.filter_authors_by_gender(results)
+
         except Exception as e:
             print(f"Error scraping page: {e}")
             return []
 
+
     def fetch_pages(self, base_url, headers, profile_url_pattern, is_field, start_page, end_page):
-        urls = [
-            f"{base_url}&startPage={i}" for i in range(start_page, end_page)
-        ]
+        urls = [f"{base_url}&startPage={i}" for i in range(start_page, end_page)]
         results = []
-        with ThreadPoolExecutor(max_workers=5) as executor:
-            futures = [
-                executor.submit(self.scrape_page, url, headers, profile_url_pattern, is_field)
-                for url in urls
-            ]
-            for future in futures:
-                results.extend(future.result())
+
+        for url in urls:
+            page_results = self.scrape_page(url, headers, profile_url_pattern, is_field)
+            results.extend(page_results)
+
         return results
 
     def search_acm_author(self, author_name, page_number, max_pages):
