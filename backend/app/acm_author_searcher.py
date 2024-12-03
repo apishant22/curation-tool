@@ -2,36 +2,15 @@ import time
 import requests
 from bs4 import BeautifulSoup
 import re
-from gender_guesser.detector import Detector
 
 
 class ACMAuthorSearcher:
     results_per_page = 21
 
-    def __init__(self, filter_by_gender=False):
+    def __init__(self):
         self.seen_authors = set()
         self.current_query = None
         self.next_page_cache = []
-        self.gender_detector = Detector()
-        self.filter_by_gender = filter_by_gender
-
-    def filter_authors_by_gender(self, authors):
-        if not self.filter_by_gender:
-            return authors
-
-        filtered_authors = []
-        for author in authors:
-            try:
-                name = author["Name"]
-                first_name = name.split()[0]
-                gender = self.gender_detector.get_gender(first_name)
-                if gender != "male":
-                    filtered_authors.append(author)
-                else:
-                    print(f"Skipped '{name}' (Gender: {gender})")
-            except Exception as e:
-                print(f"Error processing name '{author.get('Name', 'Unknown')}': {e}")
-        return filtered_authors
 
     def scrape_page(self, url, headers, profile_url_pattern, is_field):
         try:
@@ -75,7 +54,7 @@ class ACMAuthorSearcher:
                             "Profile Link": profile_link
                         })
 
-            return self.filter_authors_by_gender(results)
+            return results
 
         except Exception as e:
             print(f"Error scraping page: {e}")

@@ -2,7 +2,6 @@ import requests
 from bs4 import BeautifulSoup
 import math
 import json
-from backend.app.context_manager import get_request_context
 from backend.db.db_helper import *
 from backend.app.acm_author_searcher import ACMAuthorSearcher
 from backend.llm import llmNew
@@ -13,11 +12,11 @@ def delayed_request(url, headers=None, params=None, timeout=10):
     response = requests.get(url, headers=headers, params=params, timeout=timeout)
     return response
 
-def identify_input_type_and_search(context, input_value, page_number, search_type, max_pages=None):
+def identify_input_type_and_search(input_value, page_number, search_type, max_pages=None):
     if page_number < 0:
         page_number = 0
 
-    searcher = ACMAuthorSearcher(context.should_filter_gender())
+    searcher = ACMAuthorSearcher()
 
     if max_pages is None:
         max_pages = get_estimated_max_pages(input_value)
@@ -83,14 +82,13 @@ def get_estimated_max_pages(input_value, timeout=None):
 def scrape_author_details(author_name, profile_link):
     headers = {'User-Agent': 'Mozilla/5.0', 'Accept': 'text/html'}
     response = delayed_request(profile_link, headers=headers)
-    context = get_request_context()
 
     if response.status_code != 200:
         print(f"Failed to retrieve author profile for {author_name}")
         return {}
 
     soup = BeautifulSoup(response.content, 'html.parser')
-    publications = scrape_author_publications(context, profile_link, author_name)
+    publications = scrape_author_publications(profile_link, author_name)
     subject_fields = extract_subject_fields(soup)
 
     author_details = {
@@ -111,7 +109,7 @@ def extract_subject_fields(soup):
             return [tag['label'] for tag in tags if 'label' in tag]
     return []
 
-def scrape_author_publications(context, profile_link, author_name):
+def scrape_author_publications(profile_link, author_name):
     publications_url = f"{profile_link}/publications?Role=author&startPage=0&pageSize=50"
     headers = {'User-Agent': 'Mozilla/5.0', 'Accept': 'text/html'}
 
@@ -152,14 +150,7 @@ def scrape_author_publications(context, profile_link, author_name):
                         co_author_name != author_name and
                         co_author_name != "Get Access"
                 ):
-                    if context.should_filter_gender():
-                        gender = context.get_gender(co_author_name)
-                        if gender != "male":
-                            co_authors.append({"Name": co_author_name, "Profile Link": co_author_link})
-                        else:
-                            print(f"Skipped co-author '{co_author_name}' (Gender: {gender})")
-                    else:
-                        co_authors.append({"Name": co_author_name, "Profile Link": co_author_link})
+                    co_authors.append({"Name": co_author_name, "Profile Link": co_author_link})
             except Exception as e:
                 print(f"Error processing co-author '{co_author.get('title', 'Unknown')}': {e}")
 
