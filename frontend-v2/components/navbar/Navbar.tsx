@@ -6,13 +6,25 @@ import Logo from "./Logo";
 import Container from "../global/Container";
 import UserMenu from "./UserMenu";
 
-const Navbar = () => {
+type User =
+  | {
+      name?: string | null | undefined;
+      email?: string | null | undefined;
+      image?: string | null | undefined;
+    }
+  | undefined;
+
+type Props = {
+  user: User;
+};
+
+const Navbar: React.FC<Props> = (user) => {
   return (
     <div className="fixed z-10 w-full bg-white border dark:bg-zinc-900">
       <Container>
         <div className="flex items-center justify-between gap-2 p-4 md:gap-6">
           <Logo />
-          <UserMenu />
+          <UserMenu image={user.user?.image} />
         </div>
       </Container>
     </div>

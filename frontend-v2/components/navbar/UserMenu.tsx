@@ -4,8 +4,13 @@ import { MdOutlineDarkMode, MdOutlineLightMode } from "react-icons/md";
 import MenuItem from "./MenuItem";
 import { TbCaretDownFilled, TbCaretUpFilled } from "react-icons/tb";
 import { useRouter } from "next/navigation";
+import { signOut } from "next-auth/react";
 
-const UserMenu = () => {
+interface UserMenuProps {
+  image?: string | null | undefined;
+}
+
+const UserMenu: React.FC<UserMenuProps> = ({ image }) => {
   const [darkMode, setDarkMode] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
@@ -43,23 +48,23 @@ const UserMenu = () => {
         <button className="hover:text-neutral-600" onClick={toggleDarkMode}>
           {darkMode ? <MdOutlineDarkMode /> : <MdOutlineLightMode />}
         </button>
-        <div className="flex cursor-pointer items-center" onClick={toggleOpen}>
-          <div className="flex-shrink-0">
-            <Avatar web />
+        {image && (
+          <div
+            className="flex cursor-pointer items-center"
+            onClick={toggleOpen}>
+            <div className="flex-shrink-0">
+              <Avatar web src={image} />
+            </div>
+            <div>{isOpen ? <TbCaretUpFilled /> : <TbCaretDownFilled />}</div>
           </div>
-          <div>{isOpen ? <TbCaretUpFilled /> : <TbCaretDownFilled />}</div>
-        </div>
+        )}
       </div>
 
       {isOpen && (
         <div className="absolute right-0 top-12 w-[40vw] overflow-hidden rounded-xl bg-white text-sm shadow-md md:w-[200px] dark:bg-zinc-900">
           <div className="flex cursor-pointer flex-col">
             <>
-              <MenuItem
-                label="Settings"
-                onClick={() => router.push("/settings")}
-              />
-              <MenuItem transparent label="Log out" onClick={() => {}} />
+              <MenuItem transparent label="Log out" onClick={() => signOut()} />
             </>
           </div>
         </div>
