@@ -82,7 +82,7 @@ const Homepage: React.FC = () => {
       );
       if (response.ok) {
         const authors = await response.json();
-        const processedAuthors = authors.map((author) => ({
+        const processedAuthors = authors.map((author: { Summary: any; }) => ({
           ...author,
           Summary: author.Summary || "No summary available.",
         }));
@@ -160,28 +160,18 @@ const Homepage: React.FC = () => {
             </div>
           </div>
 
-          <Container>
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 pt-20 p-20 gap-10">
+        <Container>
+        <div className="min-h-screen max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 pt-20 p-20 gap-10">
+          <section className="overflow-y-auto">
           <div className="flex flex-row gap-8 justify-between items-start">
-            {/* Content: AuthorNetwork */}
-            <div className="text-left">
-              <h2 className="text-xl font-bold mb-5 ">
-                Author Collaboration Network
-              </h2>
-              <div className="flex-1">
-                <AuthorNetwork />
-              </div>
-            </div>
+
             {/* Content: Recommend cards*/}
             <div className="text-left">
-                <h2 className="text-xl font-bold mb-5">Other Elements</h2>
-              <div className="flex-1 min-w-[600px] bg-gray-50 rounded-lg p-6">
+              <h2 className="text-xl font-bold mb-5">Community Searches</h2>
+                <div className="flex-1 min-w-[800px]rounded-lg">
                 {/* Recently Searched */}
-          {recentAuthors.length > 0 && (
-            <div className="w-full group relative pt-12">
-              <h2 className="text-xl font-bold text-gray-800 dark:text-white mb-4">
-                Community Searches
-              </h2>
+            {recentAuthors.length > 0 && (
+            <div className="group relative">
               <div className="relative">
                 {/* Left Arrow */}
                 {recentIndex > 0 && (
@@ -195,22 +185,26 @@ const Homepage: React.FC = () => {
                 )}
 
                 {/* Carousel */}
-                <div className="overflow-hidden relative">
+                <div className="overflow-hidden overflow-y-auto relative">
                   <div
-                    className="flex transition-transform duration-500"
+                    className="grid md:grid-cols-2 gap-4 transition-transform duration-5000"
                     style={{
                       transform: `translateX(-${recentIndex * 100}%)`,
                     }}>
+                    
                     {recentAuthors.map((author, index) => (
+                    
                       <div
                         key={index}
-                        className={`min-w-[33.3%] flex-shrink-0 p-2`}>
+                        className={`min-w-[300px] flex-shrink-0 p-2`}>
                         <SummaryCard
                           name={author.Name}
                           profileLink={author["Profile Link"]}
                           summary={author.Summary || "No summary available."}
                         />
+
                       </div>
+                      
                     ))}
                   </div>
                 </div>
@@ -231,11 +225,11 @@ const Homepage: React.FC = () => {
                   </button>
                 )}
               </div>
-            </div>
-          )}
+              </div>
+            )}
 
-          {/* Recommendations */}
-          <div className="flex flex-col gap-10 items-center justify-center pt-12 pb-12">
+            {/* Recommendations */}
+           <div className="flex flex-col gap-10 items-center justify-center pt-12">
             {data ? (
                 <>
                   {[
@@ -252,7 +246,7 @@ const Homepage: React.FC = () => {
                               {currentIndex[sectionIndex] > 0 && (
                                   <button
                                       onClick={() => handlePrev(sectionIndex)}
-                                      className="absolute left-[-50px] top-1/2 transform -translate-y-1/2 bg-gray-800 text-white p-2 rounded-full shadow-md transition-opacity duration-300 opacity-0 group-hover:opacity-100 hover:scale-105 z-10"
+                                      className="absolute left-[-20px] transform -translate-y-1/2 bg-gray-800 text-white rounded-full shadow-md transition-opacity duration-300 opacity-0 group-hover:opacity-100 hover:scale-105"
                                   >
                                     <IoIosArrowBack size={20} />
                                   </button>
@@ -287,7 +281,7 @@ const Homepage: React.FC = () => {
                                           onClick={() =>
                                               handleNext(sectionIndex, recommendation.Authors.length)
                                           }
-                                          className="absolute right-[-50px] top-1/2 transform -translate-y-1/2 bg-gray-800 text-white p-2 rounded-full shadow-md transition-opacity duration-300 opacity-0 group-hover:opacity-100 hover:scale-105 z-10"
+                                          className="absolute right-[-20px] transform -translate-y-1/2 bg-gray-800 text-white rounded-full shadow-md transition-opacity duration-300 opacity-0 group-hover:opacity-100 hover:scale-105"
                                       >
                                         <IoIosArrowForward size={20} />
                                       </button>
@@ -303,11 +297,36 @@ const Homepage: React.FC = () => {
                          Loading recommendations
                   </span>
                 </div>
-            )}
-          </div>;
+              )}
+              </div>
               </div>
               </div>
             </div>
+            </section>
+            <Container>
+            {/* Content: AuthorNetwork */}
+            <div className="flex flex-row gap-8 max-w-[1000px] justify-between items-start pb-10">
+              <div className="flex-1 text-left">
+                <h2 className="text-xl font-bold mb-5 ">
+                  Author Collaboration Network
+                </h2>
+                <div className="min-w-[600px] max-w-[600px] min-h-[400px] max-h-[400px]">
+                  <div className="flex-1">
+                    <AuthorNetwork />
+                  </div>
+                </div>
+              </div>
+              <div className="text-left">
+                <h2 className="text-xl font-bold mb-5">Other Elements</h2>
+              <div className="flex-1 min-w-[400px] rounded-lg p-6">
+                <p className="text-neutral-600 dark:text-neutral-400">
+                  Add content here ...
+                </p>
+              </div>
+              </div>
+            </div>
+
+            </Container>
           </div>
         </Container>
         </Container>

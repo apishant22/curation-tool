@@ -22,6 +22,7 @@ export default function RootLayout({
       <body
         className="flex min-h-screen flex-col"
         suppressHydrationWarning={true}>
+        <div className="flex-1">
         <ToasterProvider />
         <RegenerateModal />
         {/* <NetworkModal /> */}
@@ -29,8 +30,10 @@ export default function RootLayout({
         <Suspense>
           <main className="flex-grow">{children}</main>
         </Suspense>
-
-        <Footer />
+        </div>
+        <footer className=" bg-neutral-600">
+          <Footer />
+        </footer>
       </body>
     </html>
   );

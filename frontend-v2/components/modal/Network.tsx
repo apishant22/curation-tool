@@ -4,7 +4,7 @@ import React, { useEffect, useState, useRef } from "react";
 import dynamic from "next/dynamic";
 
 const ForceGraph3D = dynamic(
-  () => import("react-force-graph").then((mod) => mod.ForceGraph3D),
+  () => import("react-force-graph").then((mod) => mod.ForceGraph2D),
   { ssr: false }
 );
 
@@ -71,7 +71,6 @@ const AuthorNetwork = () => {
         height: "100vh",
         margin: "0 auto",
         position: "relative",
-        borderRadius: "10px",
         overflow: "hidden",
         //border: "1px solid #ccc",
       }}>
@@ -98,7 +97,7 @@ const AuthorNetwork = () => {
           if (node?.link) window.open(node.link, "_blank");
         }}
         width={600}
-        height={600}
+        height={400}
         backgroundColor="rgba(250,250,250,1)"
       />
     </div>

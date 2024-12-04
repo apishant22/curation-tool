@@ -40,7 +40,7 @@ function Page() {
     return currentAuthors;
   };
 
-  const fetchAuthor = async (name, profileId) => {
+  const fetchAuthor = async (name: string, profileId: number) => {
     try {
       setLoading(true);
       const response = await fetch(`http://localhost:3002/query/${name}/${profileId}`);
@@ -54,7 +54,7 @@ function Page() {
         const { Name, "Fields of Study": fieldsOfStudy } = fetchedData.author_details;
         const updatedAuthors = updateStoredAuthors({ Name, "Fields of Study": fieldsOfStudy });
 
-        const fetchAndStoreRecommendations = async (updatedAuthors) => {
+        const fetchAndStoreRecommendations = async (updatedAuthors: any[]) => {
           try {
             const recommendations = await fetchRecommendations(updatedAuthors, 6, 6);
             if (recommendations) {
@@ -159,25 +159,33 @@ function Page() {
   }
 
   return (
-      <div className="pt-24">
-        <Container>
-          <div className="flex flex-grow shadow-2xl dark:bg-zinc-900">
-            <div className="w-[70%] p-4 flex flex-col">
-              <div className="p-2">
-                <AuthorHeader name={data?.author_details?.Name || "No name available"} />
-              </div>
+    <div className="pt-24">
+      <Container>
+        {loading ? (
+          <Loading />
+        ) : (
+          <>
+            <div className="flex flex-grow shadow-2xl dark:bg-zinc-900">
+              <div className="w-[70%] p-4 flex flex-col">
+                <div className="p-2">
+                  <AuthorHeader
+                    name={data?.author_details?.Name || "No name available"}
+                  />
+                </div>
 
                 <Tiptap name={name} summary={data?.summary} />
-
+      
                 <div className="flex gap-4 justify-center p-2 mb-6">
                   <Button className="bg-green-400 hover:bg-green-600">
                     <IoMdCheckmark size={30} />
                   </Button>
                   <Button
                     onClick={() => {
+                      // Check if cachedData exists
                       if (cachedData) {
-                        router.push(cachedData);
+                        router.push(cachedData); // Push to cached URL
                       } else {
+                        console.warn("No cached URL found in sessionStorage");
                         router.back();
                       }
                     }}>
@@ -185,17 +193,19 @@ function Page() {
                   </Button>
                 </div>
               </div>
-
               <div className="flex max-w-[600px] p-3 flex-col gap-4 mt-6 overflow-auto">
                 <PublicationCard
                   publications={data?.author_details?.Publications || []}
+                  name={data?.author_details?.Name}
                 />
               </div>
             </div>
-          </div>
-        </Container>
-      </div>
+          </>
+        )}
+      </Container>
+    </div>
   );
+
 }
 
 export default Page;
