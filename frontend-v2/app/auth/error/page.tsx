@@ -40,7 +40,7 @@ const SignInPage = () => {
               Please contact whitelisted ACM-W members to have access to this
               tool.
             </div>
-            <div>
+            <div className="w-fit">
               <Link href="/auth/login">
                 <IoArrowBack
                   size={20}
