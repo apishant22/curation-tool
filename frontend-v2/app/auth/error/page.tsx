@@ -1,14 +1,14 @@
 "use client";
-import Button from "@/components/global/Button";
+
 import Container from "@/components/global/Container";
 import Logo from "@/components/navbar/Logo";
-import { signIn } from "next-auth/react";
+
 import React from "react";
-import { FcGoogle } from "react-icons/fc";
+
 import { MdError } from "react-icons/md";
 import background from "@/public/images/geometric.jpg";
 import { IoArrowBack } from "react-icons/io5";
-import { useRouter } from "next/router";
+
 import Link from "next/link";
 
 const SignInPage = () => {

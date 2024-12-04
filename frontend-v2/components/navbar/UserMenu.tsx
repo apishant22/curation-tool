@@ -3,7 +3,6 @@ import Avatar from "../global/Avatar";
 import { MdOutlineDarkMode, MdOutlineLightMode } from "react-icons/md";
 import MenuItem from "./MenuItem";
 import { TbCaretDownFilled, TbCaretUpFilled } from "react-icons/tb";
-import { useRouter } from "next/navigation";
 import { signOut } from "next-auth/react";
 
 interface UserMenuProps {
@@ -14,7 +13,6 @@ const UserMenu: React.FC<UserMenuProps> = ({ image }) => {
   const [darkMode, setDarkMode] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
-  const router = useRouter();
 
   const toggleOpen = useCallback(() => {
     setIsOpen((value) => !value);

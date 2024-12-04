@@ -10,6 +10,6 @@ export const config = {
      */
     // "/((?!_next/static|favicon.ico|login|auth).*)",
     // '/((?!api|_next/static|_next/image|favicon.ico|sitemap.xml|robots.txt).*)',
-    "/((?!api|_next/static|_next/image|favicon.ico|sitemap.xml|robots.txt|login|auth).*)",
+    "/((?!api|_next/static|_next/image|favicon.ico|sitemap.xml|robots.txt|login|auth|images).*)",
   ],
 };
