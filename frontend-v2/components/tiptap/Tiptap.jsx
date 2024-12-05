@@ -6,7 +6,7 @@ import Underline from "@tiptap/extension-underline";
 import Heading from "@tiptap/extension-heading";
 import Link from "@tiptap/extension-link";
 import MarkdownContent from "../summary/MarkdownContent";
-import { FaBold, FaItalic, FaLink, FaPen, FaEdit, FaTrashAlt } from "react-icons/fa";
+import {FaBold, FaItalic, FaLink, FaPen, FaEdit, FaTrashAlt, FaSave} from "react-icons/fa";
 import { MdFormatListBulleted, MdFormatListNumbered } from "react-icons/md";
 import { useState, useEffect } from "react";
 import toast from "react-hot-toast";
@@ -257,14 +257,29 @@ const Tiptap = ({ name, summary }) => {
                     className={`fixed inset-0 bg-black bg-opacity-50 backdrop-blur-md z-10 transition-opacity duration-500 ease-out ${isEdit ? 'opacity-100' : 'opacity-0'}`}
                 ></div>
             )}
-            <div className={`relative z-20 flex flex-col w-full p-6 gap-4 transition-all duration-500 ease-out ${isEdit ? '' : ''}`}>
+            <div className={`relative z-0 flex flex-col w-full p-6 gap-4 transition-all duration-500 ease-out ${isEdit ? 'z-20' : ''}`}>
                 {/* Editor Button Outside */}
                 <div className={`flex justify-end ${isEdit ? 'relative z-20 mb-4' : ''}`}>
                     <button
                         onClick={toggleEdit}
-                        className={`px-4 py-2 bg-blue-500 text-white rounded-md shadow-md hover:bg-blue-600 transition-transform transform duration-500 ease-in-out ${isEdit ? '-translate-y-48 translate-x-6' : ''} ${isEdit ? 'relative z-20' : ''}`}
+                        className={`px-3 py-3 flex items-center text-white rounded-full shadow-md hover:shadow-lg hover:scale-105 transition-transform duration-300 ease-in-out ${isEdit ? '-translate-y-48 translate-x-6' : ''} ${isEdit ? 'relative z-20' : ''}`}
+                        style={{
+                            background: 'linear-gradient(to right, #4f46e5, #3b82f6)',
+                            fontSize: '0.9rem',
+                            fontWeight: 'bold',
+                        }}
                     >
-                        {isEdit ? "Save Changes" : "Enter Editor Mode"}
+                        {isEdit ? (
+                            <>
+                                <FaSave className="mr-2" />
+                                Save Changes
+                            </>
+                        ) : (
+                            <>
+                                <FaPen className="mr-2" />
+                                Enter Editor Mode
+                            </>
+                        )}
                     </button>
                 </div>
 
@@ -282,7 +297,7 @@ const Tiptap = ({ name, summary }) => {
                             </div>
                         ) : !isEdit ? (
                             <>
-                                <div className="text-sm font-medium px-4 py-2 bg-gradient-to-r from-blue-500 to-purple-500 text-white rounded-full mb-6 text-center">
+                                <div className="text-sm font-medium px-4 py-2 bg-gradient-to-r from-blue-500 to-purple-500 text-white rounded-full mb-6 text-center z-0">
                                     AI-Generated Summary
                                 </div>
                                 <MarkdownContent content={content} />
@@ -315,29 +330,29 @@ const Tiptap = ({ name, summary }) => {
 
                 {/* Improvement Popup */}
                 {isEdit && isPopupOpen && (
-                    <div className="popup right-8 w-[600px] bg-white p-4 rounded-md shadow-lg fixed bottom-5 z-30 transition-all duration-500 max-h-[400px] overflow-auto">
+                    <div className="popup right-8 w-[600px] h-[350px] bg-white p-4 rounded-lg shadow-lg fixed bottom-5 z-30 transition-all duration-500">
                         <h3 className="font-bold mb-2 text-lg">Improve Text</h3>
-                        <blockquote className="bg-gray-100 p-2 rounded-md mb-4 text-gray-700 dark:bg-zinc-700 dark:text-gray-200 max-h-[150px] overflow-y-auto">
+                        <div className="max-h-[125px] overflow-y-auto mb-3 p-2 bg-gray-200 rounded-md border-l-4 border-blue-500">
                             {selectedText}
-                        </blockquote>
+                        </div>
                         <textarea
-                            className="w-full p-2 border rounded-md mt-2 text-gray-900 dark:bg-zinc-800 dark:text-gray-200"
+                            className="w-full p-3 border rounded-md text-gray-900 dark:bg-zinc-800 dark:text-gray-200 focus:border-blue-500 mb-3 resize-none"
                             placeholder="Enter your improvement"
                             value={improvementReason}
                             onChange={(e) => setImprovementReason(e.target.value)}
                         />
-                        <div className="flex justify-end gap-2 mt-4">
+                        <div className="flex justify-end gap-4 mt-2">
                             <button
-                                className="bg-green-500 text-white px-4 py-2 rounded-md"
+                                className="bg-green-500 text-white px-4 py-2 rounded-md shadow hover:bg-green-600 transition-transform duration-300 ease-in-out flex items-center gap-1"
                                 onClick={applyImprovement}
                             >
-                                Apply
+                                ✓ Apply
                             </button>
                             <button
-                                className="bg-gray-500 text-white px-4 py-2 rounded-md"
+                                className="bg-gray-500 text-white px-4 py-2 rounded-md shadow hover:bg-gray-600 transition-transform duration-300 ease-in-out flex items-center gap-1"
                                 onClick={() => setIsPopupOpen(false)}
                             >
-                                Cancel
+                                ✕ Cancel
                             </button>
                         </div>
                     </div>
@@ -346,39 +361,43 @@ const Tiptap = ({ name, summary }) => {
                 {isEdit && improvementRequests.length > 0 && (
                     <div className="fixed right-8 top-9 w-[600px] max-h-[58vh] p-6 bg-white dark:bg-zinc-800 rounded-lg shadow-md transition-all duration-500 ease-in-out">
                         <div className="flex justify-between items-center mb-4">
-                            <h3 className="text-lg font-bold">Improvement List</h3>
+                            <h3 className="text-lg font-bold border-b-2 border-blue-500">Improvement List</h3>
                             <button
-                                className="bg-blue-500 text-white px-3 py-1 rounded-md hover:bg-blue-700"
+                                className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 transition duration-300 ease-in-out"
                                 onClick={handleRegenerate}
                             >
                                 Regenerate
                             </button>
                         </div>
-                        <div className="overflow-y-auto max-h-[48vh]">
-                            <ul className="flex flex-col gap-3">
-                                {improvementRequests.map((request, index) => (
-                                    <li key={index} className="p-4 bg-gray-100 dark:bg-zinc-700 rounded-md">
-                                        <p className="text-sm font-semibold">Selected Text:</p>
-                                        <blockquote className="text-sm mb-2">{request.text}</blockquote>
-                                        <p className="text-sm font-semibold">Reason:</p>
-                                        <blockquote className="text-sm mb-2">{request.reason}</blockquote>
-                                        <div className="flex justify-end gap-2">
-                                            <button
-                                                onClick={() => handleEditRequest(index)}
-                                                className="text-blue-500 hover:text-blue-700"
-                                            >
-                                                <FaEdit />
-                                            </button>
-                                            <button
-                                                onClick={() => handleDeleteRequest(index)}
-                                                className="text-red-500 hover:text-red-700"
-                                            >
-                                                <FaTrashAlt />
-                                            </button>
-                                        </div>
-                                    </li>
-                                ))}
-                            </ul>
+                        <div className="overflow-y-auto max-h-[48vh] flex flex-col gap-4">
+                            {improvementRequests.map((request, index) => (
+                                <div key={index} className="p-4 bg-gray-50 dark:bg-zinc-700 rounded-lg shadow-sm border border-gray-200">
+                                    <div className="mb-2">
+                                        <p className="text-sm font-bold text-gray-800">Selected Text:</p>
+                                        <blockquote className="text-sm bg-gray-100 dark:bg-zinc-600 p-2 rounded-md mt-1 mb-4 overflow-y-auto border-l-4 border-blue-500">
+                                            {request.text}
+                                        </blockquote>
+                                    </div>
+                                    <div className="mb-2">
+                                        <p className="text-sm font-bold text-gray-800">Reason:</p>
+                                        <p className="text-sm mt-1">{request.reason}</p>
+                                    </div>
+                                    <div className="flex justify-end gap-2 mt-4">
+                                        <button
+                                            onClick={() => handleEditRequest(index)}
+                                            className="text-blue-600 hover:text-blue-800 transition-colors"
+                                        >
+                                            <FaEdit />
+                                        </button>
+                                        <button
+                                            onClick={() => handleDeleteRequest(index)}
+                                            className="text-red-600 hover:text-red-800 transition-colors"
+                                        >
+                                            <FaTrashAlt />
+                                        </button>
+                                    </div>
+                                </div>
+                            ))}
                         </div>
                     </div>
                 )}
