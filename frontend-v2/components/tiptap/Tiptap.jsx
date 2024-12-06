@@ -26,8 +26,6 @@ const Tiptap = ({ name, summary }) => {
     const [isPopupOpen, setIsPopupOpen] = useState(false);
     const [improvementRequests, setImprovementRequests] = useState([]);
     const [loading, setLoading] = useState(false);
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const [isPenVisible, setIsPenVisible] = useState(false);
 
     const editor = useEditor({
         extensions: [
@@ -116,7 +114,6 @@ const Tiptap = ({ name, summary }) => {
         const text = selection?.toString();
         if (text) {
             setSelectedText(text);
-            setIsPenVisible(false);
         }
     };
 
@@ -129,7 +126,6 @@ const Tiptap = ({ name, summary }) => {
             editor.commands.setContent(updatedContent);
             setIsPopupOpen(false);
             setImprovementReason("");
-            setIsPenVisible(false);
 
             setImprovementRequests(prevRequests => [
                 ...prevRequests,
@@ -153,7 +149,6 @@ const Tiptap = ({ name, summary }) => {
             setSelectedText("");
             setImprovementReason("");
             setIsPopupOpen(false);
-            setIsPenVisible(false);
             setImprovementRequests([]);
             if (editor) {
                 editor.commands.setContent(response.data);
