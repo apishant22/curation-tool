@@ -1,10 +1,14 @@
 "use client";
 
-import { useEditor, EditorContent } from "@tiptap/react";
+import { useEditor, EditorContent, BubbleMenu } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import Underline from "@tiptap/extension-underline";
 import Heading from "@tiptap/extension-heading";
 import Link from "@tiptap/extension-link";
+import Paragraph from "@tiptap/extension-paragraph"
+import ListItem from '@tiptap/extension-list-item'
+import OrderedList from '@tiptap/extension-ordered-list'
+import BulletList from '@tiptap/extension-bullet-list'
 import MarkdownContent from "../summary/MarkdownContent";
 import {FaBold, FaItalic, FaLink, FaPen, FaEdit, FaTrashAlt, FaSave} from "react-icons/fa";
 import { MdFormatListBulleted, MdFormatListNumbered } from "react-icons/md";
@@ -13,40 +17,83 @@ import toast from "react-hot-toast";
 import { Markdown } from "tiptap-markdown";
 import axios from "axios";
 
+
 const Tiptap = ({ name, summary }) => {
     const [content, setContent] = useState(summary);
     const [isEdit, setIsEdit] = useState(false);
     const [selectedText, setSelectedText] = useState("");
     const [improvementReason, setImprovementReason] = useState("");
     const [isPopupOpen, setIsPopupOpen] = useState(false);
-    const [isPenVisible, setIsPenVisible] = useState(false);
-    const [penPosition, setPenPosition] = useState({ top: 0, left: 0 });
     const [improvementRequests, setImprovementRequests] = useState([]);
     const [loading, setLoading] = useState(false);
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const [isPenVisible, setIsPenVisible] = useState(false);
 
     const editor = useEditor({
         extensions: [
             StarterKit.configure({
-                bulletList: {
-                    HTMLAttributes: {
-                        class: 'ml-6 list-disc'
-                    }
+                bulletList: false,
+                orderedList: false,
+                paragraph: false,
+            }),
+            BulletList.configure({
+                HTMLAttributes: {
+                    class: 'list-disc ml-6 text-gray-600 dark:text-neutral-200',
                 },
-                orderedList: {
-                    HTMLAttributes: {
-                        class: 'ml-6 list-decimal'
-                    }
-                }
+                keepMarks: true,
+                keepAttributes: true,
+            }),
+            OrderedList.configure({
+                HTMLAttributes: {
+                    class: 'list-decimal ml-6 text-gray-600 dark:text-neutral-200',
+                },
+            }),
+            ListItem.configure({
+                HTMLAttributes: {
+                    class: 'mb-2 text-gray-600 dark:text-neutral-200',
+                },
+            }),
+            Paragraph.configure({
+                HTMLAttributes: {
+                    class: 'mb-3 text-gray-600 leading-relaxed dark:text-neutral-200',
+                },
             }),
             Underline,
-            Heading.configure({ levels: [1, 2, 3] }),
-            Link,
-            Markdown
+            Markdown,
+            Heading.configure({
+                levels: [1, 2, 3],
+                HTMLAttributes: {
+                    class: '',
+                },
+            }).extend({
+                addOptions() {
+                    return {
+                        ...this.parent?.(),
+                        HTMLAttributes: {
+                            1: 'text-2xl font-bold mb-4 text-gray-800 dark:text-white',
+                            2: 'text-xl font-semibold mt-6 mb-3 text-gray-700 dark:text-white',
+                            3: 'text-lg font-semibold mt-4 mb-2 text-gray-600 dark:text-white',
+                        },
+                    };
+                },
+                renderHTML({ node }) {
+                    const level = node.attrs.level;
+                    const attributes = this.options.HTMLAttributes[level] || {};
+                    return [`h${level}`, { class: attributes }, 0];
+                },
+            }),
+            Link.configure({
+                HTMLAttributes: {
+                    class: 'text-blue-600 dark:text-blue-400 hover:text-blue-800 underline',
+                    target: '_blank',
+                    rel: 'noopener noreferrer',
+                },
+            }),
         ],
         content: `${content}`,
         editorProps: {
             attributes: {
-                class: "p-6 border-[1px] focus:outline-none rounded-md prose prose-sm dark:prose-invert max-w-none",
+                class: 'p-6 border-[1px] focus:outline-none rounded-md prose prose-sm dark:prose-invert max-w-none',
             },
         },
     });
@@ -67,21 +114,8 @@ const Tiptap = ({ name, summary }) => {
     const handleMouseUp = () => {
         const selection = window.getSelection();
         const text = selection?.toString();
-        if (text && text.trim().split(/\s+/).length > 1) {
-            const range = selection.getRangeAt(0);
-            const rect = range.getBoundingClientRect();
-            let top = rect.bottom + window.scrollY + 2;
-            let left = rect.left + window.scrollX + rect.width / 2 - 16;
-
-            // Adjust position if there's not enough space below the selection
-            if (window.innerHeight - rect.bottom < 50) {
-                top = rect.top + window.scrollY - 30; // Move above the selection
-            }
-
+        if (text) {
             setSelectedText(text);
-            setIsPenVisible(true);
-            setPenPosition({ top, left });
-        } else {
             setIsPenVisible(false);
         }
     };
@@ -259,7 +293,7 @@ const Tiptap = ({ name, summary }) => {
             )}
             <div className={`relative z-0 flex flex-col w-full p-6 gap-4 transition-all duration-500 ease-out ${isEdit ? 'z-20' : ''}`}>
                 {/* Editor Button Outside */}
-                <div className={`flex justify-end ${isEdit ? 'relative z-20 mb-4' : ''}`}>
+                <div className={`flex justify-end ${isEdit ? 'relative z-20 mb-4 -top-4' : ''}`}>
                     <button
                         onClick={toggleEdit}
                         className={`px-3 py-3 flex items-center text-white rounded-full shadow-md hover:shadow-lg hover:scale-105 transition-transform duration-300 ease-in-out ${isEdit ? '-translate-y-48 translate-x-6' : ''} ${isEdit ? 'relative z-20' : ''}`}
@@ -306,27 +340,52 @@ const Tiptap = ({ name, summary }) => {
                             <>
                                 {renderToolbar()}
                                 <div className="prose prose-sm dark:prose-invert max-w-none">
-                                    <EditorContent editor={editor} />
+                                    <div className="relative">
+                                        {editor && (
+                                            <BubbleMenu
+                                                editor={editor}
+                                                tippyOptions={{
+                                                    duration: 100,
+                                                    placement: "bottom-end",
+                                                    offset: [0, -20],
+                                                    popperOptions: {
+                                                        modifiers: [
+                                                            {
+                                                                name: "preventOverflow",
+                                                                options: {
+                                                                    boundary: "viewport",
+                                                                },
+                                                            },
+                                                            {
+                                                                name: "flip",
+                                                                options: {
+                                                                    fallbackPlacements: ["top"],
+                                                                },
+                                                            },
+                                                        ],
+                                                    },
+                                                }}
+                                            >
+                                                <div
+                                                    className="flex items-center justify-center p-2 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full shadow-lg hover:shadow-xl transform transition-all duration-300 hover:scale-105"
+                                                >
+                                                    <button
+                                                        onClick={() => setIsPopupOpen(true)}
+                                                        title="Improve it"
+                                                        className="flex items-center justify-center"
+                                                    >
+                                                        <FaPen size={18} className="text-white" />
+                                                    </button>
+                                                </div>
+                                            </BubbleMenu>
+                                        )}
+                                        <EditorContent editor={editor} />
+                                    </div>
                                 </div>
                             </>
                         )}
                     </div>
                 </div>;
-
-                {/* Pen Icon for Improvement */}
-                {isEdit && isPenVisible && (
-                    <div
-                        className="absolute z-30 cursor-pointer bg-white p-2 rounded-full shadow-md transition-transform duration-300 ease-out"
-                        style={{
-                            top: penPosition.top - 220,
-                            left: penPosition.left - 340,
-                        }}
-                        onClick={() => setIsPopupOpen(true)}
-                        title="Improve it"
-                    >
-                        <FaPen size={16} className="text-blue-500" />
-                    </div>
-                )}
 
                 {/* Improvement Popup */}
                 {isEdit && isPopupOpen && (
