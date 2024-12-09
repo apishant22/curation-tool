@@ -9,6 +9,7 @@ duckduckgo_search==6.3.3
 Flask==3.0.3
 Flask-Cors==5.0.0
 fuzzywuzzy==0.18.0
+httpx==0.27.2
 idna==3.10
 importlib_metadata==8.5.0
 itsdangerous==2.2.0

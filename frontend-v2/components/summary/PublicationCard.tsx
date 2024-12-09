@@ -87,6 +87,11 @@ const PublicationCard: React.FC<PublicationCardProps> = ({
     nodeDiameter: 8, // Size of the nodes
   };
 
+  const parseLink = (link: string) => {
+    const profileIdMatch = link.match(/profile\/(\d+)$/);
+    return profileIdMatch ? profileIdMatch[1] : null;
+  };
+
   useEffect(() => {
     const fetchAuthorNetwork = async (name: string) => {
       try {
@@ -138,7 +143,18 @@ const PublicationCard: React.FC<PublicationCardProps> = ({
                 // onNodeHover={handleNodeHover}
                 // nodeAutoColorBy="id"
                 onNodeClick={(node) => {
-                  if (node?.link) window.open(node.link, "_blank");
+                  if (node?.link)
+                    window.open(
+                      `http://localhost:3000/summary?name=${encodeURI(
+                        node.name
+                      )}&profileId=${parseLink(node.link)}`,
+                      "_blank"
+                    );
+                  console.log(
+                    `http://localhost:3000/summary?name=${encodeURI(
+                      node.name
+                    )}&profileId=${parseLink(node.link)}`
+                  );
                 }}
                 width={450}
                 height={200}
