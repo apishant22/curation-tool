@@ -98,9 +98,9 @@ function ResultsPage() {
       <Container>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 pt-12"></div>
         <Container>
-          <div className="p-6 pt-12 pb-6 flex flex-row justify-between">
+          <div className="p-6 pt-20 pb-6 flex flex-row justify-between">
             <div className="text-2xl mt-4 font-semibold text-gray-400">
-              No Result Found
+              Result Not Found
             </div>
             <div className="items-end">
               <Search />
