@@ -6,8 +6,8 @@ import Container from "./Container";
 import { FaInstagram, FaLinkedin, FaTwitter } from "react-icons/fa";
 
 const Footer = () => {
-  const currentYear = new Date().getFullYear();
-  return (
+    new Date().getFullYear();
+    return (
 
     <div className="z-10 max-w-screen border-t-[1px] bg-neutral-600 dark:bg-zinc-900 shadow-sm">
       <Container>
@@ -49,7 +49,7 @@ const Footer = () => {
 
                   <div className='items-end text-[12px] font-bold py-20'>
                     <ul className='flex gap-7'>
-                        <span>© 2024 copyright</span>
+                        <span>copyright© 2024</span>
                         {/*<a href='/' className='underline font-CourierPrime'>Content to add</a>*/}
                     </ul>
                 </div>

@@ -82,7 +82,7 @@ const ContentCard: React.FC<ContentCardProps> = ({ name, profileLink, summary, r
                 transition: "transform 1s ease-in-out",
                 position: "relative",
                 zIndex: isHovered ? 10 : 1,
-                width: "517px",
+                width: "300px",
                 maxWidth: "100%",
                 wordWrap: "break-word",
             }}
@@ -97,13 +97,14 @@ const ContentCard: React.FC<ContentCardProps> = ({ name, profileLink, summary, r
                 </h2>
 
                 <div className="text-sm text-gray-500">
-                    <p className="flex items-center space-x-1">
-                        <span className="font-medium">ACM DL:</span>
+                    <p className="flex items-start space-x-1">
+                        <span className="font-medium whitespace-nowrap">ACM DL:</span>
                         <a
                             href={profileLink}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="hover:text-blue-600"
+                            className="hover:text-blue-600 break-words"
+                            style={{ wordBreak: "break-word", whiteSpace: "normal" }}
                             onClick={(e) => e.stopPropagation()}
                         >
                             {profileLink}
