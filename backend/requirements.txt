@@ -78,7 +78,7 @@ sympy==1.13.1
 textblob==0.18.0.post0
 threadpoolctl==3.5.0
 tokenizers==0.20.3
-torch==2.5.1
+torch==2.2.2
 torch-geometric==2.6.1
 tqdm==4.67.0
 transformers==4.46.3
