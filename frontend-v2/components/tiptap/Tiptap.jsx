@@ -12,10 +12,13 @@ import BulletList from '@tiptap/extension-bullet-list'
 import MarkdownContent from "../summary/MarkdownContent";
 import {FaBold, FaItalic, FaLink, FaPen, FaEdit, FaTrashAlt, FaSave} from "react-icons/fa";
 import { MdFormatListBulleted, MdFormatListNumbered } from "react-icons/md";
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import toast from "react-hot-toast";
 import { Markdown } from "tiptap-markdown";
 import axios from "axios";
+import {Button} from "@/components/ui/button";
+import {IoMdArrowBack, IoMdCheckmark} from "react-icons/io";
+import {useRouter} from "next/navigation";
 
 
 const Tiptap = ({ name, summary }) => {
@@ -26,6 +29,7 @@ const Tiptap = ({ name, summary }) => {
     const [isPopupOpen, setIsPopupOpen] = useState(false);
     const [improvementRequests, setImprovementRequests] = useState([]);
     const [loading, setLoading] = useState(false);
+    const router = useRouter();
 
     const editor = useEditor({
         extensions: [
@@ -164,6 +168,29 @@ const Tiptap = ({ name, summary }) => {
 
     const handleDeleteRequest = (index) => {
         setImprovementRequests((prevRequests) => prevRequests.filter((_, i) => i !== index));
+    };
+
+    const handleUpdateSummary = async (content) => {
+        try {
+            setLoading(true);
+            const response = await axios.post(
+                `http://localhost:3002/update_summary/${name}`,
+                {
+                    content: content,
+                    name: name,
+                }
+            );
+            if (response.status === 200) {
+                console.log("Summary successfully updated!");
+            } else {
+                console.log("Failed to update the summary.");
+            }
+        } catch (error) {
+            console.error("Update summary failed:", error);
+            toast.error("An error occurred while updating the summary.");
+        } finally {
+            setLoading(false);
+        }
     };
 
     const handleEditRequest = (index) => {
@@ -380,7 +407,7 @@ const Tiptap = ({ name, summary }) => {
                             </>
                         )}
                     </div>
-                </div>;
+                </div>
 
                 {/* Improvement Popup */}
                 {isEdit && isPopupOpen && (
@@ -456,8 +483,32 @@ const Tiptap = ({ name, summary }) => {
                     </div>
                 )}
             </div>
+            <div className="flex gap-4 justify-center p-2 mb-6">
+                <Button
+                    className="bg-green-400 hover:bg-green-600"
+                    onClick={async () => {
+                        await handleUpdateSummary(content);
+                        router.push("/");
+                    }}
+                >
+                    <IoMdCheckmark size={30} />
+                </Button>
+
+
+                <Button
+                    onClick={() => {
+                        if (cachedData) {
+                            router.push(cachedData);
+                        } else {
+                            console.warn("No cached URL found in sessionStorage");
+                            router.back();
+                        }
+                    }}>
+                    <IoMdArrowBack />
+                </Button>
+            </div>
         </div>
-    );
-};
+    )
+}
 
 export default Tiptap;

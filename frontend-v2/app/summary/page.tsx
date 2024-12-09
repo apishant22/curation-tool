@@ -203,25 +203,6 @@ function Page() {
                 </div>
 
                 <Tiptap name={name} summary={data?.summary} />
-      
-                <div className="flex gap-4 justify-center p-2 mb-6">
-                  <Button className="bg-green-400 hover:bg-green-600">
-                    <IoMdCheckmark size={30} />
-                  </Button>
-                  <Button
-                    onClick={() => {
-                      // Check if cachedData exists
-                      if (cachedData) {
-                        router.push(cachedData); // Push to cached URL
-                      } else {
-                        console.warn("No cached URL found in sessionStorage");
-                        router.back();
-                      }
-                    }}>
-                    <IoMdArrowBack />
-                  </Button>
-                </div>
-        
 
               </div>
 
@@ -236,7 +217,7 @@ function Page() {
         )}
       </Container>
     </div>
-  );
+  )
 }
 
 export default Page;

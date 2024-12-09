@@ -126,5 +126,25 @@ def regenerate_request(author_name):
     print(res)
     return db.get_researcher_summary(author_name), 200
 
+@app.route('/update_summary/<author_name>', methods=['POST'])
+def update_summary(author_name):
+    if request.headers.get('Content-Type') == 'application/json':
+        try:
+            json_data = request.json
+            new_summary = json_data.get('content')
+
+            if not new_summary:
+                return jsonify({"error": "No content provided"}), 400
+
+            db.update_researcher_summary(author_name, new_summary)
+            return jsonify({"message": f"Summary for {author_name} updated successfully"}), 200
+
+        except Exception as e:
+            print(f"Error in /update_summary route: {e}")
+            return jsonify({"error": str(e)}), 500
+    else:
+        return jsonify({"error": "Invalid Content-Type"}), 400
+
+
 if __name__=="__main__":
     app.run(debug=True)
