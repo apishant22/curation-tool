@@ -11,7 +11,7 @@ interface ContentCardProps {
     reason?: string;
 }
 
-const ContentCard: React.FC<ContentCardProps> = ({ name, profileLink, summary, reason }) => {
+const ContentCard: React.FC<ContentCardProps> = ({ name, profileLink, reason }) => {
     const [isHovered, setIsHovered] = useState(false);
     const router = useRouter();
 
@@ -23,7 +23,7 @@ const ContentCard: React.FC<ContentCardProps> = ({ name, profileLink, summary, r
     };
 
     const truncateWithEllipsis = (text: string, maxWords: number): string => {
-        if (!text || typeof text !== "string") return "Details not available.";
+        if (!text) return "Details not available.";
         const words = text.split(" ");
         if (words.length > maxWords) {
             return words.slice(0, maxWords - 1).join(" ") + " ...";
@@ -91,6 +91,7 @@ const ContentCard: React.FC<ContentCardProps> = ({ name, profileLink, summary, r
             onClick={handleCardClick}
         >
             {/* Main Content */}
+            { reason && (
             <div className="space-y-2">
                 <h2 className="text-xl font-semibold text-blue-600 dark:text-white hover:text-blue-800 dark:hover:text-neutral-500">
                     {formatName(name)}
@@ -104,32 +105,30 @@ const ContentCard: React.FC<ContentCardProps> = ({ name, profileLink, summary, r
                             target="_blank"
                             rel="noopener noreferrer"
                             className="hover:text-blue-600 break-words"
-                            style={{ wordBreak: "break-word", whiteSpace: "normal" }}
+                            style={{wordBreak: "break-word", whiteSpace: "normal"}}
                             onClick={(e) => e.stopPropagation()}
                         >
                             {profileLink}
                         </a>
                     </p>
+                    <div
+                        className="mt-4 text-gray-600 dark:text-neutral-400 text-sm italic"
+                        style={{
+                            overflow: "hidden",
+                            maxHeight: "4.5em",
+                            whiteSpace: "normal",
+                            textOverflow: "ellipsis",
+                            display: "-webkit-box",
+                            WebkitBoxOrient: "vertical",
+                            WebkitLineClamp: 4,
+                        }}
+                    >
+                        {truncateWithEllipsis(reason, 25)}
+                    </div>
                 </div>
             </div>
-
-            {/* Hover Effect - Reason Reveal */}
-            {isHovered && reason && (
-                <div
-                    className="mt-4 text-gray-600 dark:text-neutral-400 text-sm italic"
-                    style={{
-                        overflow: "hidden",
-                        maxHeight: "4.5em",
-                        whiteSpace: "normal",
-                        textOverflow: "ellipsis",
-                        display: "-webkit-box",
-                        WebkitBoxOrient: "vertical",
-                        WebkitLineClamp: 4,
-                    }}
-                >
-                    {truncateWithEllipsis(reason, 25)}
-                </div>
             )}
+
         </div>
     );
 };

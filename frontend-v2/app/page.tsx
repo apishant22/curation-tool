@@ -11,6 +11,7 @@ import { MdOutlineInsights } from "react-icons/md";
 import { IoIosArrowBack, IoIosArrowForward } from "react-icons/io";
 import { fetchRecommendations } from "@/utils/fetchRecommendations";
 import SummaryCard from "@/components/homepage/SummaryCard";
+import SpotlightCard from "@/components/homepage/SpotlightCard";
 
 const getStoredAuthors = () => {
   const storedAuthors = sessionStorage.getItem("authors");
@@ -163,14 +164,65 @@ const Homepage: React.FC = () => {
             <Container>
               {/* Content: AuthorNetwork */}
               <div className="flex flex-row gap-8 justify-between items-start pb-10 w-full group relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 pt-12">
-                <div className="text-left max-w-3xl">
+                <div className="text-left max-w-[380px]">
                   <h2 className="text-xl font-bold mb-5 ">
                     Spotlight
                   </h2>
-                  <div className="flex-1 min-w-[400px] rounded-lg p-6">
-                    <p className="text-neutral-600 dark:text-neutral-400">
-                      Add content here ...
-                    </p>
+                  <div className="flex-1 rounded-lg">
+                    <div className="text-neutral-600 dark:text-neutral-400">
+                      {/* Recently Searched */}
+                      {recentAuthors.length > 0 && (
+                            <div className="relative">
+                              {/* Left Arrow */}
+                              {recentIndex > 0 && (
+                                  <button
+                                      onClick={() =>
+                                          setRecentIndex((prev) => Math.max(0, prev - 1))
+                                      }
+                                      className="absolute left-[-50px] top-1/2 transform -translate-y-1/2 bg-gray-800 text-white p-2 rounded-full shadow-md transition-opacity duration-300 opacity-0 group-hover:opacity-100 hover:scale-105 z-10">
+                                    <IoIosArrowBack size={20} />
+                                  </button>
+                              )}
+
+                              {/* Carousel */}
+                              <div className="overflow-hidden relative">
+                                <div
+                                    className="flex flex-row transition-transform duration-500"
+                                    style={{
+                                      transform: `translateX(-${recentIndex * 100}%)`,
+                                    }}>
+                                  {recentAuthors.map((author, index) => (
+                                      <div
+                                          key={index}
+                                          className={`min-w-[20%] flex-shrink-0 p-2`}>
+                                        <SpotlightCard
+                                            name={author.Name}
+                                            profileLink={author["Profile Link"]}
+                                            summary={author.Summary || "No summary available."}
+                                        />
+                                      </div>
+                                  ))}
+                                </div>
+                              </div>
+
+                              {/* Right Arrow */}
+                              {recentIndex < Math.ceil(recentAuthors.length / 3) - 1 && (
+                                  <button
+                                      onClick={() =>
+                                          setRecentIndex((prev) =>
+                                              Math.min(
+                                                  prev + 1,
+                                                  Math.ceil(recentAuthors.length / 3) - 1
+                                              )
+                                          )
+                                      }
+                                      className="absolute right-[-50px] top-1/2 transform -translate-y-1/2 bg-gray-800 text-white p-2 rounded-full shadow-md transition-opacity duration-300 opacity-0 group-hover:opacity-100 hover:scale-105 z-10">
+                                    <IoIosArrowForward size={20} />
+                                  </button>
+                              )}
+                          </div>
+                      )}
+                    </div>
                   </div>
                 </div>
 
@@ -187,65 +239,6 @@ const Homepage: React.FC = () => {
 
               </div>
             </Container>
-
-
-            {/* Recently Searched */}
-            {recentAuthors.length > 0 && (
-                <div className="w-full group relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 pt-12">
-                  <h2 className="text-xl font-bold text-gray-800 dark:text-white mb-4">
-                    Community Searches
-                  </h2>
-                  <div className="relative">
-                    {/* Left Arrow */}
-                    {recentIndex > 0 && (
-                        <button
-                            onClick={() =>
-                                setRecentIndex((prev) => Math.max(0, prev - 1))
-                            }
-                            className="absolute left-[-50px] top-1/2 transform -translate-y-1/2 bg-gray-800 text-white p-2 rounded-full shadow-md transition-opacity duration-300 opacity-0 group-hover:opacity-100 hover:scale-105 z-10">
-                          <IoIosArrowBack size={20} />
-                        </button>
-                    )}
-
-                    {/* Carousel */}
-                    <div className="overflow-hidden relative">
-                      <div
-                          className="flex transition-transform duration-500"
-                          style={{
-                            transform: `translateX(-${recentIndex * 100}%)`,
-                          }}>
-                        {recentAuthors.map((author, index) => (
-                            <div
-                                key={index}
-                                className={`min-w-[33.3%] flex-shrink-0 p-2`}>
-                              <SummaryCard
-                                  name={author.Name}
-                                  profileLink={author["Profile Link"]}
-                                  summary={author.Summary || "No summary available."}
-                              />
-                            </div>
-                        ))}
-                      </div>
-                    </div>
-
-                    {/* Right Arrow */}
-                    {recentIndex < Math.ceil(recentAuthors.length / 3) - 1 && (
-                        <button
-                            onClick={() =>
-                                setRecentIndex((prev) =>
-                                    Math.min(
-                                        prev + 1,
-                                        Math.ceil(recentAuthors.length / 3) - 1
-                                    )
-                                )
-                            }
-                            className="absolute right-[-50px] top-1/2 transform -translate-y-1/2 bg-gray-800 text-white p-2 rounded-full shadow-md transition-opacity duration-300 opacity-0 group-hover:opacity-100 hover:scale-105 z-10">
-                          <IoIosArrowForward size={20} />
-                        </button>
-                    )}
-                  </div>
-                </div>
-            )}
 
             {/* Recommendations */}
             <div className="flex flex-col items-center justify-center">
@@ -278,7 +271,7 @@ const Homepage: React.FC = () => {
                                         transform: `translateX(-${currentIndex[sectionIndex] * 100}%)`,
                                       }}
                                   >
-                                    {recommendation.Authors.map((author, authorIndex) => (
+                                    {recommendation.Authors.map((author: { [x: string]: string; Name: any; Summary: any; Reason: any; }, authorIndex: React.Key | null | undefined) => (
                                         <div
                                             key={authorIndex}
                                             className={`min-w-[33.3%] flex-shrink-0 p-2`}

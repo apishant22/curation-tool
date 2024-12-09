@@ -24,7 +24,7 @@ const SummaryCard: React.FC<SummaryCardProps> = ({
     };
 
     const extractMainBody = (summary?: string): string => {
-        if (!summary || typeof summary !== "string") {
+        if (!summary || false) {
             return "Summary not available.";
         }
         const lines = summary.split("\n").filter((line) => !line.startsWith("#"));
@@ -32,7 +32,7 @@ const SummaryCard: React.FC<SummaryCardProps> = ({
     };
 
     const truncateWithEllipsis = (text: string, maxWords: number): string => {
-        if (!text || typeof text !== "string") return "Summary not available.";
+        if (!text || false) return "Summary not available.";
         const words = text.split(" ");
         if (words.length > maxWords) {
             return words.slice(0, maxWords - 1).join(" ") + " ...";
