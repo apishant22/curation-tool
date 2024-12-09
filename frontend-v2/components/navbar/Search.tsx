@@ -20,7 +20,7 @@ const Search = () => {
   const router = useRouter();
   const [isOpen, setIsOpen] = useState(false);
   const [category, setCategory] = useState("Author");
-  const [placeholder, setPlaceholder] = useState("Search an author ...");
+  const [placeholder, setPlaceholder] = useState("Search author ...");
   const [gender, setGender] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
@@ -193,7 +193,7 @@ const Search = () => {
       />
       <div className="pr-3">
         <div
-          className={` p-2 rounded-lg text-sm cursor-pointer border-[1px] transition duration-300 hover:text-neutral-600 dark:border-zinc-600 dark:hover:text-zinc-400 ${
+          className={` p-2 rounded-lg text-sm cursor-pointer bg-gray-100 transition duration-300 hover:bg-gray-200 dark:border-zinc-600 dark:hover:text-zinc-400 ${
             gender ? "bg-blue-300 dark:bg-zinc-900" : ""
           }`}
           onClick={handleGenderClick}>
