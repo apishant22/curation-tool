@@ -133,11 +133,11 @@ function ResultsPage() {
       <Container>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 pt-12">
           <Container>
-            <div className="pt-12 pb-6 flex flex-row justify-between">
-              <div className="text-2xl mt-4 font-semibold text-gray-400">
+            <div className="pt-20 pb-6 flex justify-between items-center">
+              <div className="text-2xl font-semibold text-gray-400">
                 Search Results
               </div>
-              <div className="items-end">
+              <div className="">
                 <Search />
               </div>
             </div>

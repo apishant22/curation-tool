@@ -18,7 +18,7 @@ const Logo: React.FC<LogoProps> = ({ src, alt }) => {
       src={src || "/images/acm-logo.png"}
       width={100}
       height={100}
-      className="hidden cursor-pointer md:block"
+      className="cursor-pointer md:block"
     />
   );
 };
