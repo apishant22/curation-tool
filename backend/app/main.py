@@ -17,14 +17,12 @@ app = Flask(__name__)
 CORS(app)
 
 def _search(search_type, name, page):
-    assert(search_type in ('author', 'field'))
-
     normalized_name = name.lower()
 
     db.delete_stale_cache_entries(CACHE_LIFETIME)
 
     # try to get the estimated max pages from the database
-    typ = 0 if search_type == 'author' else 1
+    typ = model.SearchType.from_string(search_type)
     try:
         max_pages = db.get_records(model.MaxPagesCache.max_pages, {'name': normalized_name, 'search_type': typ})[0][0]
     except IndexError:
