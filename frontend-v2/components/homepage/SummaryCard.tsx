@@ -91,7 +91,7 @@ const SummaryCard: React.FC<SummaryCardProps> = ({
                 transition: "transform 1s ease-in-out",
                 position: "relative",
                 zIndex: isHovered ? 10 : 1,
-                width: "300px",
+                width: "370px",
                 maxWidth: "100%",
                 wordWrap: "break-word",
             }}

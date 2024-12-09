@@ -96,7 +96,7 @@ const AuthorNetwork = () => {
         onNodeClick={(node) => {
           if (node?.link) window.open(node.link, "_blank");
         }}
-        width={600}
+        width={800}
         height={400}
         backgroundColor="rgba(250,250,250,1)"
       />
