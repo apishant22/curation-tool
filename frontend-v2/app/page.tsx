@@ -162,8 +162,8 @@ const Homepage: React.FC = () => {
 
             <Container>
               {/* Content: AuthorNetwork */}
-              <div className="flex flex-row gap-8 justify-between items-start pb-10 w-full group relative max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-4 pt-4">
-                <div className="text-left">
+              <div className="flex flex-row gap-8 justify-between items-start pb-10 w-full group relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 pt-12">
+                <div className="text-left max-w-3xl">
                   <h2 className="text-xl font-bold mb-5 ">
                     Spotlight
                   </h2>
@@ -174,8 +174,8 @@ const Homepage: React.FC = () => {
                   </div>
                 </div>
 
-                <div className="flex-1 text-right">
-                  <div className="max-w-[540px] max-h-[400px]">
+                <div className="flex-1 text-center item-end">
+                  <div className="max-w-4xl max-h-[400px]">
                     <div className="flex-1">
                       <AuthorNetwork/>
                     </div>
@@ -191,7 +191,7 @@ const Homepage: React.FC = () => {
 
             {/* Recently Searched */}
             {recentAuthors.length > 0 && (
-                <div className="w-full group relative max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-4 pt-12">
+                <div className="w-full group relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 pt-12">
                   <h2 className="text-xl font-bold text-gray-800 dark:text-white mb-4">
                     Community Searches
                   </h2>
@@ -217,7 +217,7 @@ const Homepage: React.FC = () => {
                         {recentAuthors.map((author, index) => (
                             <div
                                 key={index}
-                                className={`min-w-[20%] flex-shrink-0 p-2`}>
+                                className={`min-w-[33.3%] flex-shrink-0 p-2`}>
                               <SummaryCard
                                   name={author.Name}
                                   profileLink={author["Profile Link"]}
@@ -257,7 +257,7 @@ const Homepage: React.FC = () => {
                     ]
                         .filter((recommendation) => recommendation.Authors?.length > 0)
                         .map((recommendation, sectionIndex) => (
-                            <div key={sectionIndex} className="w-full group relative max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+                            <div key={sectionIndex} className="w-full group relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
                               <h2 className="text-xl font-bold text-gray-800 dark:text-white mb-4">
                                 {recommendation.Subheading}
                               </h2>
@@ -281,7 +281,7 @@ const Homepage: React.FC = () => {
                                     {recommendation.Authors.map((author, authorIndex) => (
                                         <div
                                             key={authorIndex}
-                                            className={`min-w-[20%] flex-shrink-0 p-2`}
+                                            className={`min-w-[33.3%] flex-shrink-0 p-2`}
                                         >
                                           <ContentCard
                                               name={author.Name || author["Recommended Author"]}
