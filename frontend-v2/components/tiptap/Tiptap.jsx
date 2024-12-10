@@ -603,6 +603,7 @@ const Tiptap = ({ name, summary }) => {
                                     await handleUpdateSummary(content);
                                     router.push("/");
                                     onClose();
+                                    toast.success("Summary Saved!");
                                 }}
                             >
                                 I Understand
