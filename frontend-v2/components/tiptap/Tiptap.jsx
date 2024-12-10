@@ -19,7 +19,8 @@ import axios from "axios";
 import {Button} from "@/components/ui/button";
 import {IoMdArrowBack, IoMdCheckmark} from "react-icons/io";
 import {useRouter} from "next/navigation";
-
+import Shepherd from 'shepherd.js';
+import 'shepherd.js/dist/css/shepherd.css';
 
 const Tiptap = ({ name, summary }) => {
     const [content, setContent] = useState(summary);
@@ -30,6 +31,13 @@ const Tiptap = ({ name, summary }) => {
     const [improvementRequests, setImprovementRequests] = useState([]);
     const [loading, setLoading] = useState(false);
     const router = useRouter();
+    const [isTourRunning, setIsTourRunning] = useState(false);
+    const [isImprovementPopupOpen, setImprovementPopupOpen] = useState(false);
+
+    const [isClient, setIsClient] = useState(false);
+    useEffect(() => {
+        setIsClient(true);
+    }, []);
 
     const editor = useEditor({
         extensions: [
@@ -123,10 +131,7 @@ const Tiptap = ({ name, summary }) => {
 
     const applyImprovement = () => {
         if (editor && selectedText && improvementReason) {
-            const updatedContent = content.replace(
-                selectedText,
-                `${selectedText}`
-            );
+            const updatedContent = content.replace(selectedText, `${selectedText}`);
             editor.commands.setContent(updatedContent);
             setIsPopupOpen(false);
             setImprovementReason("");
@@ -202,7 +207,7 @@ const Tiptap = ({ name, summary }) => {
     };
 
     const renderToolbar = () => (
-        <div className="flex items-center gap-4 mb-4 bg-gray-100 dark:bg-zinc-800 p-2 rounded-lg">
+        <div className="editor-toolbar flex items-center gap-4 mb-4 bg-gray-100 dark:bg-zinc-800 p-2 rounded-lg">
             <button
                 onClick={() => {
                     editor.chain().focus().toggleBold().run();
@@ -292,8 +297,23 @@ const Tiptap = ({ name, summary }) => {
             >
                 <FaLink size={16} />
             </button>
+            {isClient && (
+                <button
+                    onClick={() => {
+                        if (!isTourRunning) {
+                            setIsTourRunning(true);
+                            startTour();
+                        }
+                    }}
+                    className="ml-auto text-gray-800 hover:text-gray-600 text-2xl font-semibold focus:outline-none"
+                    title="Start Guided Tour"
+                >
+                    𝒾
+                </button>
+            )}
         </div>
     );
+
 
     useEffect(() => {
         if (editor) {
@@ -306,6 +326,229 @@ const Tiptap = ({ name, summary }) => {
         };
     }, [editor]);
 
+    const startTour = () => {
+        if (!isClient) return;
+
+        const tour = new Shepherd.Tour({
+            useModalOverlay: true,
+            defaultStepOptions: {
+                scrollTo: false,
+                cancelIcon: {
+                    enabled: true,
+                },
+                classes: 'custom-shepherd',
+            },
+            modalOverlayOpeningPadding: 10,
+        });
+
+        tour.addStep({
+            id: 'editor-container',
+            text: 'This is your AI-generated summary editor. You can refine the summary here.',
+            attachTo: { element: '.editor-container', on: 'bottom' },
+            buttons: [
+                {
+                    text: 'Next',
+                    action: tour.next
+                }
+            ]
+        });
+
+        tour.addStep({
+            id: 'editor-toolbar',
+            text: 'Use these tools to format text, add headings, lists, or links.',
+            attachTo: { element: '.editor-toolbar', on: 'bottom' },
+            buttons: [
+                {
+                    text: 'Back',
+                    action: tour.back
+                },
+                {
+                    text: 'Next',
+                    action: tour.next
+                }
+            ]
+        });
+
+        tour.addStep({
+            id: 'bubble-menu-pen',
+            text: 'Highlight some text in the editor and click the pen icon to improve the text.',
+            attachTo: { element: '.bubble-menu-pen', on: 'bottom' },
+            buttons: [
+                {
+                    text: 'Back',
+                    action: tour.back
+                }
+            ],
+            when: {
+                show: function() {
+                    // eslint-disable-next-line @typescript-eslint/no-this-alias
+                    const step = this;
+
+                    let improvementPopup = document.querySelector('.improvement-popup');
+                    if (improvementPopup && isImprovementPopupOpen) {
+                        step.updateStepOptions({
+                            buttons: [
+                                {
+                                    text: 'Back',
+                                    action: function () {
+                                        setImprovementPopupOpen(true);
+                                        tour.back();
+                                    },
+                                },
+                                { text: 'Next', action: tour.next },
+                            ],
+                        });
+                    } else {
+                        const observer = new MutationObserver(() => {
+                            improvementPopup = document.querySelector('.improvement-popup');
+                            if (improvementPopup) {
+                                observer.disconnect();
+                                step.observer = null;
+                                step.updateStepOptions({
+                                    buttons: [
+                                        {
+                                            text: 'Back',
+                                            action: function () {
+                                                setImprovementPopupOpen(true);
+                                                tour.back();
+                                            },
+                                        },
+                                    ],
+                                });
+                                tour.next();
+                            }
+                        });
+
+                        observer.observe(document.body, { childList: true, subtree: true });
+                        step.observer = observer;
+                    }
+                },
+                hide: function() {
+                    if (this.observer) {
+                        this.observer.disconnect();
+                        this.observer = null;
+                    }
+                }
+            }
+        });
+
+
+        tour.addStep({
+            id: 'improvement-popup',
+            text: 'Here you can enter your improvement suggestion for the selected text.',
+            attachTo: { element: '.improvement-popup', on: 'bottom' },
+            buttons: [
+                {
+                    text: 'Back',
+                    action: tour.back
+                }
+            ],
+            when: {
+                show: function() {
+                    // eslint-disable-next-line @typescript-eslint/no-this-alias
+                    const step = this;
+
+                    const removalObserver = new MutationObserver(() => {
+                        if (!document.querySelector('.improvement-popup') && !document.querySelector('.improvement-timeline')) {
+                            removalObserver.disconnect();
+                            step.removalObserver = null;
+                            tour.back();
+                        }
+                    });
+                    removalObserver.observe(document.body, { childList: true, subtree: true });
+                    step.removalObserver = removalObserver;
+
+                    // Check if timeline present
+                    if (document.querySelector('.improvement-timeline')) {
+                        step.updateStepOptions({
+                            buttons: [
+                                {
+                                    text: 'Back',
+                                    action: tour.back
+                                },
+                                {
+                                    text: 'Next',
+                                    action: tour.next
+                                }
+                            ]
+                        });
+                    } else {
+                        const timelineObserver = new MutationObserver(() => {
+                            if (document.querySelector('.improvement-timeline')) {
+                                timelineObserver.disconnect();
+                                step.timelineObserver = null;
+                                step.updateStepOptions({
+                                    buttons: [
+                                        {
+                                            text: 'Back',
+                                            action: tour.back
+                                        },
+                                        {
+                                            text: 'Next',
+                                            action: tour.next
+                                        }
+                                    ]
+                                });
+                                tour.next();
+                            }
+                        });
+                        timelineObserver.observe(document.body, { childList: true, subtree: true });
+                        step.timelineObserver = timelineObserver;
+                    }
+                },
+                hide: function() {
+                    if (this.removalObserver) {
+                        this.removalObserver.disconnect();
+                        this.removalObserver = null;
+                    }
+                    if (this.timelineObserver) {
+                        this.timelineObserver.disconnect();
+                        this.timelineObserver = null;
+                    }
+                }
+            }
+        });
+
+        tour.addStep({
+            id: 'improvement-timeline',
+            text: 'All your improvement requests appear here. You can edit or remove them.',
+            attachTo: { element: '.improvement-timeline', on: 'bottom' },
+            buttons: [
+                {
+                    text: 'Next',
+                    action: tour.next
+                }
+            ]
+        });
+
+        tour.addStep({
+            id: 'regenerate-button',
+            text: 'Once satisfied with your improvements, click here to regenerate the summary with those changes.',
+            attachTo: { element: '.regenerate-button', on: 'bottom' },
+            buttons: [
+                {
+                    text: 'Back',
+                    action: tour.back
+                },
+                {
+                    text: 'Done',
+                    action: tour.complete
+                }
+            ]
+        });
+
+        tour.start();
+
+        tour.on('complete', () => {
+            setIsTourRunning(false);
+        });
+
+        tour.on('cancel', () => {
+            setIsTourRunning(false);
+            tour.complete()
+        });
+    };
+
     return (
         <div className="relative w-full min-h-screen">
             {isEdit && (
@@ -315,33 +558,54 @@ const Tiptap = ({ name, summary }) => {
             )}
             <div className={`relative z-0 flex flex-col w-full p-6 gap-4 transition-all duration-500 ease-out ${isEdit ? 'z-20' : ''}`}>
                 {/* Editor Button Outside */}
-                <div className={`flex justify-end ${isEdit ? 'relative z-20 mb-4 -top-4' : ''}`}>
-                    <button
-                        onClick={toggleEdit}
-                        className={`px-3 py-3 flex items-center text-white rounded-full shadow-md hover:shadow-lg hover:scale-105 transition-transform duration-300 ease-in-out ${isEdit ? '-translate-y-48 translate-x-6' : ''} ${isEdit ? 'relative z-20' : ''}`}
-                        style={{
-                            background: 'linear-gradient(to right, #4f46e5, #3b82f6)',
-                            fontSize: '0.9rem',
-                            fontWeight: 'bold',
-                        }}
-                    >
-                        {isEdit ? (
-                            <>
-                                <FaSave className="mr-2" />
-                                Save Changes
-                            </>
-                        ) : (
-                            <>
-                                <FaPen className="mr-2" />
-                                Enter Editor Mode
-                            </>
-                        )}
-                    </button>
+                <div className="flex justify-between items-center">
+                    {/* Back Button */}
+                    <div>
+                        <Button
+                            onClick={() => {
+                                const cachedData = sessionStorage.getItem('cachedURL');
+                                if (cachedData) {
+                                    router.push(cachedData);
+                                } else {
+                                    console.warn("No cached URL found in sessionStorage");
+                                    router.back();
+                                }
+                            }}
+                            className="flex items-center"
+                        >
+                            <IoMdArrowBack />
+                        </Button>
+                    </div>
+
+                    {/* Enter Editor Mode Button */}
+                    <div className={`flex justify-end ${isEdit ? 'relative z-20 mb-4 -top-4' : ''}`}>
+                        <button
+                            onClick={toggleEdit}
+                            className={`px-3 py-3 flex items-center text-white rounded-full shadow-md hover:shadow-lg hover:scale-105 transition-transform duration-300 ease-in-out ${isEdit ? '-translate-y-48 translate-x-6' : ''} ${isEdit ? 'relative z-20' : ''}`}
+                            style={{
+                                background: 'linear-gradient(to right, #4f46e5, #3b82f6)',
+                                fontSize: '0.9rem',
+                                fontWeight: 'bold',
+                            }}
+                        >
+                            {isEdit ? (
+                                <>
+                                    <FaSave className="mr-2" />
+                                    Save Changes
+                                </>
+                            ) : (
+                                <>
+                                    <FaPen className="mr-2" />
+                                    Enter Editor Mode
+                                </>
+                            )}
+                        </button>
+                    </div>
                 </div>
 
                 {/* Summary Panel */}
                 <div
-                    className={`flex flex-col w-full lg:w-[100%] mx-auto bg-gray-100 dark:bg-zinc-800 rounded-lg shadow-md transition-all duration-500 ease-in-out ${
+                    className={`editor-container bubble-menu-pen flex flex-col w-full lg:w-[100%] mx-auto bg-gray-100 dark:bg-zinc-800 rounded-lg shadow-md transition-all duration-500 ease-in-out ${
                         isEdit ? "-translate-y-40 shadow-2xl transform scale-105 relative z-20" : ""
                     }`}
                 >
@@ -392,9 +656,9 @@ const Tiptap = ({ name, summary }) => {
                                                     className="flex items-center justify-center p-2 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full shadow-lg hover:shadow-xl transform transition-all duration-300 hover:scale-105"
                                                 >
                                                     <button
+                                                        className="flex items-center justify-center"
                                                         onClick={() => setIsPopupOpen(true)}
                                                         title="Improve it"
-                                                        className="flex items-center justify-center"
                                                     >
                                                         <FaPen size={18} className="text-white" />
                                                     </button>
@@ -411,7 +675,7 @@ const Tiptap = ({ name, summary }) => {
 
                 {/* Improvement Popup */}
                 {isEdit && isPopupOpen && (
-                    <div className="popup right-8 w-[600px] h-[350px] bg-white p-4 rounded-lg shadow-lg fixed bottom-5 z-30 transition-all duration-500">
+                    <div className="improvement-popup popup right-8 w-[600px] h-[350px] bg-white p-4 rounded-lg shadow-lg fixed bottom-5 z-30 transition-all duration-500">
                         <h3 className="font-bold mb-2 text-lg">Improve Text</h3>
                         <div className="max-h-[125px] overflow-y-auto mb-3 p-2 bg-gray-200 rounded-md border-l-4 border-blue-500">
                             {selectedText}
@@ -431,20 +695,24 @@ const Tiptap = ({ name, summary }) => {
                             </button>
                             <button
                                 className="bg-gray-500 text-white px-4 py-2 rounded-md shadow hover:bg-gray-600 transition-transform duration-300 ease-in-out flex items-center gap-1"
-                                onClick={() => setIsPopupOpen(false)}
+                                onClick={() => {
+                                    setIsPopupOpen(false);
+                                    setImprovementPopupOpen(false);
+                                }}
                             >
                                 ✕ Cancel
                             </button>
                         </div>
                     </div>
                 )}
+
                 {/* Improvement Requests Timeline */}
                 {isEdit && improvementRequests.length > 0 && (
-                    <div className="fixed right-8 top-9 w-[600px] max-h-[58vh] p-6 bg-white dark:bg-zinc-800 rounded-lg shadow-md transition-all duration-500 ease-in-out">
+                    <div className="improvement-timeline fixed right-8 top-9 w-[600px] max-h-[58vh] p-6 bg-white dark:bg-zinc-800 rounded-lg shadow-md transition-all duration-500 ease-in-out">
                         <div className="flex justify-between items-center mb-4">
                             <h3 className="text-lg font-bold border-b-2 border-blue-500">Improvement List</h3>
                             <button
-                                className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 transition duration-300 ease-in-out"
+                                className="regenerate-button bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 transition duration-300 ease-in-out"
                                 onClick={handleRegenerate}
                             >
                                 Regenerate
@@ -493,20 +761,99 @@ const Tiptap = ({ name, summary }) => {
                 >
                     <IoMdCheckmark size={30} />
                 </Button>
-
-
-                <Button
-                    onClick={() => {
-                        if (cachedData) {
-                            router.push(cachedData);
-                        } else {
-                            console.warn("No cached URL found in sessionStorage");
-                            router.back();
-                        }
-                    }}>
-                    <IoMdArrowBack />
-                </Button>
             </div>
+            <style jsx global>{`
+              .shepherd-element {
+                background: #fff;
+                border-radius: 12px; 
+                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); 
+                overflow: hidden;
+                font-family: "Inter", sans-serif; 
+                color: #333; 
+                max-width: 400px; 
+                border: 1px solid #e6e6e6; 
+              }
+
+              .shepherd-element .shepherd-header {
+                background: #f9f9f9;
+                font-weight: 500;
+                font-size: 16px; 
+                padding: 12px 16px 40px;
+                display: flex;
+                align-items: center;
+                position: relative;
+                border-bottom: 1px solid #e6e6e6;
+              }
+
+              .shepherd-has-cancel-icon .shepherd-cancel-icon {
+                position: absolute;
+                top: 50%;
+                left: 10px;
+                transform: translateY(-50%);
+                color: #666; 
+                cursor: pointer;
+                font-size: 21px; 
+                line-height: 1;
+                transition: color 0.2s ease;
+                padding: 4px;
+              }
+              .shepherd-has-cancel-icon .shepherd-cancel-icon:hover {
+                color: #333;
+              }
+
+              .shepherd-element .shepherd-content {
+                padding: 16px 20px; 
+                font-size: 14px; 
+                line-height: 1.6;
+                color: #444; 
+              }
+
+              .shepherd-element .shepherd-footer {
+                background: #f9f9f9;
+                border-top: 1px solid #e6e6e6;
+                padding: 12px 16px;
+                display: flex;
+                justify-content: flex-end;
+                gap: 8px;
+              }
+
+              .shepherd-element .shepherd-footer .shepherd-button {
+                border-radius: 8px; 
+                padding: 8px 14px; 
+                font-size: 14px;
+                cursor: pointer;
+                transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+                border: 1px solid transparent;
+                font-weight: 500;
+              }
+
+              .shepherd-element .shepherd-footer .shepherd-button[data-shepherd-button-id="next"] {
+                background: #2563eb; 
+                border-color: #2563eb;
+                color: #fff;
+              }
+              .shepherd-element .shepherd-footer .shepherd-button[data-shepherd-button-id="next"]:hover {
+                background: #1d4ed8; 
+                border-color: #1d4ed8;
+              }
+
+              .shepherd-element .shepherd-footer .shepherd-button[data-shepherd-button-id="back"],
+              .shepherd-element .shepherd-footer .shepherd-button[data-shepherd-button-id="skip"] {
+                background: #f3f4f6; 
+                color: #374151;
+                border: 1px solid #d1d5db; 
+              }
+              .shepherd-element .shepherd-footer .shepherd-button[data-shepherd-button-id="back"]:hover,
+              .shepherd-element .shepherd-footer .shepherd-button[data-shepherd-button-id="skip"]:hover {
+                background: #e5e7eb; 
+                border-color: #d1d5db;
+              }
+
+              .shepherd-element * {
+                -webkit-font-smoothing: antialiased;
+                -moz-osx-font-smoothing: grayscale;
+              }
+            `}</style>
         </div>
     )
 }

@@ -10,9 +10,6 @@ import { useRouter, useSearchParams } from "next/navigation";
 import React, { useEffect, useState } from "react";
 import Tiptap from "@/components/tiptap/Tiptap";
 
-import { Button } from "@/components/ui/button";
-import { IoMdArrowBack, IoMdCheckmark } from "react-icons/io";
-
 interface Biography {
   Biography: string;
 }
