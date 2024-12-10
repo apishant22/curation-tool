@@ -11,7 +11,7 @@ import OrderedList from '@tiptap/extension-ordered-list'
 import BulletList from '@tiptap/extension-bullet-list'
 import MarkdownContent from "../summary/MarkdownContent";
 import {FaBold, FaItalic, FaLink, FaPen, FaEdit, FaTrashAlt, FaSave} from "react-icons/fa";
-import { MdFormatListBulleted, MdFormatListNumbered } from "react-icons/md";
+import {MdFormatListBulleted, MdFormatListNumbered, MdOutlineIosShare} from "react-icons/md";
 import React, { useState, useEffect } from "react";
 import toast from "react-hot-toast";
 import { Markdown } from "tiptap-markdown";
@@ -21,6 +21,8 @@ import {IoMdArrowBack, IoMdCheckmark} from "react-icons/io";
 import {useRouter} from "next/navigation";
 import Shepherd from 'shepherd.js';
 import 'shepherd.js/dist/css/shepherd.css';
+import { confirmAlert } from 'react-confirm-alert';
+import 'react-confirm-alert/src/react-confirm-alert.css';
 
 const Tiptap = ({ name, summary }) => {
     const [content, setContent] = useState(summary);
@@ -33,6 +35,7 @@ const Tiptap = ({ name, summary }) => {
     const router = useRouter();
     const [isTourRunning, setIsTourRunning] = useState(false);
     const [isImprovementPopupOpen, setImprovementPopupOpen] = useState(false);
+    const [isExportModalOpen, setIsExportModalOpen] = useState(false);
 
     const [isClient, setIsClient] = useState(false);
     useEffect(() => {
@@ -107,6 +110,36 @@ const Tiptap = ({ name, summary }) => {
             },
         },
     });
+
+    const handleExport = (format) => {
+        if (!editor) {
+            toast.error("Editor content is not available for export.");
+            return;
+        }
+
+        let content;
+        switch (format) {
+            case 'html':
+                content = editor.getHTML();
+                break;
+            case 'markdown':
+                content = editor.storage.markdown?.getMarkdown();
+                break;
+        }
+
+        const blob = new Blob([content], { type: 'text/plain' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `exported_content.${format}`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+
+        setIsExportModalOpen(false);
+
+        toast.success(`Content exported as ${format.toUpperCase()}!`);
+    };
 
     const toggleEdit = async () => {
         if (isEdit && editor) {
@@ -313,7 +346,6 @@ const Tiptap = ({ name, summary }) => {
             )}
         </div>
     );
-
 
     useEffect(() => {
         if (editor) {
@@ -549,6 +581,39 @@ const Tiptap = ({ name, summary }) => {
         });
     };
 
+    const handleSaveWithDisclaimer = async () => {
+        confirmAlert({
+            customUI: ({ onClose }) => {
+                return (
+                    <div className="bg-white dark:bg-zinc-800 rounded-lg shadow-md p-6 max-w-md mx-auto">
+                        <h2 className="text-xl font-bold text-gray-800 dark:text-white mb-4">Disclaimer</h2>
+                        <p className="text-gray-600 dark:text-gray-400 mb-6">
+                            Please ensure you have the author’s permission before publishing or distributing the content.
+                        </p>
+                        <div className="flex justify-end gap-4">
+                            <button
+                                className="px-4 py-2 bg-gray-200 dark:bg-zinc-700 text-gray-800 dark:text-white rounded-md hover:bg-gray-300 dark:hover:bg-zinc-600"
+                                onClick={onClose}
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600"
+                                onClick={async () => {
+                                    await handleUpdateSummary(content);
+                                    router.push("/");
+                                    onClose();
+                                }}
+                            >
+                                I Understand
+                            </button>
+                        </div>
+                    </div>
+                );
+            },
+        });
+    };
+
     return (
         <div className="relative w-full min-h-screen">
             {isEdit && (
@@ -560,10 +625,11 @@ const Tiptap = ({ name, summary }) => {
                 {/* Editor Button Outside */}
                 <div className="flex justify-between items-center">
                     {/* Back Button */}
-                    <div>
+                    <div className="flex items-center gap-4">
+                        {/* Back Button */}
                         <Button
                             onClick={() => {
-                                const cachedData = sessionStorage.getItem('cachedURL');
+                                const cachedData = sessionStorage.getItem("cachedURL");
                                 if (cachedData) {
                                     router.push(cachedData);
                                 } else {
@@ -571,10 +637,51 @@ const Tiptap = ({ name, summary }) => {
                                     router.back();
                                 }
                             }}
-                            className="flex items-center"
+                            className="flex items-center justify-center w-10 h-10 rounded-full bg-gray-900 text-white hover:bg-gray-700 shadow-md hover:shadow-lg transition-all"
+                            title="Back"
                         >
-                            <IoMdArrowBack />
+                            <IoMdArrowBack size={20} />
                         </Button>
+
+                        {/* Export Button */}
+                        <Button
+                            className="flex items-center justify-center w-10 h-10 rounded-full bg-gray-800 text-white hover:bg-gray-700 shadow-md hover:shadow-lg transition-all"
+                            onClick={() => setIsExportModalOpen(true)}
+                            title="Export"
+                        >
+                            <MdOutlineIosShare size={20} />
+                        </Button>
+
+                        {/* Export Modal */}
+                        {isExportModalOpen && (
+                            <div className="fixed inset-0 flex items-center justify-center z-50">
+                                <div className="bg-white dark:bg-zinc-800 rounded-lg shadow-2xl p-6 max-w-sm w-full">
+                                    <h3 className="text-lg font-semibold text-gray-800 dark:text-white mb-4">
+                                        Export Options
+                                    </h3>
+                                    <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
+                                        Ask the author&apos;s permission before publishing or distributing the content.
+                                    </p>
+                                    <ul className="flex flex-col gap-2">
+                                        {["HTML", "Markdown"].map((format) => (
+                                            <li
+                                                key={format}
+                                                className="cursor-pointer p-2 rounded-md text-center bg-gray-100 dark:bg-zinc-700 hover:bg-gray-200 dark:hover:bg-zinc-600 text-gray-800 dark:text-white"
+                                                onClick={() => handleExport(format.toLowerCase())}
+                                            >
+                                                Export as {format}
+                                            </li>
+                                        ))}
+                                    </ul>
+                                    <button
+                                        className="mt-4 w-full p-2 rounded-md bg-red-500 text-white hover:bg-red-600 transition-colors"
+                                        onClick={() => setIsExportModalOpen(false)}
+                                    >
+                                        Cancel
+                                    </button>
+                                </div>
+                            </div>
+                        )}
                     </div>
 
                     {/* Enter Editor Mode Button */}
@@ -754,10 +861,7 @@ const Tiptap = ({ name, summary }) => {
             <div className="flex gap-4 justify-center p-2 mb-6">
                 <Button
                     className="bg-green-400 hover:bg-green-600"
-                    onClick={async () => {
-                        await handleUpdateSummary(content);
-                        router.push("/");
-                    }}
+                    onClick={handleSaveWithDisclaimer}
                 >
                     <IoMdCheckmark size={30} />
                 </Button>
@@ -765,19 +869,19 @@ const Tiptap = ({ name, summary }) => {
             <style jsx global>{`
               .shepherd-element {
                 background: #fff;
-                border-radius: 12px; 
-                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); 
+                border-radius: 12px;
+                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
                 overflow: hidden;
-                font-family: "Inter", sans-serif; 
-                color: #333; 
-                max-width: 400px; 
-                border: 1px solid #e6e6e6; 
+                font-family: "Inter", sans-serif;
+                color: #333;
+                max-width: 400px;
+                border: 1px solid #e6e6e6;
               }
 
               .shepherd-element .shepherd-header {
                 background: #f9f9f9;
                 font-weight: 500;
-                font-size: 16px; 
+                font-size: 16px;
                 padding: 12px 16px 40px;
                 display: flex;
                 align-items: center;
@@ -790,9 +894,9 @@ const Tiptap = ({ name, summary }) => {
                 top: 50%;
                 left: 10px;
                 transform: translateY(-50%);
-                color: #666; 
+                color: #666;
                 cursor: pointer;
-                font-size: 21px; 
+                font-size: 21px;
                 line-height: 1;
                 transition: color 0.2s ease;
                 padding: 4px;
@@ -802,10 +906,10 @@ const Tiptap = ({ name, summary }) => {
               }
 
               .shepherd-element .shepherd-content {
-                padding: 16px 20px; 
-                font-size: 14px; 
+                padding: 16px 20px;
+                font-size: 14px;
                 line-height: 1.6;
-                color: #444; 
+                color: #444;
               }
 
               .shepherd-element .shepherd-footer {
@@ -818,8 +922,8 @@ const Tiptap = ({ name, summary }) => {
               }
 
               .shepherd-element .shepherd-footer .shepherd-button {
-                border-radius: 8px; 
-                padding: 8px 14px; 
+                border-radius: 8px;
+                padding: 8px 14px;
                 font-size: 14px;
                 cursor: pointer;
                 transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease;
@@ -828,24 +932,24 @@ const Tiptap = ({ name, summary }) => {
               }
 
               .shepherd-element .shepherd-footer .shepherd-button[data-shepherd-button-id="next"] {
-                background: #2563eb; 
+                background: #2563eb;
                 border-color: #2563eb;
                 color: #fff;
               }
               .shepherd-element .shepherd-footer .shepherd-button[data-shepherd-button-id="next"]:hover {
-                background: #1d4ed8; 
+                background: #1d4ed8;
                 border-color: #1d4ed8;
               }
 
               .shepherd-element .shepherd-footer .shepherd-button[data-shepherd-button-id="back"],
               .shepherd-element .shepherd-footer .shepherd-button[data-shepherd-button-id="skip"] {
-                background: #f3f4f6; 
+                background: #f3f4f6;
                 color: #374151;
-                border: 1px solid #d1d5db; 
+                border: 1px solid #d1d5db;
               }
               .shepherd-element .shepherd-footer .shepherd-button[data-shepherd-button-id="back"]:hover,
               .shepherd-element .shepherd-footer .shepherd-button[data-shepherd-button-id="skip"]:hover {
-                background: #e5e7eb; 
+                background: #e5e7eb;
                 border-color: #d1d5db;
               }
 
