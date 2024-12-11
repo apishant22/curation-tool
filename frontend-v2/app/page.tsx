@@ -162,9 +162,9 @@ const Homepage: React.FC = () => {
             </div>
 
             <Container>
-              {/* Content: AuthorNetwork */}
+              {/* Content: SpotlightCard + AuthorNetwork */}
               <div className="flex flex-row gap-8 justify-between items-start pb-10 w-full group relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 pt-12">
-                <div className="text-left max-w-[380px]">
+                <div className="text-left max-w-[395px]">
                   <h2 className="text-xl font-bold mb-5 ">
                     Spotlight
                   </h2>
@@ -187,7 +187,7 @@ const Homepage: React.FC = () => {
                               {/* Carousel */}
                               <div className="overflow-hidden relative">
                                 <div
-                                    className="flex flex-row transition-transform duration-500"
+                                    className="flex flex-row transition-transform duration-1000"
                                     style={{
                                       transform: `translateX(-${recentIndex * 100}%)`,
                                     }}>
@@ -206,13 +206,13 @@ const Homepage: React.FC = () => {
                               </div>
 
                               {/* Right Arrow */}
-                              {recentIndex < Math.ceil(recentAuthors.length / 3) - 1 && (
+                              {recentIndex < recentAuthors.length - 1 && (
                                   <button
                                       onClick={() =>
                                           setRecentIndex((prev) =>
                                               Math.min(
                                                   prev + 1,
-                                                  Math.ceil(recentAuthors.length / 3) - 1
+                                                  recentAuthors.length - 1
                                               )
                                           )
                                       }
@@ -266,7 +266,7 @@ const Homepage: React.FC = () => {
 
                                 <div className="overflow-hidden relative">
                                   <div
-                                      className="flex transition-transform duration-500"
+                                      className="flex transition-transform duration-1000"
                                       style={{
                                         transform: `translateX(-${currentIndex[sectionIndex] * 100}%)`,
                                       }}

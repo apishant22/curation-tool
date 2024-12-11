@@ -82,7 +82,7 @@ const ContentCard: React.FC<ContentCardProps> = ({ name, profileLink, reason }) 
                 transition: "transform 1s ease-in-out",
                 position: "relative",
                 zIndex: isHovered ? 10 : 1,
-                width: "370px",
+                width: "380px",
                 maxWidth: "100%",
                 wordWrap: "break-word",
             }}

@@ -83,15 +83,15 @@ const SpotlightCard: React.FC<SpotlightCardProps> = ({
 
     return (
         <div
-            className={`p-6 rounded-lg shadow-sm transition-transform hover:shadow-lg dark:bg-zinc-800 cursor-pointer ${
+            className={`p-6 border rounded-lg shadow-sm transition-transform hover:shadow-lg dark:bg-zinc-800 cursor-pointer ${
                 isHovered ? "z-10 transform scale-105" : ""
             }`}
             style={{
                 transform: "scale(1)",
-                transition: "transform 1s ease-in-out",
+                transition: "transform 2s ease-in-out",
                 position: "relative",
                 zIndex: isHovered ? 10 : 1,
-                width: "370px",
+                width: "380px",
                 maxWidth: "100%",
                 wordWrap: "break-word",
             }}
