@@ -1,0 +1,46 @@
+### Cigdem Sengul: Academic and Professional Profile
+
+**Professional Background:**
+Cigdem Sengul is a distinguished researcher and educator in the field of computer networks, with a particular focus on wireless and mobile networks. She currently serves as a Senior Lecturer at Brunel University, where she specializes in network protocols across various layers of wireless networks. Her research interests include network privacy, security, identity, and authorization.
+
+**Academic and Industry Experience:**
+Cigdem has over a decade of experience in both academia and industry. She has held several notable positions, including:
+
+- **Senior Researcher at Nominet (2015-2019):** During her tenure, she worked on standards for building privacy and trust in the Internet of Things (IoT).
+- **Senior Lecturer at Oxford Brookes University (2012-2015):** Here, she focused on energy and interference efficiency in wireless and mobile networks, as well as the Internet of Robotic Things.
+- **Senior Research Scientist at Telekom Innovation Labs (2008-2012):** She led projects on Wireless Mesh Networks at the main research unit of Deutsche Telekom.
+
+**Research Contributions:**
+Cigdem Sengul has an extensive publication record, with over 50 journal and conference publications. Some of her notable works include:
+
+1. **"Forward and Backhaul Link Optimization for Energy Efficient OFDMA Small Cell Networks"** (2017): This paper addresses the optimization of system energy efficiency in orthogonal frequency division multiple access (OFDMA) small cell networks, considering both forward and backhaul links.
+   - **DOI:** [10.1109/TWC.2016.2636821](https://doi.org/10.1109/TWC.2016.2636821)
+
+2. **"Load-adaptive networking for energy-efficient wireless access"** (2015): This publication explores adaptive networking techniques to enhance energy efficiency in wireless access networks.
+   - **DOI:** [10.1016/j.comcom.2015.05.004](https://doi.org/10.1016/j.comcom.2015.05.004)
+
+3. **"Measurement-based simulation of WiFi interference"** (2013): This paper proposes interference models based on measurements in WiFi testbeds to improve the accuracy of wireless network simulations.
+   - **DOI:** [10.1145/2507924.2507990](https://doi.org/10.1145/2507924.2507990)
+
+4. **"Energino: energy saving tips for your wireless network"** (2012): This work presents an energy measurement and control system designed to optimize energy usage in wireless networks.
+   - **DOI:** [10.1145/2377677.2377727](https://doi.org/10.1145/2377677.2377727)
+
+5. **"A survey of adaptive services to cope with dynamics in wireless self-organizing networks"** (2012): This survey categorizes adaptive services in wireless self-organizing networks and provides design guidelines for achieving self-organizing behavior in network protocols.
+   - **DOI:** [10.1145/2333112.2333118](https://doi.org/10.1145/2333112.2333118)
+
+**Advocacy and Outreach:**
+Cigdem is a passionate advocate for diversity in computing. She serves as the Communications Co-Chair and Secretary of ACM-W Global, supporting women in STEM. She has also collaborated with the Micro:bit Educational Foundation to promote coding education among school children and co-authored the book "Networking with the Micro:bit."
+
+**Educational Background:**
+Cigdem Sengul is a Fulbright fellow and has received fellowships from the Department of Computer Science at the University of Illinois at Urbana-Champaign (UIUC) and Vodafone.
+
+**Professional Affiliations:**
+- Fellow of the Higher Education Academy
+- Athena SWAN SAT Lead
+- Equality, Diversity, and Inclusion Champion at the college level
+
+**Contact Information:**
+- **Brunel University London:** [Profile](https://www.brunel.ac.uk/people/cigdem-sengul)
+- **Personal Website:** [Cigdem Sengul](https://www.cigdemsengul.com/)
+
+Cigdem Sengul's contributions to the field of wireless networks and her advocacy for diversity in STEM make her a prominent figure in both academia and industry. Her work continues to influence the development of energy-efficient and secure network protocols.

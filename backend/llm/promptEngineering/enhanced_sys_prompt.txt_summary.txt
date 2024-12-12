@@ -1,0 +1,57 @@
+# Cigdem Sengul: Academic Profile and Contributions
+
+## Professional Background
+
+Cigdem Sengul is a distinguished researcher and educator in the field of computer networks, currently serving as a Senior Lecturer at Brunel University. With over a decade of experience in both academia and industry, she has made significant contributions to the development and optimization of wireless and mobile networks. Her expertise spans various aspects of network protocols, including network privacy, security, identity, and authorization.
+
+### Academic and Professional Journey
+
+- **Brunel University (2019-Present):** Senior Lecturer, focusing on network privacy, security, and authorization.
+- **Nominet (2015-2019):** Senior Researcher, working on standards for building privacy and trust in the Internet of Things.
+- **Oxford Brookes University (2012-2015):** Senior Lecturer, conducting research on energy and interference efficiency in wireless networks.
+- **Telekom Innovation Labs (2008-2012):** Senior Research Scientist, leading projects on Wireless Mesh Networks.
+
+Cigdem Sengul is also a passionate advocate for diversity in computing. She serves as the Communications Co-Chair and Secretary of ACM-W Global, supporting women in STEM fields.
+
+## Research Interests
+
+Cigdem Sengul's research interests are diverse and encompass several critical areas in network technology:
+
+- **Network Structure and Architectures:** Exploring the design and optimization of network structures to enhance performance and reliability.
+- **Wireless Access and Mobile Networks:** Investigating the efficiency and security of wireless and mobile network protocols.
+- **Distributed Architectures and Network Management:** Developing methodologies for managing distributed network systems.
+- **Modeling Methodologies:** Creating models to simulate and analyze network behaviors and performance.
+
+## Key Publications
+
+Cigdem Sengul has an extensive publication record, with her work appearing in numerous prestigious journals and conferences. Some of her notable publications include:
+
+1. **"Forward and Backhaul Link Optimization for Energy Efficient OFDMA Small Cell Networks"** (2017)
+   - **DOI:** [10.1109/TWC.2016.2636821](https://doi.org/10.1109/TWC.2016.2636821)
+   - **Abstract:** This paper addresses the optimization of system energy efficiency in small cell networks, considering both forward and backhaul links.
+
+2. **"Load-adaptive networking for energy-efficient wireless access"** (2015)
+   - **DOI:** [10.1016/j.comcom.2015.05.004](https://doi.org/10.1016/j.comcom.2015.05.004)
+   - **Abstract:** This study explores adaptive networking techniques to enhance energy efficiency in wireless access networks.
+
+3. **"Measurement-based simulation of WiFi interference"** (2013)
+   - **DOI:** [10.1145/2507924.2507990](https://doi.org/10.1145/2507924.2507990)
+   - **Abstract:** The paper proposes interference models based on measurements from WiFi testbeds to improve the accuracy of wireless network simulations.
+
+4. **"Energino: energy saving tips for your wireless network"** (2012)
+   - **DOI:** [10.1145/2377677.2377727](https://doi.org/10.1145/2377677.2377727)
+   - **Abstract:** This demo presents Energino, a system designed to measure and control energy consumption in wireless networks.
+
+5. **"TCPSpeaker: clean and dirty sides of the same slate"** (2011)
+   - **DOI:** [10.1145/1942268.1942284](https://doi.org/10.1145/1942268.1942284)
+   - **Abstract:** The paper introduces TCPSpeaker, a transport-protocol translator for improving TCP performance in wireless mesh networks.
+
+## Contributions to the Community
+
+Cigdem Sengul is actively involved in initiatives to promote diversity and inclusion in the field of computing. She collaborates with the Micro:bit Educational Foundation to support coding education for school children and is the co-author of the book "Networking with the Micro:bit." Additionally, she has held various leadership roles within ACM Women, including serving as the Communication and Outreach Chair of ACM Women-Europe from 2019 to 2022.
+
+## Conclusion
+
+Cigdem Sengul's work has had a profound impact on the field of wireless and mobile networks, particularly in the areas of energy efficiency, network security, and privacy. Her dedication to research, education, and community service continues to inspire and influence the next generation of network researchers and professionals.
+
+For more information, you can visit her [Brunel University profile](https://www.brunel.ac.uk/people/cigdem-sengul) or her [personal website](https://www.cigdemsengul.com/).
