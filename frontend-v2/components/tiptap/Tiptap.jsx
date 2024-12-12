@@ -17,7 +17,7 @@ import toast from "react-hot-toast";
 import { Markdown } from "tiptap-markdown";
 import axios from "axios";
 import {Button} from "@/components/ui/button";
-import {IoMdArrowBack, IoMdCheckmark} from "react-icons/io";
+import {IoMdArrowBack, IoMdCheckmark, IoMdClose} from "react-icons/io";
 import {useRouter} from "next/navigation";
 import Shepherd from 'shepherd.js';
 import 'shepherd.js/dist/css/shepherd.css';
@@ -36,6 +36,12 @@ const Tiptap = ({ name, summary }) => {
     const [isTourRunning, setIsTourRunning] = useState(false);
     const [isImprovementPopupOpen, setImprovementPopupOpen] = useState(false);
     const [isExportModalOpen, setIsExportModalOpen] = useState(false);
+
+    const capitalizeWords = (str) => {
+        return str.replace(/\b\w/g, (char) => char.toUpperCase());
+    };
+
+    const capitalizedName = capitalizeWords(name);
 
     const [isClient, setIsClient] = useState(false);
     useEffect(() => {
@@ -226,6 +232,36 @@ const Tiptap = ({ name, summary }) => {
         } catch (error) {
             console.error("Update summary failed:", error);
             toast.error("An error occurred while updating the summary.");
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleRemoveAuthor = async () => {
+        try {
+            setLoading(true);
+            const response = await axios.post(
+                `http://localhost:3002/remove_author/${encodeURIComponent(name)}`,
+                {},
+                {
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                }
+            );
+            if (response.status === 200) {
+                console.log("Author successfully removed!");
+                router.push("/");
+            } else {
+                console.log("Failed to remove the author.");
+            }
+        } catch (error) {
+            console.error("Remove author failed:", error);
+            if (error.response && error.response.data && error.response.data.error) {
+                console.log(`Error: ${error.response.data.error}`);
+            } else {
+                console.log("An error occurred while removing the author.");
+            }
         } finally {
             setLoading(false);
         }
@@ -615,6 +651,44 @@ const Tiptap = ({ name, summary }) => {
         });
     };
 
+    const handleDeleteAuthor = () => {
+        if (!name.trim()) {
+            toast.warn("Author name cannot be empty.");
+            return;
+        }
+
+        confirmAlert({
+            customUI: ({ onClose }) => {
+                return (
+                    <div className="bg-white dark:bg-zinc-800 rounded-lg shadow-md p-6 max-w-md mx-auto">
+                        <h2 className="text-xl font-bold text-gray-800 dark:text-white mb-4">Confirm Deletion</h2>
+                        <p className="text-gray-600 dark:text-gray-400 mb-6">
+                            Are you sure you want to remove the author <strong>&quot;{capitalizedName}&quot;</strong> from the database?
+                        </p>
+                        <div className="flex justify-end gap-4">
+                            <button
+                                className="px-4 py-2 bg-gray-200 dark:bg-zinc-700 text-gray-800 dark:text-white rounded-md hover:bg-gray-300 dark:hover:bg-zinc-600"
+                                onClick={onClose}
+                            >
+                                No
+                            </button>
+                            <button
+                                className="px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600"
+                                onClick={async () => {
+                                    await handleRemoveAuthor();
+                                    toast.success(`${capitalizedName} removed successfully!`)
+                                    onClose();
+                                }}
+                            >
+                                Yes, Remove
+                            </button>
+                        </div>
+                    </div>
+                );
+            }
+        });
+    };
+
     return (
         <div className="relative w-full min-h-screen">
             {isEdit && (
@@ -865,6 +939,12 @@ const Tiptap = ({ name, summary }) => {
                     onClick={handleSaveWithDisclaimer}
                 >
                     <IoMdCheckmark size={30} />
+                </Button>
+                <Button
+                    className="bg-red-400 hover:bg-red-600"
+                    onClick={handleDeleteAuthor}
+                >
+                    <IoMdClose size={30} />
                 </Button>
             </div>
             <style jsx global>{`

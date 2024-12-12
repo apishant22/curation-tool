@@ -145,6 +145,14 @@ def update_summary(author_name):
     else:
         return jsonify({"error": "Invalid Content-Type"}), 400
 
+@app.route('/remove_author/<author_name>', methods=['POST'])
+def remove_author(author_name):
+    try:
+        db.delete_author_details_from_db(author_name)
+        return jsonify({"message": f"Author '{author_name}' removed successfully."}), 200
+    except Exception as e:
+        print(f"Error in /remove_author route: {e}")
+        return jsonify({"error": "An error occurred while removing the author."}), 500
 
 if __name__=="__main__":
     app.run(debug=True)
