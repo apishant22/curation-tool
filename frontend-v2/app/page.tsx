@@ -10,7 +10,6 @@ import AuthorNetwork from "@/components/modal/Network";
 import { MdOutlineInsights } from "react-icons/md";
 import { IoIosArrowBack, IoIosArrowForward } from "react-icons/io";
 import { fetchRecommendations } from "@/utils/fetchRecommendations";
-import SummaryCard from "@/components/homepage/SummaryCard";
 import SpotlightCard from "@/components/homepage/SpotlightCard";
 
 const getStoredAuthors = () => {
@@ -32,6 +31,7 @@ const Homepage: React.FC = () => {
   const [data, setData] = useState<any>(null);
   const [recentAuthors, setRecentAuthors] = useState<any[]>([]);
   const [recentIndex, setRecentIndex] = useState<number>(0);
+  const [presentedAuthor, setPresentedAuthor] = useState<string | null>(null);
   const maxRecommendations = 6;
   const maxResultsPerField = 6;
 
@@ -89,6 +89,9 @@ const Homepage: React.FC = () => {
         }));
         console.log("Fetched recent authors:", processedAuthors);
         setRecentAuthors(processedAuthors);
+        if (processedAuthors.length > 0) {
+          setPresentedAuthor(processedAuthors[0].Name);
+        }
       } else {
         console.warn("Failed to fetch recent authors.");
       }
@@ -112,6 +115,11 @@ const Homepage: React.FC = () => {
   }, []);
 
   const [currentIndex, setCurrentIndex] = useState<number[]>([]);
+
+  useEffect(() => {
+    setPresentedAuthor(() =>
+        recentAuthors[recentIndex]?.Name || "");
+  }, [recentIndex, recentAuthors]);
 
   useEffect(() => {
     if (data) {
@@ -142,7 +150,7 @@ const Homepage: React.FC = () => {
   };
 
   return (
-      <div className="pt-36 flex justify-center items-center">
+      <div className="pt-36 pb-18 flex justify-center items-center">
         <ClientOnly>
           <Container>
             {/* Header */}
@@ -176,8 +184,9 @@ const Homepage: React.FC = () => {
                               {/* Left Arrow */}
                               {recentIndex > 0 && (
                                   <button
-                                      onClick={() =>
-                                          setRecentIndex((prev) => Math.max(0, prev - 1))
+                                      onClick={() => {
+                                          setRecentIndex((prev) => Math.max(0, prev - 1));
+                                        }
                                       }
                                       className="absolute left-[-50px] top-1/2 transform -translate-y-1/2 bg-gray-800 text-white p-2 rounded-full shadow-md transition-opacity duration-300 opacity-0 group-hover:opacity-100 hover:scale-105 z-10">
                                     <IoIosArrowBack size={20} />
@@ -191,6 +200,7 @@ const Homepage: React.FC = () => {
                                     style={{
                                       transform: `translateX(-${recentIndex * 100}%)`,
                                     }}>
+
                                   {recentAuthors.map((author, index) => (
                                       <div
                                           key={index}
@@ -208,13 +218,9 @@ const Homepage: React.FC = () => {
                               {/* Right Arrow */}
                               {recentIndex < recentAuthors.length - 1 && (
                                   <button
-                                      onClick={() =>
-                                          setRecentIndex((prev) =>
-                                              Math.min(
-                                                  prev + 1,
-                                                  recentAuthors.length - 1
-                                              )
-                                          )
+                                      onClick={() => {
+                                          setRecentIndex((prev) => Math.min(prev + 1, recentAuthors.length - 1));
+                                        }
                                       }
                                       className="absolute right-[-50px] top-1/2 transform -translate-y-1/2 bg-gray-800 text-white p-2 rounded-full shadow-md transition-opacity duration-300 opacity-0 group-hover:opacity-100 hover:scale-105 z-10">
                                     <IoIosArrowForward size={20} />
@@ -229,7 +235,11 @@ const Homepage: React.FC = () => {
                 <div className="flex-1 text-center item-end">
                   <div className="max-w-4xl max-h-[400px]">
                     <div className="flex-1">
-                      <AuthorNetwork/>
+                      <AuthorNetwork
+                          authorName={presentedAuthor || ""}
+                          width={800}
+                          height={400}
+                      />
                     </div>
                   </div>
                   <h4 className="font-bold mb-5 text-gray-400 pt-2">
@@ -241,7 +251,7 @@ const Homepage: React.FC = () => {
             </Container>
 
             {/* Recommendations */}
-            <div className="flex flex-col items-center justify-center">
+            <div className="border-t-[1px] pt-8 pb-18 flex flex-col items-center justify-center">
               {data ? (
                   <>
                     {[

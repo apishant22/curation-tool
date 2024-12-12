@@ -2,27 +2,53 @@
 
 import React, { useEffect, useState, useRef } from "react";
 import dynamic from "next/dynamic";
+import {toast} from "react-hot-toast";
+import { useRouter } from "next/navigation";
 
 const ForceGraph3D = dynamic(
   () => import("react-force-graph").then((mod) => mod.ForceGraph2D),
   { ssr: false }
 );
 
-const AuthorNetwork = () => {
+interface NetworkProps {
+    authorName: string;
+    width: number;
+    height: number;
+    graphConfig?: {
+        nodeColor?: string;
+        nodeActiveColor?: string;
+        linkColor?: string;
+        nodeDiameter?: number | undefined;
+        centerNodeColor?: string;
+    };
+};
+
+const AuthorNetwork: React.FC<NetworkProps> = ({
+    authorName,
+    width,
+    height,
+    graphConfig={
+        nodeColor:"#2196F3",
+        nodeActiveColor: "#4DAF83",
+        linkColor: "#9E9E9E",
+        nodeDiameter: 4,
+        centerNodeColor: "#4CBFF3",
+    },
+    }
+) => {
   const [graphData, setGraphData] = useState(null);
   const [loading, setLoading] = useState(true);
-  const containerRef = useRef<HTMLDivElement>(null);
-  // const hoveredNode = useRef<NodeData | null>(null);
-  // Reference to ForceGraph2D component for zooming functions
-  //const fgRef = useRef<any>(null);
+  const router = useRouter();
 
+  const containerRef = useRef<HTMLDivElement>(null);
   // Fetch the graph data from the backend
   useEffect(() => {
-    const fetchGraph = async () => {
-      try {
-        const res = await fetch("http://localhost:3002/graph");
-        if (!res.ok) {
-          throw new Error(`HTTP error! status: ${res.status}`);
+    const fetchAuthorNetwork = async () => {
+        setLoading(true);
+        try {
+            const res = await fetch(`http://localhost:3002/network/${authorName}`);
+            if (!res.ok) {
+                throw new Error(`HTTP error! status: ${res.status}`);
         }
         const data = await res.json();
         setGraphData(data);
@@ -32,76 +58,102 @@ const AuthorNetwork = () => {
         setLoading(false);
       }
     };
-    fetchGraph();
-  }, []);
+    fetchAuthorNetwork();
+  }, [authorName, width, height]);
 
-  // Custom node object with color configuration
-  const graphConfig = {
-    nodeColor: "#2196F3", // Default node color (blue)
-    nodeActiveColor: "#4CAF50", // Hover node color (green)
-    linkColor: "#9E9E9E", // Default link color (gray)
-    nodeDiameter: 8, // Size of the nodes
-  };
 
-  // const handleNodeHover = (node: NodeData | null) => {
-  //     // Reset the previous hovered node to default color
-  //     if (hoveredNode.current && hoveredNode.current !== node) {
-  //         hoveredNode.current.color = graphConfig.nodeColor;
-  //     }
+  if (loading) {
+      return (
+          <div className="flex flex-col items-center justify-center space-x-2">
+              <div className="w-5 h-5 border-4 border-gray-400 border-t-transparent rounded-full animate-spin"></div>
+              <span className="text-gray-600 dark:text-neutral-400 text-lg">
+                         Loading author network ...
+              </span>
+          </div>
+      );
+  }
+    if (!graphData) {
+        return (
+            <div className="flex items-center justify-center h-20 space-x-2">
+                <div className="text-center text-red-600">
+                    Error loading network
+                </div>
+            </div>
+        );
+    }
 
-  //     // Set the new hovered node color
-  //     if (node) {
-  //         node.color = graphConfig.nodeActiveColor;
-  //         hoveredNode.current = node;
-  //     } else if (hoveredNode.current) {
-  //         // If no node is being hovered, reset the last hovered node
-  //         hoveredNode.current.color = graphConfig.nodeColor;
-  //         hoveredNode.current = null;
-  //     }
-  // };
+    return (
+        <div ref={containerRef}
+             style={{
+                 width: "100%",
+                 height: "100%",
+                 margin: "0 auto",
+                 position: "relative",
+                 overflow: "hidden",
+             }}>
+            <div>
+                {/*Main body*/}
+                <ForceGraph3D
+                    graphData={graphData}
+                    nodeLabel={(node) => node.name || node.id}
+                    nodeCanvasObject={(node, ctx, globalScale) => {
+                        const label = node.name || node.id;
+                        const fontSize = 12 / globalScale;
+                        //const isHovered = node.id === hoveredNode?.id;
+                        const nodeColor =
+                            //isHovered ? graphConfig.nodeActiveColor :
+                            node.name === authorName ? graphConfig.centerNodeColor :
+                            graphConfig.nodeColor;
 
-  if (loading) return <div> Loading... </div>;
-  if (!graphData) return <div> Error loading graph</div>;
+                        if (node.x === undefined || node.y === undefined) {
+                            return;
+                        }
+                        // Draw the node (default style)
+                        ctx.fillStyle = nodeColor || node.color;
+                        ctx.beginPath();
+                        ctx.arc(node.x, node.y, graphConfig.nodeDiameter, 0, 2 * Math.PI, false);
+                        ctx.fill();
 
-  return (
-    <div
-      ref={containerRef}
-      style={{
-        width: "100%",
-        height: "100vh",
-        margin: "0 auto",
-        position: "relative",
-        overflow: "hidden",
-        //border: "1px solid #ccc",
-      }}>
-      {/*Main body*/}
-      <ForceGraph3D
-        //ref={fgRef}
-        graphData={graphData}
-        nodeLabel={(node) => `
-                    <div style="color: gray; font-weight: bold;">
-                        ${node.name || node.id}
-                    </div>
-                `}
-        // Node styling
-        nodeColor={(node) => node.color || graphConfig.nodeColor}
-        //nodeRelSize={graphConfig.nodeDiameter}
-
-        // Link styling
-        linkColor={graphConfig.linkColor}
-        linkWidth={1.5}
-        // Node interaction
-        //onNodeHover={handleNodeHover}
-        nodeAutoColorBy="id"
-        onNodeClick={(node) => {
-          if (node?.link) window.open(node.link, "_blank");
-        }}
-        width={800}
-        height={400}
-        backgroundColor="rgba(250,250,250,1)"
-      />
-    </div>
-  );
+                        // Add the label below the node
+                        ctx.font = `${fontSize}px Sans-Serif`;
+                        ctx.textAlign = "center";
+                        ctx.textBaseline = "top";
+                        ctx.fillStyle = nodeColor || node.color; // Use the same color as the node
+                        ctx.fillText(label, node.x, node.y + graphConfig.nodeDiameter + 2);
+                    }}
+                    //onNodeHover={(node) => setHoveredNode(node)}
+                    // Link styling
+                    linkColor={graphConfig.linkColor}
+                    linkWidth={1.5}
+                    nodeAutoColorBy="group"
+                    onNodeClick={(node) =>
+                        //(node) => {if (node?.link) window.open(node.link, "_blank");}
+                        {
+                            const profileIdMatch = node.link.match(/profile\/(\d+)$/);
+                            const profileId = profileIdMatch ? profileIdMatch[1] : "";
+                            const formattedName = node.name.trim().replace(/\s+/g, " ").toLowerCase();
+                            const searchParams = new URLSearchParams({
+                                name: formattedName,
+                                profileId: profileId,
+                            });
+                            if (!profileId) {
+                                toast.error("Invalid profile link.");
+                                return;
+                            }
+                            toast.success(
+                                "Item has been successfully clicked! Redirecting to the details page."
+                            );
+                            router.push(`/summary?${searchParams.toString()}`);
+                        }
+                    }
+                    width={width}
+                    height={height}
+                    backgroundColor="rgba(250,250,250,1)"
+                    enablePointerInteraction={true}
+                />
+            </div>
+        </div>
+    );
 };
 
 export default AuthorNetwork;
