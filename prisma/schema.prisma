@@ -1,0 +1,66 @@
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["typedSql"]
+}
+
+datasource db {
+  provider = "sqlserver"
+  url      = env("DATABASE_URL")
+}
+
+model Email_Access {
+  email       String   @id(map: "PK__Email_Ac__AB6E6165AA15F114") @db.Char(255)
+  admin       Boolean?
+  blacklisted Boolean?
+}
+
+model Fields_of_Study {
+  field_id                   Int                          @id(map: "PK__tmp_ms_x__1BB6F43E8EFF1D1A") @default(autoincrement())
+  field_name                 String?                      @db.VarChar(Max)
+  Researcher_Fields_of_Study Researcher_Fields_of_Study[] @ignore
+}
+
+model Max_Pages_Cache {
+  name         String    @id(map: "PK__Max_Page__72E12F1AC0B9C9AD") @db.Char(255)
+  max_pages    Int?
+  search_type  Int?
+  date_created DateTime? @db.Date
+}
+
+model Paper {
+  doi              String          @id(map: "PK__Paper__C0308D558D9B0816") @db.Char(255)
+  title            String?         @db.Text
+  publication_date DateTime?       @db.Date
+  abstract         String?         @db.Text
+  citations        Int?
+  Paper_Authors    Paper_Authors[] @ignore
+}
+
+/// The underlying table does not contain a valid unique identifier and can therefore currently not be handled by Prisma Client.
+model Paper_Authors {
+  doi        String?     @db.Char(255)
+  id         Int?
+  Paper      Paper?      @relation(fields: [doi], references: [doi], onDelete: Cascade, map: "FK__Paper_Autho__Doi__18EBB532")
+  Researcher Researcher? @relation(fields: [id], references: [id], onDelete: Cascade, map: "FK__Paper_Author__id__22751F6C")
+
+  @@ignore
+}
+
+model Researcher {
+  id                         Int                          @id(map: "PK__tmp_ms_x__3213E83FF0CD0BCC") @default(autoincrement())
+  name                       String?                      @db.VarChar(Max)
+  profile_link               String?                      @db.VarChar(Max)
+  summary                    String?                      @db.Text
+  Paper_Authors              Paper_Authors[]              @ignore
+  Researcher_Fields_of_Study Researcher_Fields_of_Study[] @ignore
+}
+
+/// The underlying table does not contain a valid unique identifier and can therefore currently not be handled by Prisma Client.
+model Researcher_Fields_of_Study {
+  id              Int?
+  field_id        Int?
+  Fields_of_Study Fields_of_Study? @relation(fields: [field_id], references: [field_id], onDelete: Cascade, map: "FK__Researche__field__25518C17")
+  Researcher      Researcher?      @relation(fields: [id], references: [id], onDelete: Cascade, map: "FK__Researcher_F__id__2180FB33")
+
+  @@ignore
+}

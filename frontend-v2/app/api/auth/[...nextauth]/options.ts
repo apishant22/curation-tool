@@ -1,4 +1,5 @@
 import type { NextAuthOptions } from "next-auth";
+import { PrismaClient } from '@prisma/client'
 import GoogleProvider from "next-auth/providers/google";
 
 export const options: NextAuthOptions = {
@@ -19,13 +20,17 @@ export const options: NextAuthOptions = {
       // 2) we want to query the database
       // 3) use prisma orm to query the database (a lot of tutorials in docs or youtube)
       // 4) build the logic to authenticate here
-      var authenticatedEmail = process.env.AUTH_USERS;
-      console.log(user.email);
-      console.log(authenticatedEmail);
-      if (user.email != authenticatedEmail) {
-        return false;
+
+      const prisma = new PrismaClient()
+      // By unique identifier
+      const users = await prisma.email_Access.findMany({where: {email: user.email}})
+      if(users.length > 0){
+        return !users[0].blacklisted
       }
-      return true;
+      return false
+
+
     },
-  },
+
+    },
 };
