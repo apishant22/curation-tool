@@ -137,16 +137,16 @@ const Search = () => {
       <div className="pl-2 text-sm">
         <div ref={dropdownRef} className="relative">
           <div
-            className="flex items-center dark:bg-zinc-800 hover:bg-zinc-100 dark:hover:bg-zinc-900 transition duration-100 rounded-lg"
-            onClick={toggleOpen}>
-            <div className="p-1">{category}</div>
+              className="flex items-center dark:bg-zinc-800 hover:bg-zinc-100 dark:hover:bg-zinc-900 transition duration-100 rounded-lg"
+              onClick={toggleOpen}>
             <div>
-              <TbCaretDownFilled />
+              <TbCaretDownFilled/>
             </div>
+            <div className="p-1">{category}</div>
           </div>
           {isOpen && (
-            <div
-              className={`absolute bg-white dark:bg-zinc-800 top-10 w-40 border-[1px] shadow-lg rounded-lg`}>
+              <div
+                  className={`absolute bg-white dark:bg-zinc-800 top-10 w-40 border-[1px] shadow-lg rounded-lg`}>
               <div
                 className="p-1"
                 onClick={() =>
@@ -237,6 +237,7 @@ const Search = () => {
 };
 
 export default Search;
+
 function setGender(arg0: (value: any) => boolean) {
   throw new Error("Function not implemented.");
 }
