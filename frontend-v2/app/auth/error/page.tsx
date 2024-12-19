@@ -1,9 +1,6 @@
 "use client";
-import Button from "@/components/global/Button";
 import Container from "@/components/global/Container";
-import { signIn } from "next-auth/react";
 import React from "react";
-import { FcGoogle } from "react-icons/fc";
 import { MdError } from "react-icons/md";
 
 const SignInPage = () => {

@@ -17,7 +17,7 @@ model Email_Access {
 model Fields_of_Study {
   field_id                   Int                          @id(map: "PK__tmp_ms_x__1BB6F43E8EFF1D1A") @default(autoincrement())
   field_name                 String?                      @db.VarChar(Max)
-  Researcher_Fields_of_Study Researcher_Fields_of_Study[] @ignore
+  Researcher_Fields_of_Study Researcher_Fields_of_Study[]
 }
 
 model Max_Pages_Cache {
@@ -33,7 +33,7 @@ model Paper {
   publication_date DateTime?       @db.Date
   abstract         String?         @db.Text
   citations        Int?
-  Paper_Authors    Paper_Authors[] @ignore
+  Paper_Authors    Paper_Authors[]
 }
 
 /// The underlying table does not contain a valid unique identifier and can therefore currently not be handled by Prisma Client.
@@ -51,8 +51,8 @@ model Researcher {
   name                       String?                      @db.VarChar(Max)
   profile_link               String?                      @db.VarChar(Max)
   summary                    String?                      @db.Text
-  Paper_Authors              Paper_Authors[]              @ignore
-  Researcher_Fields_of_Study Researcher_Fields_of_Study[] @ignore
+  Paper_Authors              Paper_Authors[]
+  Researcher_Fields_of_Study Researcher_Fields_of_Study[]
 }
 
 /// The underlying table does not contain a valid unique identifier and can therefore currently not be handled by Prisma Client.

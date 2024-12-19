@@ -64,6 +64,11 @@ const UserMenu: React.FC<UserMenuProps> = ({ image }) => {
         <div className="absolute right-0 top-12 w-[40vw] overflow-hidden rounded-xl bg-white text-sm shadow-md md:w-[200px] dark:bg-zinc-900">
           <div className="flex cursor-pointer flex-col">
             <>
+              <MenuItem
+                transparent
+                label="Settings"
+                onClick={() => router.push("/settings")}
+              />
               <MenuItem transparent label="Log out" onClick={() => signOut()} />
             </>
           </div>
