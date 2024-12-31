@@ -1,4 +1,5 @@
 from datetime import datetime
+from enum import IntEnum
 
 from sqlalchemy import Column, String, Integer, ForeignKey, Date
 from sqlalchemy.orm import relationship, declarative_base
@@ -48,3 +49,28 @@ class MaxPagesCache(Base):
     search_type = Column(Integer, default=0)
     date_created = Column(Date, default=datetime.utcnow)
     max_pages = Column(Integer, nullable=True)
+
+class EmailAccess(Base):
+    __tablename__ = 'Email_Access'
+    email = Column(String, primary_key=True)
+    status = Column(Integer, default=0)
+
+# Azure SQL has no native support for enums, so we store enum values as
+# integers and convert to enums in python
+class SearchType(IntEnum):
+    AUTHOR = 0
+    FIELD = 1
+
+    @classmethod
+    def from_string(cls, string):
+        if string == 'author':
+            return cls.AUTHOR
+        elif string == 'field':
+            return cls.FIELD
+        else:
+            raise ValueError('search type must be "author" or "field"')
+
+class AccountStatus(IntEnum):
+    REGULAR = 0
+    ADMIN = 1
+    BANNED = 2

@@ -17,14 +17,12 @@ app = Flask(__name__)
 CORS(app)
 
 def _search(search_type, name, page):
-    assert(search_type in ('author', 'field'))
-
     normalized_name = name.lower()
 
     db.delete_stale_cache_entries(CACHE_LIFETIME)
 
     # try to get the estimated max pages from the database
-    typ = 0 if search_type == 'author' else 1
+    typ = model.SearchType.from_string(search_type)
     try:
         max_pages = db.get_records(model.MaxPagesCache.max_pages, {'name': normalized_name, 'search_type': typ})[0][0]
     except IndexError:
@@ -59,7 +57,7 @@ def search_author(name, page):
 
 # Expose graph.json data at http://localhost:3002/graph
 @app.route('/graph', methods=['GET'])
-def get_graph():
+def graph():
     try:
         graph_path = os.path.join(os.path.dirname(__file__), "graph.json")
         with open(graph_path,"r") as f:
@@ -69,7 +67,7 @@ def get_graph():
         return jsonify({"error": "Graph data not found"}), 404
     
 @app.route('/network/<name>')
-def generate_network(name):
+def network(name):
     network_data = nw.convert_to_json(name)
     # try:
     #     network_path = os.path.join(os.path.dirname(__file__), "graph.json")

@@ -7,7 +7,7 @@ class DuckDuckGoSearchManager:
     A class to perform various types of web searches using DuckDuckGo.
     """
 
-    def text_search(self, query, num_results=3) -> list:
+    def text_search(self, query, num_results=5) -> list:
         """
         Performs a DuckDuckGo text search and returns a list of URLs.
 
@@ -23,7 +23,7 @@ class DuckDuckGoSearchManager:
             urls = [result['href'] for result in results]
             return urls
 
-    def news_search(self, query, num_results=3) -> list:
+    def news_search(self, query, num_results=5) -> list:
         """
         Performs a DuckDuckGo news search and returns a list of news article URLs.
 
