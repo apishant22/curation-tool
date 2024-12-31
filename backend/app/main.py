@@ -19,15 +19,13 @@ CACHE_LIFETIME = timedelta(weeks=4)
 app = Flask(__name__)
 CORS(app)
 
-def _search(search_type, name, page, gender):
-    assert(search_type in ('author', 'field'))
-
+def _search(search_type, name, page):
     normalized_name = name.lower()
 
     db.delete_stale_cache_entries(CACHE_LIFETIME)
 
     # try to get the estimated max pages from the database
-    typ = 0 if search_type == 'author' else 1
+    typ = model.SearchType.from_string(search_type)
     try:
         max_pages = db.get_records(model.MaxPagesCache.max_pages, {'name': normalized_name, 'search_type': typ})[0][0]
     except IndexError:
@@ -74,7 +72,7 @@ def _search(search_type, name, page, gender):
 
 # Expose graph.json data at http://localhost:3002/graph
 @app.route('/graph', methods=['GET'])
-def get_graph():
+def graph():
     try:
         graph_path = os.path.join(os.path.dirname(__file__), "graph.json")
         with open(graph_path,"r") as f:
@@ -84,7 +82,7 @@ def get_graph():
         return jsonify({"error": "Graph data not found"}), 404
     
 @app.route('/network/<name>')
-def generate_network(name):
+def network(name):
     network_data = nw.convert_to_json(name)
     # try:
     #     network_path = os.path.join(os.path.dirname(__file__), "graph.json")
@@ -143,6 +141,34 @@ def regenerate_request(author_name):
     res = db.get_researcher_summary(author_name)
     print(res)
     return db.get_researcher_summary(author_name), 200
+
+@app.route('/update_summary/<author_name>', methods=['POST'])
+def update_summary(author_name):
+    if request.headers.get('Content-Type') == 'application/json':
+        try:
+            json_data = request.json
+            new_summary = json_data.get('content')
+
+            if not new_summary:
+                return jsonify({"error": "No content provided"}), 400
+
+            db.update_researcher_summary(author_name, new_summary)
+            return jsonify({"message": f"Summary for {author_name} updated successfully"}), 200
+
+        except Exception as e:
+            print(f"Error in /update_summary route: {e}")
+            return jsonify({"error": str(e)}), 500
+    else:
+        return jsonify({"error": "Invalid Content-Type"}), 400
+
+@app.route('/remove_author/<author_name>', methods=['POST'])
+def remove_author(author_name):
+    try:
+        db.delete_author_details_from_db(author_name)
+        return jsonify({"message": f"Author '{author_name}' removed successfully."}), 200
+    except Exception as e:
+        print(f"Error in /remove_author route: {e}")
+        return jsonify({"error": "An error occurred while removing the author."}), 500
 
 @app.route('/recommendations', methods=['POST'])
 def get_recommendations():

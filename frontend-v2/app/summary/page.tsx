@@ -10,9 +10,6 @@ import { AlertCircle } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import React, { useEffect, useState } from "react";
 import Tiptap from "@/components/tiptap/Tiptap";
-
-import { Button } from "@/components/ui/button";
-import { IoMdArrowBack, IoMdCheckmark } from "react-icons/io";
 import { fetchRecommendations } from "@/utils/fetchRecommendations";
 
 function Page() {
@@ -29,9 +26,14 @@ function Page() {
     return storedAuthors ? JSON.parse(storedAuthors) : [];
   };
 
-  const updateStoredAuthors = (newAuthor: { Name: string; "Fields of Study": string[] }) => {
+  const updateStoredAuthors = (newAuthor: {
+    Name: string;
+    "Fields of Study": string[];
+  }) => {
     const currentAuthors = getStoredAuthors();
-    const isAlreadyAdded = currentAuthors.some((author: any) => author.Name === newAuthor.Name);
+    const isAlreadyAdded = currentAuthors.some(
+      (author: any) => author.Name === newAuthor.Name
+    );
     if (!isAlreadyAdded) {
       const updatedAuthors = [...currentAuthors, newAuthor];
       sessionStorage.setItem("authors", JSON.stringify(updatedAuthors));
@@ -43,29 +45,44 @@ function Page() {
   const fetchAuthor = async (name: string, profileId: number) => {
     try {
       setLoading(true);
-      const response = await fetch(`http://localhost:3002/query/${name}/${profileId}`);
+      const response = await fetch(
+        `http://localhost:3002/query/${name}/${profileId}`
+      );
       if (!response.ok) {
         throw new Error(`HTTP error! Status: ${response.status}`);
       }
       const fetchedData = await response.json();
-      sessionStorage.setItem(`author_${name}_${profileId}`, JSON.stringify(fetchedData));
+      sessionStorage.setItem(
+        `author_${name}_${profileId}`,
+        JSON.stringify(fetchedData)
+      );
 
       if (fetchedData?.author_details) {
-        const { Name, "Fields of Study": fieldsOfStudy } = fetchedData.author_details;
-        const updatedAuthors = updateStoredAuthors({ Name, "Fields of Study": fieldsOfStudy });
+        const { Name, "Fields of Study": fieldsOfStudy } =
+          fetchedData.author_details;
+        const updatedAuthors = updateStoredAuthors({
+          Name,
+          "Fields of Study": fieldsOfStudy,
+        });
 
         const fetchAndStoreRecommendations = async (updatedAuthors: any[]) => {
           try {
-            const recommendations = await fetchRecommendations(updatedAuthors, 6, 6);
+            const recommendations = await fetchRecommendations(
+              updatedAuthors,
+              6,
+              6
+            );
             if (recommendations) {
-              sessionStorage.setItem("recommendations", JSON.stringify(recommendations));
+              sessionStorage.setItem(
+                "recommendations",
+                JSON.stringify(recommendations)
+              );
             }
           } catch (error) {
             console.error("Failed to fetch recommendations:", error);
           }
         };
         fetchAndStoreRecommendations(updatedAuthors);
-
       }
 
       return fetchedData;
@@ -85,37 +102,39 @@ function Page() {
     } else {
       setLoading(true);
       fetchAuthor(name, profileId)
-          .then((fetchedData) => setData(fetchedData))
-          .catch((error) => {
-            console.error("Querying author failed:", error);
-            setError("An error occurred while fetching data. Redirecting to the results page...");
-            setTimeout(() => {
-              router.back();
-            }, 2000);
-          })
-          .finally(() => {
-            setLoading(false);
-          });
+        .then((fetchedData) => setData(fetchedData))
+        .catch((error) => {
+          console.error("Querying author failed:", error);
+          setError(
+            "An error occurred while fetching data. Redirecting to the results page..."
+          );
+          setTimeout(() => {
+            router.back();
+          }, 2000);
+        })
+        .finally(() => {
+          setLoading(false);
+        });
     }
   }, [name, profileId]);
 
   if (loading) {
     return (
-        <div className="pt-48 flex justify-center">
-          <Container>
-            <Loading />
-          </Container>
-        </div>
+      <div className="pt-48 flex justify-center">
+        <Container>
+          <Loading />
+        </Container>
+      </div>
     );
   }
 
   if (error || !data) {
     return (
-        <div className="pt-48 flex justify-center">
-          <Container>
-            <p className="text-red-500">{error}</p>
-          </Container>
-        </div>
+      <div className="pt-48 flex justify-center">
+        <Container>
+          <p className="text-red-500">{error}</p>
+        </Container>
+      </div>
     );
   }
   const cachedData = sessionStorage.getItem(`currentPagePath`);
@@ -124,37 +143,39 @@ function Page() {
     sessionStorage.removeItem(`author_${name}_${profileId}`);
 
     return (
-        <div className="pt-48 flex justify-center">
-          <Container>
-            <div className="min-h-[50vh] flex items-center justify-center p-4">
-              <div className="max-w-md w-full">
-                <Alert variant="destructive" className="mb-4">
-                  <AlertCircle className="h-4 w-4" />
-                  <AlertTitle className="ml-2">Error</AlertTitle>
-                  <AlertDescription className="mt-2">
-                    We couldn&apos;t load the required data. This might be due to a network issue or the content might be
-                    unavailable.
-                  </AlertDescription>
-                </Alert>
+      <div className="pt-48 flex justify-center">
+        <Container>
+          <div className="min-h-[50vh] flex items-center justify-center p-4">
+            <div className="max-w-md w-full">
+              <Alert variant="destructive" className="mb-4">
+                <AlertCircle className="h-4 w-4" />
+                <AlertTitle className="ml-2">Error</AlertTitle>
+                <AlertDescription className="mt-2">
+                  We couldn&apos;t load the required data. This might be due to
+                  a network issue or the content might be unavailable.
+                </AlertDescription>
+              </Alert>
 
-                <div className="flex flex-col gap-4">
-                  <Buttons
-                      onClick={() => {
-                        if (cachedData) {
-                          router.push(cachedData);
-                        } else {
-                          router.back();
-                        }
-                      }}
-                      label={"Go back to results page"}
-                      outline
-                  />
-                  <p className="text-sm text-gray-500 text-center">If the problem persists, please try again later.</p>
-                </div>
+              <div className="flex flex-col gap-4">
+                <Buttons
+                  onClick={() => {
+                    if (cachedData) {
+                      router.push(cachedData);
+                    } else {
+                      router.back();
+                    }
+                  }}
+                  label={"Go back to results page"}
+                  outline
+                />
+                <p className="text-sm text-gray-500 text-center">
+                  If the problem persists, please try again later.
+                </p>
               </div>
             </div>
-          </Container>
-        </div>
+          </div>
+        </Container>
+      </div>
     );
   }
 
@@ -174,24 +195,6 @@ function Page() {
                 </div>
 
                 <Tiptap name={name} summary={data?.summary} />
-      
-                <div className="flex gap-4 justify-center p-2 mb-6">
-                  <Button className="bg-green-400 hover:bg-green-600">
-                    <IoMdCheckmark size={30} />
-                  </Button>
-                  <Button
-                    onClick={() => {
-                      // Check if cachedData exists
-                      if (cachedData) {
-                        router.push(cachedData); // Push to cached URL
-                      } else {
-                        console.warn("No cached URL found in sessionStorage");
-                        router.back();
-                      }
-                    }}>
-                    <IoMdArrowBack />
-                  </Button>
-                </div>
               </div>
               <div className="flex max-w-[600px] p-3 flex-col gap-4 mt-6 overflow-auto">
                 <PublicationCard
@@ -205,7 +208,6 @@ function Page() {
       </Container>
     </div>
   );
-
 }
 
 export default Page;

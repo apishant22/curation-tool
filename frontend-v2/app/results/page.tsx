@@ -137,7 +137,7 @@ function ResultsPage() {
               <div className="text-2xl mt-4 font-semibold text-gray-400">
                 Search Results
               </div>
-              <div className="items-end">
+              <div className="">
                 <Search />
               </div>
             </div>

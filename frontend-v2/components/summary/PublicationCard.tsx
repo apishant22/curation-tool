@@ -72,11 +72,83 @@ const PublicationCard: React.FC<PublicationCardProps> = ({
     }
   });
 
+  // Custom node object with color configuration
+  const graphConfig = {
+    nodeColor: "#2196F3", // Default node color (blue)
+    nodeActiveColor: "#4CAF50", // Hover node color (green)
+    linkColor: "#9E9E9E", // Default link color (gray)
+    nodeDiameter: 8, // Size of the nodes
+  };
+
+  const parseLink = (link: string) => {
+    const profileIdMatch = link.match(/profile\/(\d+)$/);
+    return profileIdMatch ? profileIdMatch[1] : null;
+  };
+
+  useEffect(() => {
+    const fetchAuthorNetwork = async (name: string) => {
+      try {
+        const response = await fetch(`http://localhost:3002/network/${name}`);
+        if (!response.ok) {
+          throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+        const data = await response.json();
+        setNetwork(data);
+      } catch (error) {
+        console.error("Search failed:", error);
+        throw error;
+      }
+    };
+    fetchAuthorNetwork(name);
+  }, [name]);
+
   return (
-        <div className="flex flex-col justify-center items-center">
-          <div className="pt-5">
-            <AuthorNetwork
-                authorName={name || ""}
+    <>
+      {" "}
+      {network ? (
+        <div className="flex flex-col">
+          <div>
+            <div
+              className="flex justify-center items-center"
+              style={{
+                width: "100%",
+                height: "100%",
+                //margin: "0 auto",
+                position: "relative",
+                //border: "1px solid #ccc",
+              }}>
+              {/*Main body*/}
+              <ForceGraph3D
+                //ref={fgRef}
+                graphData={network}
+                nodeLabel={(node) => `
+                    <div style="color: gray; font-weight: bold;">
+                        ${node.name || node.id}
+                    </div>
+                `}
+                // Node styling
+                nodeColor={(node) => node.color || graphConfig.nodeColor}
+                //nodeRelSize={12}
+                // Link styling
+                linkColor={graphConfig.linkColor}
+                linkWidth={1.5}
+                // Node interaction
+                // onNodeHover={handleNodeHover}
+                // nodeAutoColorBy="id"
+                onNodeClick={(node) => {
+                  if (node?.link)
+                    window.open(
+                      `http://localhost:3000/summary?name=${encodeURI(
+                        node.name
+                      )}&profileId=${parseLink(node.link)}`,
+                      "_blank"
+                    );
+                  console.log(
+                    `http://localhost:3000/summary?name=${encodeURI(
+                      node.name
+                    )}&profileId=${parseLink(node.link)}`
+                  );
+                }}
                 width={450}
                 height={300}
             />
