@@ -72,121 +72,50 @@ const PublicationCard: React.FC<PublicationCardProps> = ({
     }
   });
 
-  // Custom node object with color configuration
-  const graphConfig = {
-    nodeColor: "#2196F3", // Default node color (blue)
-    nodeActiveColor: "#4CAF50", // Hover node color (green)
-    linkColor: "#9E9E9E", // Default link color (gray)
-    nodeDiameter: 8, // Size of the nodes
-  };
-
-  const parseLink = (link: string) => {
-    const profileIdMatch = link.match(/profile\/(\d+)$/);
-    return profileIdMatch ? profileIdMatch[1] : null;
-  };
-
-  useEffect(() => {
-    const fetchAuthorNetwork = async (name: string) => {
-      try {
-        const response = await fetch(`http://localhost:3002/network/${name}`);
-        if (!response.ok) {
-          throw new Error(`HTTP error! Status: ${response.status}`);
-        }
-        const data = await response.json();
-        setNetwork(data);
-      } catch (error) {
-        console.error("Search failed:", error);
-        throw error;
-      }
-    };
-    fetchAuthorNetwork(name);
-  }, [name]);
-
   return (
-    <>
-      {" "}
-      {network ? (
-        <div className="flex flex-col">
-          <div>
-            <div
-              className="flex justify-center items-center"
-              style={{
-                width: "100%",
-                height: "100%",
-                //margin: "0 auto",
-                position: "relative",
-                //border: "1px solid #ccc",
-              }}>
-              {/*Main body*/}
-              <ForceGraph3D
-                //ref={fgRef}
-                graphData={network}
-                nodeLabel={(node) => `
-                    <div style="color: gray; font-weight: bold;">
-                        ${node.name || node.id}
-                    </div>
-                `}
-                // Node styling
-                nodeColor={(node) => node.color || graphConfig.nodeColor}
-                //nodeRelSize={12}
-                // Link styling
-                linkColor={graphConfig.linkColor}
-                linkWidth={1.5}
-                // Node interaction
-                // onNodeHover={handleNodeHover}
-                // nodeAutoColorBy="id"
-                onNodeClick={(node) => {
-                  if (node?.link)
-                    window.open(
-                      `http://localhost:3000/summary?name=${encodeURI(
-                        node.name
-                      )}&profileId=${parseLink(node.link)}`,
-                      "_blank"
-                    );
-                  console.log(
-                    `http://localhost:3000/summary?name=${encodeURI(
-                      node.name
-                    )}&profileId=${parseLink(node.link)}`
-                  );
-                }}
-                width={450}
-                height={300}
-            />
-          </div>
+      <div className="flex flex-col justify-center items-center">
+        <div className="pt-5">
+          <AuthorNetwork
+              authorName={name || ""}
+              width={450}
+              height={300}
+          />
+        </div>
 
-          <div className="flex justify-center gap-4 p-4">
-            <Select
+
+        <div className="flex justify-center gap-4 p-4">
+          <Select
               value={sortBy}
               onValueChange={(value) =>
-                setSortBy(value as "date" | "citations")
+                  setSortBy(value as "date" | "citations")
               }>
-              <SelectTrigger className="w-[180px]">
-                <SelectValue placeholder="Sort by..." />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="date">Publication Date</SelectItem>
-                <SelectItem value="citations">Citation Count</SelectItem>
-              </SelectContent>
-            </Select>
+            <SelectTrigger className="w-[180px]">
+              <SelectValue placeholder="Sort by..."/>
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="date">Publication Date</SelectItem>
+              <SelectItem value="citations">Citation Count</SelectItem>
+            </SelectContent>
+          </Select>
 
-            <Select
+          <Select
               value={sortOrder}
               onValueChange={(value) => setSortOrder(value as "asc" | "desc")}>
-              <SelectTrigger className="w-[180px]">
-                <SelectValue placeholder="Order..." />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="desc">Descending</SelectItem>
-                <SelectItem value="asc">Ascending</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
+            <SelectTrigger className="w-[180px]">
+              <SelectValue placeholder="Order..."/>
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="desc">Descending</SelectItem>
+              <SelectItem value="asc">Ascending</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
 
-          <div className="p-4">
-            <Timeline>
-              {sortedPublications.map((pub, index) => (
+        <div className="p-4">
+          <Timeline>
+            {sortedPublications.map((pub, index) => (
                 <Timeline.Item key={index}>
-                  <Timeline.Point />
+                  <Timeline.Point/>
                   <Timeline.Content>
                     <Timeline.Time>
                       {pub["Publication Date"] || "No time available"}
@@ -194,50 +123,50 @@ const PublicationCard: React.FC<PublicationCardProps> = ({
 
                     <Timeline.Title className="text-sm hover:cursor-pointer hover:text-gray-400">
                       <a
-                        href={`https://dl.acm.org/doi/${pub.DOI}`}
-                        target="_blank"
-                        rel="noopener noreferrer">
+                          href={`https://dl.acm.org/doi/${pub.DOI}`}
+                          target="_blank"
+                          rel="noopener noreferrer">
                         {pub.Title || "Untitled Publication"}
                       </a>
                     </Timeline.Title>
 
                     {pub.DOI && (
-                      <a
-                        href={`https://dl.acm.org/doi/${pub.DOI}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-xs font-normal text-gray-500 hover:cursor-pointer hover:text-black">
-                        DOI: {pub.DOI}
-                      </a>
+                        <a
+                            href={`https://dl.acm.org/doi/${pub.DOI}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-xs font-normal text-gray-500 hover:cursor-pointer hover:text-black">
+                          DOI: {pub.DOI}
+                        </a>
                     )}
 
                     <p className="text-xs text-gray-500 mt-1">
                       Citation Count: {pub["Citation Count"]}
                     </p>
                     {pub["Co-Authors"].length > 0 && (
-                      <div>
-                        <p className="text-sm font-medium text-neutral-400 mt-3">
-                          Co-Authors:
-                        </p>
-                        <ul className="list-disc list-inside text-xs text-gray-500">
-                          {pub["Co-Authors"].map((coAuthor, idx) => (
-                            <li key={idx}>
-                              <a
-                                href={coAuthor["Profile Link"]}
-                                target="_blank">
-                                {coAuthor.Name}
-                              </a>{" "}
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
+                        <div>
+                          <p className="text-sm font-medium text-neutral-400 mt-3">
+                            Co-Authors:
+                          </p>
+                          <ul className="list-disc list-inside text-xs text-gray-500">
+                            {pub["Co-Authors"].map((coAuthor, idx) => (
+                                <li key={idx}>
+                                  <a
+                                      href={coAuthor["Profile Link"]}
+                                      target="_blank">
+                                    {coAuthor.Name}
+                                  </a>{" "}
+                                </li>
+                            ))}
+                          </ul>
+                        </div>
                     )}
                   </Timeline.Content>
                 </Timeline.Item>
-              ))}
-            </Timeline>
-          </div>
+            ))}
+          </Timeline>
         </div>
+      </div>
   );
 };
 

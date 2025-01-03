@@ -22,16 +22,16 @@ export default function RootLayout({
       <body
         className="flex min-h-screen flex-col"
         suppressHydrationWarning={true}>
-        <div className="flex-1">
+        <div className="flex flex-col flex-1">
         <ToasterProvider />
         <RegenerateModal />
         {/* <NetworkModal /> */}
         <Navbar />
         <Suspense>
-          <main className="flex-grow">{children}</main>
+          <main className="flex-grow p-4 pb-12 sm:p-6 lg:p-8">{children}</main>
         </Suspense>
         </div>
-        <footer className=" bg-neutral-600">
+        <footer className="text-center sm:text-left">
           <Footer />
         </footer>
       </body>

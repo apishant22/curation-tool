@@ -1,9 +1,9 @@
 "use client";
 
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState } from "react";
 import dynamic from "next/dynamic";
-import {toast} from "react-hot-toast";
-import { useRouter } from "next/navigation";
+import {Alert, AlertDescription, AlertTitle} from "@/components/ui/alert";
+import {AlertCircle} from "lucide-react";
 
 const ForceGraph3D = dynamic(
   () => import("react-force-graph").then((mod) => mod.ForceGraph2D),
@@ -18,27 +18,37 @@ interface NetworkProps {
         nodeColor?: string;
         nodeActiveColor?: string;
         linkColor?: string;
+        centerNodeDiameter?: number | undefined;
         nodeDiameter?: number | undefined;
         centerNodeColor?: string;
     };
 };
-
+const { useRef } = React;
 const AuthorNetwork: React.FC<NetworkProps> = ({
     authorName,
     width,
     height,
     graphConfig={
-        nodeColor:"#2196F3",
-        nodeActiveColor: "#4DAF83",
-        linkColor: "#9E9E9E",
-        nodeDiameter: 4,
+        nodeColor:"#207AF6",
+        nodeActiveColor: "#2196F3",
+        linkColor: "#AFAF83",
+        nodeDiameter: 6,
+        centerNodeDiameter: 10,
         centerNodeColor: "#4CBFF3",
     },
     }
 ) => {
   const [graphData, setGraphData] = useState(null);
   const [loading, setLoading] = useState(true);
-  const router = useRouter();
+  const fgRef = useRef();
+  const img = new Image();
+  img.src = "./images/avatar.png";
+
+
+  const parseLink = (link: string) => {
+        const profileIdMatch = link.match(/profile\/(\d+)$/);
+        return profileIdMatch ? profileIdMatch[1] : null;
+  };
 
   const containerRef = useRef<HTMLDivElement>(null);
   // Fetch the graph data from the backend
@@ -52,8 +62,9 @@ const AuthorNetwork: React.FC<NetworkProps> = ({
         }
         const data = await res.json();
         setGraphData(data);
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
       } catch (error) {
-        console.error("Error fetching graph data:", error);
+       // console.error("Error fetching graph data:", error);
       } finally {
         setLoading(false);
       }
@@ -61,27 +72,75 @@ const AuthorNetwork: React.FC<NetworkProps> = ({
     fetchAuthorNetwork();
   }, [authorName, width, height]);
 
+    useEffect(() => {
+        let count = 0;
+        const interval = setInterval(() => {
+            if (fgRef.current?.getGraphBbox()?.x) {
+                fgRef.current.zoomToFit(100, 50);
+                count += 1;
+                if (count > 100) {
+                    clearInterval(interval);
+                }
+            }
+        }, 10);
+        return () => {
+            clearInterval(interval);
+        };
+    }, [graphData]);
 
   if (loading) {
       return (
-          <div className="flex flex-col items-center justify-center space-x-2">
-              <div className="w-5 h-5 border-4 border-gray-400 border-t-transparent rounded-full animate-spin"></div>
-              <span className="text-gray-600 dark:text-neutral-400 text-lg">
+          <div ref={containerRef}
+               style={
+              {
+                  width: width,
+                  height: height,
+                  margin: "0 auto",
+                  position: "relative",
+                  overflow: "hidden",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  backgroundColor:"rgba(250,250,250,0.1)"
+              }}>
+            <div className="flex flex-row items-center justify-center space-x-2">
+              <div className="w-5 h-5 border-4 border-gray-400 border-t-transparent rounded-full animate-spin text-blue-500"></div>
+                <span className="text-gray-600 dark:text-neutral-400 text-lg animate-pulse">
                          Loading author network ...
-              </span>
+                </span>
+            </div>
           </div>
       );
   }
     if (!graphData) {
         return (
-            <div className="flex items-center justify-center h-20 space-x-2">
-                <div className="text-center text-red-600">
-                    Error loading network
+            <div ref={containerRef}
+                 style={
+                     {
+                         width: width,
+                         height: height,
+                         margin: "0 auto",
+                         position: "relative",
+                         overflow: "hidden",
+                         display: "flex",
+                         alignItems: "center",
+                         justifyContent: "center",
+                         backgroundColor:"rgba(250,250,250,0.1)"
+                     }}>
+                <div className="min-h-[50vh] flex items-center justify-center h-20 space-x-2 max-w-md w-full">
+                    <Alert variant="destructive" className="mb-4">
+                        <AlertCircle className="h-4 w-4"/>
+                        <AlertTitle className="ml-2">Error</AlertTitle>
+                        <AlertDescription className="mt-2">
+                            We couldn&apos;t load the network data. This might be due to
+                            a network issue or the content might be unavailable.
+                        </AlertDescription>
+                    </Alert>
                 </div>
             </div>
-        );
-    }
-
+        );}
+    const nodeCount = graphData.nodes.length;
+    const linkCount = graphData.links.length;
     return (
         <div ref={containerRef}
              style={{
@@ -91,9 +150,35 @@ const AuthorNetwork: React.FC<NetworkProps> = ({
                  position: "relative",
                  overflow: "hidden",
              }}>
+            <div
+                style={{
+                    display: "flex",
+                    justifyContent: "flex-end",
+                    alignItems: "flex-end",
+                    padding: "10px 10px",
+                    position: "absolute",
+                    gap:10,
+                    top: 0,
+                    right: 0,
+                    zIndex: 10,
+                }}
+            >
+                <div>
+                    <div className="p-1 font-sans font-semibold text-blue-600 rounded-md">
+                        <span>Co-authors: {nodeCount-1} </span>
+                    </div>
+                </div>
+                <div>
+                    <div className="p-1 font-sans font-semibold text-blue-600 rounded-md">
+                        <span> Relations: {linkCount}</span>
+                    </div>
+                </div>
+            </div>
+
             <div>
                 {/*Main body*/}
                 <ForceGraph3D
+                    ref={fgRef}
                     graphData={graphData}
                     nodeLabel={(node) => node.name || node.id}
                     nodeCanvasObject={(node, ctx, globalScale) => {
@@ -103,23 +188,41 @@ const AuthorNetwork: React.FC<NetworkProps> = ({
                         const nodeColor =
                             //isHovered ? graphConfig.nodeActiveColor :
                             node.name === authorName ? graphConfig.centerNodeColor :
-                            graphConfig.nodeColor;
+                                graphConfig.nodeColor;
+
+                        const nodeDiameter =
+                            node.name === authorName
+                                ? graphConfig.centerNodeDiameter // Use centerNodeDiameter for the center node
+                                : graphConfig.nodeDiameter;
 
                         if (node.x === undefined || node.y === undefined) {
                             return;
                         }
+
                         // Draw the node (default style)
+
+                        if (img.complete) {
+                            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+                            // @ts-expect-error
+                            ctx.drawImage(img, node.x - nodeDiameter / 2, node.y - nodeDiameter / 2, nodeDiameter, nodeDiameter);
+                        }
                         ctx.fillStyle = nodeColor || node.color;
+                        ctx.globalAlpha = 0.6;
                         ctx.beginPath();
-                        ctx.arc(node.x, node.y, graphConfig.nodeDiameter, 0, 2 * Math.PI, false);
+                        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+                        // @ts-expect-error
+                        ctx.arc(node.x, node.y, nodeDiameter / 2, 0, 2 * Math.PI);
                         ctx.fill();
+                        ctx.globalAlpha = 1.0;
 
                         // Add the label below the node
                         ctx.font = `${fontSize}px Sans-Serif`;
                         ctx.textAlign = "center";
                         ctx.textBaseline = "top";
-                        ctx.fillStyle = nodeColor || node.color; // Use the same color as the node
-                        ctx.fillText(label, node.x, node.y + graphConfig.nodeDiameter + 2);
+                        ctx.fillStyle = nodeColor || node.color;
+                        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+                        // @ts-expect-error
+                        ctx.fillText(label, node.x, node.y + nodeDiameter + 1);
                     }}
                     //onNodeHover={(node) => setHoveredNode(node)}
                     // Link styling
@@ -128,27 +231,25 @@ const AuthorNetwork: React.FC<NetworkProps> = ({
                     nodeAutoColorBy="group"
                     onNodeClick={(node) =>
                         //(node) => {if (node?.link) window.open(node.link, "_blank");}
-                        {
-                            const profileIdMatch = node.link.match(/profile\/(\d+)$/);
-                            const profileId = profileIdMatch ? profileIdMatch[1] : "";
-                            const formattedName = node.name.trim().replace(/\s+/g, " ").toLowerCase();
-                            const searchParams = new URLSearchParams({
-                                name: formattedName,
-                                profileId: profileId,
-                            });
-                            if (!profileId) {
-                                toast.error("Invalid profile link.");
-                                return;
-                            }
-                            toast.success(
-                                "Item has been successfully clicked! Redirecting to the details page."
+                    {
+                        if (node?.link)
+                            window.open(
+                                `http://localhost:3000/summary?name=${encodeURI(
+                                    node.name
+                                )}&profileId=${parseLink(node.link)}`,
+                                "_blank"
                             );
-                            router.push(`/summary?${searchParams.toString()}`);
-                        }
+                        console.log(
+                            `http://localhost:3000/summary?name=${encodeURI(
+                                node.name
+                            )}&profileId=${parseLink(node.link)}`
+                        );
+
+                    }
                     }
                     width={width}
                     height={height}
-                    backgroundColor="rgba(250,250,250,1)"
+                    backgroundColor="rgba(250,250,250,0.2)"
                     enablePointerInteraction={true}
                 />
             </div>

@@ -86,9 +86,13 @@ body,
 .cards-wrapper {
   display: flex;
   transition: transform 0.5s ease-in-out;
+  flex-wrap: wrap;
+  justify-content: center;
 }
 
 .card {
+  flex: 1 1 calc(33.333% - 10px);
+  margin: 5px;
   min-width: 30%;
   margin-right: 2%;
   flex-shrink: 0;
@@ -100,7 +104,7 @@ body,
 
 .grid-container {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
   gap: 20px;
 }
 

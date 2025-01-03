@@ -15,7 +15,6 @@ from backend.app.author_recommender import get_acm_recommendations_and_field_aut
 
 
 CACHE_LIFETIME = timedelta(weeks=4)
-
 app = Flask(__name__)
 CORS(app)
 
@@ -68,30 +67,14 @@ def _search(search_type, name, page):
         msg = f'An unexpected error occurred: {e}'
         print(msg)
         return jsonify(error=msg), 500
-
-
-# Expose graph.json data at http://localhost:3002/graph
-@app.route('/graph', methods=['GET'])
-def graph():
-    try:
-        graph_path = os.path.join(os.path.dirname(__file__), "graph.json")
-        with open(graph_path,"r") as f:
-            graph_data = json.load(f)
-        return jsonify(graph_data), 200
-    except FileNotFoundError:
-        return jsonify({"error": "Graph data not found"}), 404
     
 @app.route('/network/<name>')
 def network(name):
-    network_data = nw.convert_to_json(name)
-    # try:
-    #     network_path = os.path.join(os.path.dirname(__file__), "graph.json")
-    #     with open(network_path,"r") as f:
-    #         network_data = json.load(f)
-    #     return jsonify(network_data), 200
-    # except FileNotFoundError:
-    #     return jsonify({"error": "Network data not found"}), 404
-    return network_data, 200
+    try:
+        network_data = nw.convert_to_json(name)
+        return network_data,200
+    except Exception as e:
+        return jsonify({"error":str(e)}), 500
 
 @app.route('/search/author/<name>/<int:page>/<gender>')
 def search_author(name, page,gender):

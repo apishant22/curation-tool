@@ -11,6 +11,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import React, { useEffect, useState } from "react";
 import Tiptap from "@/components/tiptap/Tiptap";
 import { fetchRecommendations } from "@/utils/fetchRecommendations";
+import Search from "@/components/navbar/Search";
 
 function Page() {
   const searchParams = useSearchParams();
@@ -138,6 +139,9 @@ function Page() {
     );
   }
   const cachedData = sessionStorage.getItem(`currentPagePath`);
+  if (typeof window !== "undefined") {
+    sessionStorage.setItem("lastPage", window.location.href);
+  }
 
   if (!data?.author_details) {
     sessionStorage.removeItem(`author_${name}_${profileId}`);
@@ -161,11 +165,14 @@ function Page() {
                   onClick={() => {
                     if (cachedData) {
                       router.push(cachedData);
-                    } else {
+                    } else if (window.history.length > 1) {
                       router.back();
+                    } else {
+                      window.close();
+                      window.location.href = "lastPage";
                     }
                   }}
-                  label={"Go back to results page"}
+                  label={"Go back to the last page"}
                   outline
                 />
                 <p className="text-sm text-gray-500 text-center">
@@ -180,10 +187,17 @@ function Page() {
   }
 
   return (
-    <div className="pt-24">
+    <div className="pt-4">
       <Container>
+        <Container>
+          <div className="pt-12 pb-4 flex justify-end">
+            <div className="items-end">
+              <Search/>
+            </div>
+          </div>
+        </Container>
         {loading ? (
-          <Loading />
+            <Loading/>
         ) : (
           <>
             <div className="flex flex-grow shadow-2xl dark:bg-zinc-900">

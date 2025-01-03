@@ -155,7 +155,7 @@ const Homepage: React.FC = () => {
           <Container>
             {/* Header */}
             <div className="border-b-[1px] flex flex-col items-center gap-10">
-              <div className="pt-10 pb-10">
+              <div className="pt-4 pb-4">
                 <HomeLogo/>
               </div>
               <div className="pl-5 pr-5">
@@ -226,6 +226,19 @@ const Homepage: React.FC = () => {
                                     <IoIosArrowForward size={20} />
                                   </button>
                               )}
+
+                              {/* Dot Navigation */}
+                              <div className="flex justify-center mt-4 space-x-2">
+                                {recentAuthors.map((_, index) => (
+                                    <button
+                                        key={index}
+                                        onClick={() => setRecentIndex(index)}
+                                        className={`h-2 w-2 rounded-full transition-all ${
+                                            index === recentIndex ? 'bg-gray-600 scale-75' : 'bg-gray-200'
+                                        }`}
+                                    />
+                                ))}
+                              </div>
                           </div>
                       )}
                     </div>
@@ -270,7 +283,7 @@ const Homepage: React.FC = () => {
                                         onClick={() => handlePrev(sectionIndex)}
                                         className="absolute left-[-50px] top-1/2 transform -translate-y-1/2 bg-gray-800 text-white p-2 rounded-full shadow-md transition-opacity duration-300 opacity-0 group-hover:opacity-100 hover:scale-105 z-10"
                                     >
-                                      <IoIosArrowBack size={20} />
+                                      <IoIosArrowBack size={20}/>
                                     </button>
                                 )}
 
@@ -281,7 +294,12 @@ const Homepage: React.FC = () => {
                                         transform: `translateX(-${currentIndex[sectionIndex] * 100}%)`,
                                       }}
                                   >
-                                    {recommendation.Authors.map((author: { [x: string]: string; Name: any; Summary: any; Reason: any; }, authorIndex: React.Key | null | undefined) => (
+                                    {recommendation.Authors.map((author: {
+                                      [x: string]: string;
+                                      Name: any;
+                                      Summary: any;
+                                      Reason: any;
+                                    }, authorIndex: React.Key | null | undefined) => (
                                         <div
                                             key={authorIndex}
                                             className={`min-w-[33.3%] flex-shrink-0 p-2`}
@@ -305,16 +323,40 @@ const Homepage: React.FC = () => {
                                             }
                                             className="absolute right-[-50px] top-1/2 transform -translate-y-1/2 bg-gray-800 text-white p-2 rounded-full shadow-md transition-opacity duration-300 opacity-0 group-hover:opacity-100 hover:scale-105 z-10"
                                         >
-                                          <IoIosArrowForward size={20} />
+                                          <IoIosArrowForward size={20}/>
                                         </button>
                                     )}
+                                {/* Dot Navigation */}
+                                <div className="flex justify-center mt-4 space-x-2">
+                                  {Array.from(
+                                      {length: Math.ceil(recommendation.Authors.length / 3)},
+                                      (_, dotIndex) => (
+                                          <button
+                                              key={dotIndex}
+                                              onClick={() =>
+                                                  setCurrentIndex((prev) =>
+                                                      prev.map((index, i) =>
+                                                          i === sectionIndex ? dotIndex : index
+                                                      )
+                                                  )
+                                              }
+                                              className={`h-2 w-2 rounded-full transition-all ${
+                                                  dotIndex === currentIndex[sectionIndex]
+                                                      ? "bg-gray-600 scale-75"
+                                                      : "bg-gray-200"
+                                              }`}
+                                          />
+                                      )
+                                  )}
+                                </div>
                               </div>
                             </div>
                         ))}
                   </>
               ) : (
                   <div className="flex items-center justify-center h-20 space-x-2">
-                    <div className="w-5 h-5 border-4 border-gray-400 border-t-transparent rounded-full animate-spin"></div>
+                    <div
+                        className="w-5 h-5 border-4 border-gray-400 border-t-transparent rounded-full animate-spin"></div>
                     <span className="text-gray-600 dark:text-neutral-400 text-lg">
                          Loading recommendations
                   </span>
