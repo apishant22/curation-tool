@@ -47,7 +47,7 @@ const RegenerateCard = ({
     <div
       className="w-[560px]
     ">
-      <div className="dark:bg-zinc-900 p-3 bg-blue-500 border rounded-md">
+      <div className="dark:bg-zinc-900 p-3 bg-white border rounded-md">
         <form onSubmit={handleSubmit}>
           <div className="p-2 text-sm font-bold text-white">Text to change</div>
           <textarea

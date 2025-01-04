@@ -46,6 +46,7 @@ Thumbs.db
 
 # Python
 .venv/
+.venv2/
 __pycache__
 
 *.orig

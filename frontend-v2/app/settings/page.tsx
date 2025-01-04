@@ -8,8 +8,12 @@ import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Plus, Trash2 } from "lucide-react";
 
+interface Member {
+  email: string;
+}
+
 const SettingsPage = () => {
-  const [members, setMembers] = useState([]);
+  const [members, setMembers] = useState<Member[]>([]);
   const [newEmail, setNewEmail] = useState("");
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");

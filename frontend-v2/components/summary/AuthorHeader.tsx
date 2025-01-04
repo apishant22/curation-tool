@@ -9,7 +9,7 @@ const AuthorHeader: React.FC<AuthorHeaderProps> = ({ name }) => {
   return (
     <div className="relative pt-6 ">
       <div className="max-w-2xl mx-auto px-4">
-        <div className=" p-2 rounded-lg border ">
+        <div className=" p-2 rounded-lg ">
           <h1 className="text-center text-3xl font-bold">
             {name.toUpperCase()}
           </h1>

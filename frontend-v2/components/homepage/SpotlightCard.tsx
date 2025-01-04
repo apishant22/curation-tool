@@ -1,17 +1,18 @@
-"use client";
-
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "react-hot-toast";
 
-interface ContentCardProps {
+interface SpotlightCardProps {
     name: string;
     profileLink: string;
     summary?: string;
-    reason?: string;
 }
 
-const ContentCard: React.FC<ContentCardProps> = ({ name, profileLink, reason }) => {
+const SpotlightCard: React.FC<SpotlightCardProps> = ({
+                                                     name,
+                                                     profileLink,
+                                                     summary,
+                                                 }) => {
     const [isHovered, setIsHovered] = useState(false);
     const router = useRouter();
 
@@ -22,8 +23,16 @@ const ContentCard: React.FC<ContentCardProps> = ({ name, profileLink, reason }) 
             .join(" ");
     };
 
+    const extractMainBody = (summary?: string): string => {
+        if (!summary) {
+            return "Summary not available.";
+        }
+        const lines = summary.split("\n").filter((line) => !line.startsWith("#"));
+        return lines.join(" ").trim();
+    };
+
     const truncateWithEllipsis = (text: string, maxWords: number): string => {
-        if (!text) return "Details not available.";
+        if (!text) return "Summary not available.";
         const words = text.split(" ");
         if (words.length > maxWords) {
             return words.slice(0, maxWords - 1).join(" ") + " ...";
@@ -79,7 +88,7 @@ const ContentCard: React.FC<ContentCardProps> = ({ name, profileLink, reason }) 
             }`}
             style={{
                 transform: "scale(1)",
-                transition: "transform 1s ease-in-out",
+                transition: "transform 2s ease-in-out",
                 position: "relative",
                 zIndex: isHovered ? 10 : 1,
                 width: "380px",
@@ -91,7 +100,6 @@ const ContentCard: React.FC<ContentCardProps> = ({ name, profileLink, reason }) 
             onClick={handleCardClick}
         >
             {/* Main Content */}
-            { reason && (
             <div className="space-y-2">
                 <h2 className="text-xl font-semibold text-blue-600 dark:text-white hover:text-blue-800 dark:hover:text-neutral-500">
                     {formatName(name)}
@@ -104,7 +112,7 @@ const ContentCard: React.FC<ContentCardProps> = ({ name, profileLink, reason }) 
                             href={profileLink}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="hover:text-blue-600 break-words"
+                            className="hover:text-blue-600"
                             style={{wordBreak: "break-word", whiteSpace: "normal"}}
                             onClick={(e) => e.stopPropagation()}
                         >
@@ -112,7 +120,7 @@ const ContentCard: React.FC<ContentCardProps> = ({ name, profileLink, reason }) 
                         </a>
                     </p>
                     <div
-                        className="mt-4 text-gray-600 dark:text-neutral-400 text-sm italic"
+                        className="mt-4 text-gray-600 dark:text-neutral-400 text-sm"
                         style={{
                             overflow: "hidden",
                             maxHeight: "4.5em",
@@ -123,14 +131,15 @@ const ContentCard: React.FC<ContentCardProps> = ({ name, profileLink, reason }) 
                             WebkitLineClamp: 4,
                         }}
                     >
-                        {truncateWithEllipsis(reason, 25)}
+                        <p>
+                            <strong>Summary:</strong>{" "}
+                            {truncateWithEllipsis(extractMainBody(summary), 25)}
+                        </p>
                     </div>
                 </div>
             </div>
-            )}
-
         </div>
     );
 };
 
-export default ContentCard;
+export default SpotlightCard;

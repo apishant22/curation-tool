@@ -1,7 +1,7 @@
+import time
 import requests
 from bs4 import BeautifulSoup
 import re
-from concurrent.futures import ThreadPoolExecutor
 
 
 class ACMAuthorSearcher:
@@ -14,6 +14,8 @@ class ACMAuthorSearcher:
 
     def scrape_page(self, url, headers, profile_url_pattern, is_field):
         try:
+            time.sleep(1)
+
             response = requests.get(url, headers=headers)
             if response.status_code != 200:
                 print(f"Failed to retrieve data from URL: {url}")
@@ -51,23 +53,22 @@ class ACMAuthorSearcher:
                             "Location": location,
                             "Profile Link": profile_link
                         })
+
             return results
+
         except Exception as e:
             print(f"Error scraping page: {e}")
             return []
 
+
     def fetch_pages(self, base_url, headers, profile_url_pattern, is_field, start_page, end_page):
-        urls = [
-            f"{base_url}&startPage={i}" for i in range(start_page, end_page)
-        ]
+        urls = [f"{base_url}&startPage={i}" for i in range(start_page, end_page)]
         results = []
-        with ThreadPoolExecutor(max_workers=5) as executor:
-            futures = [
-                executor.submit(self.scrape_page, url, headers, profile_url_pattern, is_field)
-                for url in urls
-            ]
-            for future in futures:
-                results.extend(future.result())
+
+        for url in urls:
+            page_results = self.scrape_page(url, headers, profile_url_pattern, is_field)
+            results.extend(page_results)
+
         return results
 
     def search_acm_author(self, author_name, page_number, max_pages):

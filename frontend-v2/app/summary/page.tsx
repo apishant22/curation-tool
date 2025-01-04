@@ -1,4 +1,7 @@
+/* eslint-disable react-hooks/exhaustive-deps */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
+
 import Buttons from "@/components/global/Button";
 import Container from "@/components/global/Container";
 import AuthorHeader from "@/components/summary/AuthorHeader";
@@ -9,67 +12,38 @@ import { AlertCircle } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import React, { useEffect, useState } from "react";
 import Tiptap from "@/components/tiptap/Tiptap";
-
-import { Button } from "@/components/ui/button";
-import { IoMdArrowBack, IoMdCheckmark } from "react-icons/io";
-
-interface Biography {
-  Biography: string;
-}
-
-interface EducationHistory {
-  Department: string | null;
-  "End Date": string;
-  Institution: string;
-  Role: string | null;
-  "Start Date": string;
-}
-
-interface EmploymentHistory {
-  Department: string | null;
-  "End Date": string;
-  Organization: string;
-  Role: string;
-  "Start Date": string;
-}
-
-interface CoAuthor {
-  Name: string;
-  "Profile Link": string;
-}
-
-interface Publication {
-  Abstract: string;
-  "Citation Count": number;
-  "Co-Authors": CoAuthor[];
-  DOI: string;
-  "Publication Date": string;
-  Title: string;
-}
-
-interface AuthorDetails {
-  Biography: Biography;
-  "Education History": EducationHistory[];
-  "Employment History": EmploymentHistory[];
-  Name: string;
-  "Orcid ID": string;
-  Publications: Publication[];
-}
-
-interface AuthorResponse {
-  author_details: AuthorDetails;
-  message: string;
-  summary: string;
-}
+import { fetchRecommendations } from "@/utils/fetchRecommendations";
+import Search from "@/components/navbar/Search";
 
 function Page() {
   const searchParams = useSearchParams();
-  const [loading, setLoading] = useState(true);
   const router = useRouter();
-  const [data, setData] = useState<AuthorResponse | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [data, setData] = useState<any>(null);
   const [error, setError] = useState<string | null>(null);
   const name = searchParams.get("name") || "";
   const profileId = parseInt(searchParams.get("profileId") || "0", 10);
+
+  const getStoredAuthors = () => {
+    const storedAuthors = sessionStorage.getItem("authors");
+    return storedAuthors ? JSON.parse(storedAuthors) : [];
+  };
+
+  const updateStoredAuthors = (newAuthor: {
+    Name: string;
+    "Fields of Study": string[];
+  }) => {
+    const currentAuthors = getStoredAuthors();
+    const isAlreadyAdded = currentAuthors.some(
+      (author: any) => author.Name === newAuthor.Name
+    );
+    if (!isAlreadyAdded) {
+      const updatedAuthors = [...currentAuthors, newAuthor];
+      sessionStorage.setItem("authors", JSON.stringify(updatedAuthors));
+      return updatedAuthors;
+    }
+    return currentAuthors;
+  };
 
   const fetchAuthor = async (name: string, profileId: number) => {
     try {
@@ -80,13 +54,41 @@ function Page() {
       if (!response.ok) {
         throw new Error(`HTTP error! Status: ${response.status}`);
       }
-      const data = await response.json();
+      const fetchedData = await response.json();
       sessionStorage.setItem(
         `author_${name}_${profileId}`,
-        JSON.stringify(data)
+        JSON.stringify(fetchedData)
       );
 
-      return data;
+      if (fetchedData?.author_details) {
+        const { Name, "Fields of Study": fieldsOfStudy } =
+          fetchedData.author_details;
+        const updatedAuthors = updateStoredAuthors({
+          Name,
+          "Fields of Study": fieldsOfStudy,
+        });
+
+        const fetchAndStoreRecommendations = async (updatedAuthors: any[]) => {
+          try {
+            const recommendations = await fetchRecommendations(
+              updatedAuthors,
+              6,
+              6
+            );
+            if (recommendations) {
+              sessionStorage.setItem(
+                "recommendations",
+                JSON.stringify(recommendations)
+              );
+            }
+          } catch (error) {
+            console.error("Failed to fetch recommendations:", error);
+          }
+        };
+        fetchAndStoreRecommendations(updatedAuthors);
+      }
+
+      return fetchedData;
     } catch (error) {
       console.error("Search failed:", error);
       throw error;
@@ -96,7 +98,6 @@ function Page() {
   };
 
   useEffect(() => {
-    // Check for cached results
     const cachedData = sessionStorage.getItem(`author_${name}_${profileId}`);
     if (cachedData) {
       setData(JSON.parse(cachedData));
@@ -104,21 +105,21 @@ function Page() {
     } else {
       setLoading(true);
       fetchAuthor(name, profileId)
-        .then((data) => setData(data))
+        .then((fetchedData) => setData(fetchedData))
         .catch((error) => {
           console.error("Querying author failed:", error);
           setError(
             "An error occurred while fetching data. Redirecting to the results page..."
           );
           setTimeout(() => {
-            router.back(); // Redirect after a short delay
-          }, 2000); // 2 seconds delay for user to see the message
+            router.back();
+          }, 2000);
         })
         .finally(() => {
           setLoading(false);
         });
     }
-  }, [searchParams, router, name, profileId]);
+  }, [name, profileId]);
 
   if (loading) {
     return (
@@ -140,8 +141,11 @@ function Page() {
     );
   }
   const cachedData = sessionStorage.getItem(`currentPagePath`);
+  if (typeof window !== "undefined") {
+    sessionStorage.setItem("lastPage", window.location.href);
+  }
 
-  if (data.author_details == null) {
+  if (!data?.author_details) {
     sessionStorage.removeItem(`author_${name}_${profileId}`);
 
     return (
@@ -155,25 +159,22 @@ function Page() {
                 <AlertDescription className="mt-2">
                   We couldn&apos;t load the required data. This might be due to
                   a network issue or the content might be unavailable.
-                  <p className="font-bold text-red-800">
-                    Sometimes the database need a little bit of nudge before it
-                    can start working..
-                  </p>
                 </AlertDescription>
               </Alert>
 
               <div className="flex flex-col gap-4">
                 <Buttons
                   onClick={() => {
-                    // Check if cachedData exists
                     if (cachedData) {
-                      router.push(cachedData); // Push to cached URL
-                    } else {
-                      console.warn("No cached URL found in sessionStorage");
+                      router.push(cachedData);
+                    } else if (window.history.length > 1) {
                       router.back();
+                    } else {
+                      window.close();
+                      window.location.href = "lastPage";
                     }
                   }}
-                  label={"Go back to results page"}
+                  label={"Go back to the last page"}
                   outline
                 />
                 <p className="text-sm text-gray-500 text-center">
@@ -188,8 +189,15 @@ function Page() {
   }
 
   return (
-    <div className="pt-24">
+    <div className="pt-4">
       <Container>
+        <Container>
+          <div className="pt-20 pb-4 pr-4 flex justify-end">
+            <div className="items-end">
+              <Search />
+            </div>
+          </div>
+        </Container>
         {loading ? (
           <Loading />
         ) : (
@@ -203,28 +211,7 @@ function Page() {
                 </div>
 
                 <Tiptap name={name} summary={data?.summary} />
-      
-                <div className="flex gap-4 justify-center p-2 mb-6">
-                  <Button className="bg-green-400 hover:bg-green-600">
-                    <IoMdCheckmark size={30} />
-                  </Button>
-                  <Button
-                    onClick={() => {
-                      // Check if cachedData exists
-                      if (cachedData) {
-                        router.push(cachedData); // Push to cached URL
-                      } else {
-                        console.warn("No cached URL found in sessionStorage");
-                        router.back();
-                      }
-                    }}>
-                    <IoMdArrowBack />
-                  </Button>
-                </div>
-        
-
               </div>
-
               <div className="flex max-w-[600px] p-3 flex-col gap-4 mt-6 overflow-auto">
                 <PublicationCard
                   publications={data?.author_details?.Publications || []}

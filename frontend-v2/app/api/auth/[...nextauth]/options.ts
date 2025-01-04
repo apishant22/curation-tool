@@ -1,5 +1,5 @@
 import type { NextAuthOptions } from "next-auth";
-import { PrismaClient } from '@prisma/client'
+import { PrismaClient } from "@prisma/client";
 import GoogleProvider from "next-auth/providers/google";
 
 export const options: NextAuthOptions = {
@@ -15,22 +15,33 @@ export const options: NextAuthOptions = {
   },
   callbacks: {
     async signIn({ user }) {
-      // TODO (WINSTON):
-      // 1) database table setup
-      // 2) we want to query the database
-      // 3) use prisma orm to query the database (a lot of tutorials in docs or youtube)
-      // 4) build the logic to authenticate here
+      const prisma = new PrismaClient();
 
-      const prisma = new PrismaClient()
-      // By unique identifier
-      const users = await prisma.email_Access.findMany({where: {email: user.email}})
-      if(users.length > 0){
-        return !users[0].blacklisted
+      // Ensure user.email is not null or undefined
+      if (!user.email) {
+        return false;
       }
-      return false
 
+      try {
+        // Query the database for the email
+        const users = await prisma.email_Access.findMany({
+          where: { email: user.email },
+        });
 
+        // Return true if user is found and not blacklisted, otherwise false
+        if (users.length > 0) {
+          return !users[0].blacklisted;
+        }
+
+        // If no user is found, deny access
+        return false;
+      } catch (error) {
+        console.error("Error querying the database:", error);
+        return false; // Deny access in case of any errors
+      } finally {
+        // Ensure PrismaClient is disconnected to avoid memory leaks
+        await prisma.$disconnect();
+      }
     },
-
-    },
+  },
 };

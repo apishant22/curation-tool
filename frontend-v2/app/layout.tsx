@@ -4,7 +4,6 @@ import Navbar from "@/components/navbar/Navbar";
 import Footer from "@/components/global/Footer";
 
 import ToasterProvider from "@/components/providers/ToasterProvider";
-import RegenerateModal from "@/components/modal/RegenerateModal";
 import { Suspense } from "react";
 import { getServerSession } from "next-auth";
 import { options } from "./api/auth/[...nextauth]/options";
@@ -25,14 +24,18 @@ export default async function RootLayout({
       <body
         className="flex min-h-screen flex-col"
         suppressHydrationWarning={true}>
-        <ToasterProvider />
-        <RegenerateModal />
-        {/* <NetworkModal /> */}
-        {session && <Navbar user={session?.user} />}
-        <Suspense>
-          <main className="flex-grow">{children}</main>
-        </Suspense>
-        {session && <Footer />}
+        <div className="flex flex-col flex-1">
+          <ToasterProvider />
+          {session && <Navbar user={session?.user} />}
+          <Suspense>
+            <main className="flex-grow">{children}</main>
+          </Suspense>
+        </div>
+        {session && (
+          <footer className="text-center sm:text-left">
+            <Footer />
+          </footer>
+        )}
       </body>
     </html>
   );

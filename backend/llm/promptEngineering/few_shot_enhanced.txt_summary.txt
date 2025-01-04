@@ -1,0 +1,47 @@
+#### Cigdem Sengul
+
+**Summary:**
+
+Cigdem Sengul is a distinguished researcher and educator in the field of computer networks, currently serving as a Senior Lecturer at Brunel University. With over a decade of experience in both academia and industry, her expertise spans a wide range of areas within wireless networks, including network protocols, energy efficiency, interference management, and the Internet of Things (IoT). 
+
+**Academic and Professional Background:**
+
+Cigdem Sengul has a rich academic and professional background. She has held significant positions in various institutions and organizations:
+- **Brunel University**: Senior Lecturer, focusing on network privacy, security, identity, and authorization.
+- **Nominet**: Senior Researcher (2015-2019), where she worked on standards for building privacy and trust in the IoT.
+- **Oxford Brookes University**: Senior Lecturer (2012-2015), where she lectured and conducted research on wireless and mobile networks.
+- **Telekom Innovation Labs**: Senior Research Scientist (2008-2012), leading projects on Wireless Mesh Networks.
+
+Cigdem has been recognized as a Fulbright fellow, a Department of Computer Science fellow at the University of Illinois Urbana-Champaign (UIUC), and a Vodafone fellow.
+
+**Research Contributions:**
+
+Cigdem Sengul has made significant contributions to the field of wireless networks, with her work being published in over 50 journal and conference publications. Some of her notable publications include:
+- "Forward and Backhaul Link Optimization for Energy Efficient OFDMA Small Cell Networks" (2017)
+- "Load-adaptive networking for energy-efficient wireless access" (2015)
+- "Measurement-based simulation of WiFi interference" (2013)
+- "Energino: energy saving tips for your wireless network" (2012)
+- "A survey of adaptive services to cope with dynamics in wireless self-organizing networks" (2012)
+
+Her research often focuses on improving energy efficiency, optimizing network performance, and enhancing security and privacy in wireless networks.
+
+**Advocacy and Outreach:**
+
+Cigdem is a passionate advocate for diversity in STEM fields. She serves as the Communications Co-Chair and Secretary of ACM-W Global, an organization dedicated to supporting women in computing. She has also been involved with ACM Women-Europe as the Communication and Outreach Chair (2019-2022). Additionally, she collaborates with the Micro:bit Educational Foundation to promote coding education among school children and is a co-author of the book "Networking with the Micro:bit."
+
+**Recent Publications:**
+
+- Renaud, K., Sengul, C., Coopamootoo, K., Clift, B., Taylor, J., Springett, M., & Morrison, B. (2024). "We’re not that Gullible! — Revealing Dark Pattern Mental Models of 11-12 Year-Old Scottish Children." ACM Transactions on Computer-Human Interaction, 31(3), 1-41.
+- Manohar, A., Sengul, C., & Chen, J. (2023). "Inclusive Privacy Control at Home for Smart Health." In Hayes, S., Jopling, M., Connor, S., & Johnson, M. (Eds.), Human Data Interaction, Disadvantage and Skills in the Community: Enabling Cross-Sector Environments for Postdigital Inclusion. Cham, Switzerland: Springer, 151-176.
+- Michaelides, M., Sengul, C., & Patras, P. (2021). "An Experimental Evaluation of MQTT Authentication and Authorization in IoT." WiNTECH '21: 15th ACM Workshop on Wireless Network Testbeds, New Orleans, LA, USA, 25-4 February, ACM, 69-76.
+- Manohar, A., Sengul, C., & Chen, J. (2021). "Trust in Home: Rethinking Interface Design in IoT." 33rd conference on British Human Computer Interaction 2021.
+- Sengul, C. (2020). "Distributed Ledgers for Spectrum Authorization." IEEE Internet Computing, 24(3), 7-18.
+
+**Contact Information:**
+
+- **Institution**: Brunel University London
+- **Address**: Wilfred Brown Building 114, Kingston Lane, Uxbridge, Middlesex UB8 3PH, UK
+- **Phone**: +44 (0)1895 274000
+- **Fax**: +44 (0)1895 232806
+
+For more information, you can visit her [profile at Brunel University](https://www.brunel.ac.uk/people/cigdem-sengul) or her [personal website](https://www.cigdemsengul.com/).

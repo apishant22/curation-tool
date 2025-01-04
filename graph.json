@@ -1,213 +1,71 @@
 {
     "nodes": [
         {
-            "id": "1562",
-            "name": "adriana wilde",
-            "link": "https://dl.acm.org/profile/99659070982"
+            "id": "2943",
+            "name": "Emily Rakestraw",
+            "link": "https://dl.acm.org/profile/99661043018"
         },
         {
-            "id": "1563",
-            "name": "Jarutas Andritsch",
-            "link": "https://dl.acm.org/profile/99661013948"
+            "id": "2944",
+            "name": "Cyrus Tanade",
+            "link": "https://dl.acm.org/profile/99660494484"
         },
         {
-            "id": "1564",
-            "name": "Karen Arm",
-            "link": "https://dl.acm.org/profile/99661395217"
+            "id": "2945",
+            "name": "William Ladd",
+            "link": "https://dl.acm.org/profile/99661043572"
         },
         {
-            "id": "1565",
-            "name": "Adalberto L Simeone",
-            "link": "https://dl.acm.org/profile/81361594784"
+            "id": "2946",
+            "name": "Erik Draeger",
+            "link": "https://dl.acm.org/profile/81309493285"
         },
         {
-            "id": "1566",
-            "name": "Marco Speicher",
-            "link": "https://dl.acm.org/profile/89758843557"
-        },
-        {
-            "id": "1567",
-            "name": "Andreea Molnar",
-            "link": "https://dl.acm.org/profile/81552335856"
-        },
-        {
-            "id": "1568",
-            "name": "Florian Daiber",
-            "link": "https://dl.acm.org/profile/81436595707"
-        },
-        {
-            "id": "1569",
-            "name": "Anna Vasilchenko",
-            "link": "https://dl.acm.org/profile/99659184164"
-        },
-        {
-            "id": "1570",
-            "name": "Alan Dix",
-            "link": "https://dl.acm.org/profile/81100537116"
-        },
-        {
-            "id": "1571",
-            "name": "Stephen Snow",
-            "link": "https://dl.acm.org/profile/81548718656"
-        },
-        {
-            "id": "1572",
-            "name": "Madeline Balaam",
-            "link": "https://dl.acm.org/profile/81448600301"
-        },
-        {
-            "id": "1573",
-            "name": "Marie Devlin",
-            "link": "https://dl.acm.org/profile/81346488354"
-        },
-        {
-            "id": "1574",
-            "name": "Olivia Ojuroye",
-            "link": "https://dl.acm.org/profile/99659070515"
-        },
-        {
-            "id": "1575",
-            "name": "Russel Torah",
-            "link": "https://dl.acm.org/profile/81367594837"
-        },
-        {
-            "id": "1576",
-            "name": "Steve Beeby",
-            "link": "https://dl.acm.org/profile/81318493260"
+            "id": "2947",
+            "name": "Amanda Randles",
+            "link": "https://dl.acm.org/profile/81557900356"
         }
     ],
     "links": [
         {
-            "source": "1563",
-            "target": "1564"
+            "source": "2944",
+            "target": "2945"
         },
         {
-            "source": "1565",
-            "target": "1566"
+            "source": "2944",
+            "target": "2946"
         },
         {
-            "source": "1565",
-            "target": "1567"
+            "source": "2944",
+            "target": "2947"
         },
         {
-            "source": "1565",
-            "target": "1568"
+            "source": "2945",
+            "target": "2946"
         },
         {
-            "source": "1566",
-            "target": "1567"
+            "source": "2945",
+            "target": "2947"
         },
         {
-            "source": "1566",
-            "target": "1568"
+            "source": "2946",
+            "target": "2947"
         },
         {
-            "source": "1567",
-            "target": "1568"
+            "source": "2943",
+            "target": "2944"
         },
         {
-            "source": "1569",
-            "target": "1570"
+            "source": "2943",
+            "target": "2945"
         },
         {
-            "source": "1569",
-            "target": "1571"
+            "source": "2943",
+            "target": "2946"
         },
         {
-            "source": "1569",
-            "target": "1572"
-        },
-        {
-            "source": "1569",
-            "target": "1573"
-        },
-        {
-            "source": "1571",
-            "target": "1572"
-        },
-        {
-            "source": "1571",
-            "target": "1573"
-        },
-        {
-            "source": "1572",
-            "target": "1573"
-        },
-        {
-            "source": "1574",
-            "target": "1575"
-        },
-        {
-            "source": "1574",
-            "target": "1576"
-        },
-        {
-            "source": "1575",
-            "target": "1576"
-        },
-        {
-            "source": "1562",
-            "target": "1563"
-        },
-        {
-            "source": "1562",
-            "target": "1564"
-        },
-        {
-            "source": "1562",
-            "target": "1563"
-        },
-        {
-            "source": "1562",
-            "target": "1565"
-        },
-        {
-            "source": "1562",
-            "target": "1566"
-        },
-        {
-            "source": "1562",
-            "target": "1567"
-        },
-        {
-            "source": "1562",
-            "target": "1568"
-        },
-        {
-            "source": "1562",
-            "target": "1569"
-        },
-        {
-            "source": "1562",
-            "target": "1570"
-        },
-        {
-            "source": "1562",
-            "target": "1569"
-        },
-        {
-            "source": "1562",
-            "target": "1571"
-        },
-        {
-            "source": "1562",
-            "target": "1572"
-        },
-        {
-            "source": "1562",
-            "target": "1573"
-        },
-        {
-            "source": "1562",
-            "target": "1574"
-        },
-        {
-            "source": "1562",
-            "target": "1575"
-        },
-        {
-            "source": "1562",
-            "target": "1576"
+            "source": "2943",
+            "target": "2947"
         }
     ]
 }
