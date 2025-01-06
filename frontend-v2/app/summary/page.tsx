@@ -45,12 +45,12 @@ function Page() {
     return currentAuthors;
   };
 
+  const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL;
+
   const fetchAuthor = async (name: string, profileId: number) => {
     try {
       setLoading(true);
-      const response = await fetch(
-        `http://localhost:3002/query/${name}/${profileId}`
-      );
+      const response = await fetch(`${BASE_URL}/query/${name}/${profileId}`);
       if (!response.ok) {
         throw new Error(`HTTP error! Status: ${response.status}`);
       }

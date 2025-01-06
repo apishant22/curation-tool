@@ -49,13 +49,15 @@ const AuthorNetwork: React.FC<NetworkProps> = ({
     return profileIdMatch ? profileIdMatch[1] : null;
   };
 
+  const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL;
+
   const containerRef = useRef<HTMLDivElement>(null);
   // Fetch the graph data from the backend
   useEffect(() => {
     const fetchAuthorNetwork = async () => {
       setLoading(true);
       try {
-        const res = await fetch(`http://localhost:3002/network/${authorName}`);
+        const res = await fetch(`${BASE_URL}/network/${authorName}`);
         if (!res.ok) {
           throw new Error(`HTTP error! status: ${res.status}`);
         }
@@ -253,13 +255,13 @@ const AuthorNetwork: React.FC<NetworkProps> = ({
             {
               if (node?.link)
                 window.open(
-                  `http://localhost:3000/summary?name=${encodeURI(
+                  `${BASE_URL}/summary?name=${encodeURI(
                     node.name
                   )}&profileId=${parseLink(node.link)}`,
                   "_blank"
                 );
               console.log(
-                `http://localhost:3000/summary?name=${encodeURI(
+                `${BASE_URL}/summary?name=${encodeURI(
                   node.name
                 )}&profileId=${parseLink(node.link)}`
               );

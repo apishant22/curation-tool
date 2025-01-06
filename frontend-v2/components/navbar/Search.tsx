@@ -30,6 +30,7 @@ const Search = () => {
   // the api is /search
   // to use the api, need to give /search/{name}/{counter (referring to the page number, initially at 0)}
   // after fetching the data, navigate to the results page and pass the data to them
+  const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL;
 
   const fetchSearchResults = async (
     searchTerm: string,
@@ -40,7 +41,7 @@ const Search = () => {
       setLoading(true);
 
       const categoryPath = categoryMapping[category] || "author"; // Map display name to API value
-      const url = `http://localhost:3002/search/${categoryPath}/${searchTerm}/${page}`;
+      const url = `http://${BASE_URL}/search/${categoryPath}/${searchTerm}/${page}`;
       console.log(`Fetching: ${url}`);
 
       const response = await fetch(url);

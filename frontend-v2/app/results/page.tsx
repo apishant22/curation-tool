@@ -27,6 +27,8 @@ function ResultsPage() {
   const [searchData, setSearchData] = useState<SearchResponse | null>(null);
   const [loading, setLoading] = useState(true);
 
+  const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL;
+
   const fetchSearchResults = async (
     searchTerm: string,
     page: number,
@@ -37,7 +39,7 @@ function ResultsPage() {
 
       const normalizedCategory =
         category.toLowerCase() === "author" ? "author" : "field";
-      const url = `http://localhost:3002/search/${normalizedCategory}/${searchTerm}/${page}`;
+      const url = `${BASE_URL}/search/${normalizedCategory}/${searchTerm}/${page}`;
       console.log(`Fetching: ${url}`);
       const response = await fetch(url);
 

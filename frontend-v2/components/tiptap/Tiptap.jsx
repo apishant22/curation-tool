@@ -182,13 +182,15 @@ const Tiptap = ({ name, summary }) => {
         }
     };
 
+    const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL;
+
     const handleRegenerate = async () => {
         try {
             setLoading(true);
             setIsEdit(false);
             toast.success("Regenerating your summary!");
             const response = await axios.post(
-                `http://localhost:3002/regenerate_request/${name}`,
+                `${BASE_URL}/regenerate_request/${name}`,
                 {
                     contentVal: improvementRequests,
                 }
@@ -218,7 +220,7 @@ const Tiptap = ({ name, summary }) => {
         try {
             setLoading(true);
             const response = await axios.post(
-                `http://localhost:3002/update_summary/${name}`,
+                `${BASE_URL}/update_summary/${name}`,
                 {
                     content: content,
                     name: name,
@@ -241,7 +243,7 @@ const Tiptap = ({ name, summary }) => {
         try {
             setLoading(true);
             const response = await axios.post(
-                `http://localhost:3002/remove_author/${encodeURIComponent(name)}`,
+                `${BASE_URL}/remove_author/${encodeURIComponent(name)}`,
                 {},
                 {
                     headers: {

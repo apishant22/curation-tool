@@ -78,10 +78,12 @@ const Homepage: React.FC = () => {
     }
   };
 
+  const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL;
+
   const loadRecentAuthors = async () => {
     try {
       const response = await fetch(
-        "http://localhost:3002/authors_with_summaries?limit=6"
+        `${BASE_URL}/authors_with_summaries?limit=6`
       );
       if (response.ok) {
         const authors = await response.json();
