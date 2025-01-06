@@ -41,7 +41,7 @@ const Search = () => {
       setLoading(true);
 
       const categoryPath = categoryMapping[category] || "author"; // Map display name to API value
-      const url = `http://${BASE_URL}/search/${categoryPath}/${searchTerm}/${page}`;
+      const url = `${BASE_URL}/search/${categoryPath}/${searchTerm}/${page}`;
       console.log(`Fetching: ${url}`);
 
       const response = await fetch(url);

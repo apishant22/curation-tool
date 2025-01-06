@@ -16,7 +16,7 @@ from backend.app.author_recommender import get_acm_recommendations_and_field_aut
 
 CACHE_LIFETIME = timedelta(weeks=4)
 app = Flask(__name__)
-CORS(app)
+CORS(app, resources={r"/*": {"origins": "https://curation-tool.vercel.app", "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"]}})
 
 def _search(search_type, name, page):
     normalized_name = name.lower()
