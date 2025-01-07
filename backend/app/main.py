@@ -4,8 +4,6 @@ from datetime import timedelta
 import requests
 from flask import Flask, jsonify, request
 from flask_cors import CORS
-import os
-import json
 import backend.app.author_scraper as scraper
 import backend.db.db_helper as db
 import backend.db.models as model
@@ -17,6 +15,7 @@ from backend.app.author_recommender import get_acm_recommendations_and_field_aut
 CACHE_LIFETIME = timedelta(weeks=4)
 app = Flask(__name__)
 CORS(app)
+
 
 def _search(search_type, name, page):
     normalized_name = name.lower()
@@ -67,22 +66,41 @@ def _search(search_type, name, page):
         msg = f'An unexpected error occurred: {e}'
         print(msg)
         return jsonify(error=msg), 500
-    
+
+
+@app.route('/')
+def index():
+    # test that the app is working and that we can connect to the database
+    try:
+        session = db.get_session()
+        rows = session.query(model.Researcher).count()
+    except Exception as e:
+        msg = f'failed to connect to the database: {e}'
+        print(msg)
+        return jsonify(error=msg), 500
+    else:
+        msg = f'The backend is up and running! {rows} researchers processed.'
+        return msg, 200
+
+
 @app.route('/network/<name>')
 def network(name):
     try:
         network_data = nw.convert_to_json(name)
         return network_data,200
     except Exception as e:
-        return jsonify({"error":str(e)}), 500
+        return jsonify({"error": str(e)}), 500
+
 
 @app.route('/search/author/<name>/<int:page>')
 def search_author(name, page):
     return _search('author', name, page)
 
+
 @app.route('/search/field/<name>/<int:page>')
 def search_field(name, page):
     return _search('field', name, page)
+
 
 @app.route('/query/<name>/<profile_link>')
 def query(name, profile_link):
@@ -99,7 +117,7 @@ def query(name, profile_link):
 
     return jsonify(response), 200
 
-# TODO make this work with the new database
+
 @app.route('/misc_profiles/<int:number>')
 def misc_profiles(number):
     '''Fetch number of profiles from the database'''
@@ -111,6 +129,7 @@ def misc_profiles(number):
     result = [db.get_author_details_from_db(orcid) for orcid in orcids]
     print(result)
     return result
+
 
 @app.route('/regenerate_request/<author_name>', methods=['POST'])
 def regenerate_request(author_name):
@@ -124,6 +143,7 @@ def regenerate_request(author_name):
     res = db.get_researcher_summary(author_name)
     print(res)
     return db.get_researcher_summary(author_name), 200
+
 
 @app.route('/update_summary/<author_name>', methods=['POST'])
 def update_summary(author_name):
@@ -144,6 +164,7 @@ def update_summary(author_name):
     else:
         return jsonify({"error": "Invalid Content-Type"}), 400
 
+
 @app.route('/remove_author/<author_name>', methods=['POST'])
 def remove_author(author_name):
     try:
@@ -152,6 +173,7 @@ def remove_author(author_name):
     except Exception as e:
         print(f"Error in /remove_author route: {e}")
         return jsonify({"error": "An error occurred while removing the author."}), 500
+
 
 @app.route('/recommendations', methods=['POST'])
 def get_recommendations():
@@ -184,6 +206,7 @@ def get_recommendations():
     except Exception as e:
         print(f"[ERROR] Exception occurred: {e} ")
         return jsonify({"error": f"An unexpected error occurred: {str(e)}"}), 500
+
 
 @app.route('/authors_with_summaries', methods=['GET'])
 def get_authors_with_summaries():

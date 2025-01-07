@@ -18,9 +18,11 @@ username = os.getenv('DB_USER')
 password = os.getenv('DB_PASSWORD')
 
 connection_string = (
-    f"mssql+pyodbc://{username}:{password}@{server}/{database}"
-    "?driver=ODBC+Driver+17+for+SQL+Server&Encrypt=yes&TrustServerCertificate=no"
+    f"mssql+pytds://{username}:{password}@{server}/{database}"
+    "?driver=TDS+Driver&Trusted_Connection=yes&Encrypt=yes"
+    "&TrustServerCertificate=yes"
 )
+print(connection_string)
 
 engine = create_engine(
     connection_string,
