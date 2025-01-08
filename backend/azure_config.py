@@ -14,11 +14,7 @@ db_conn_timeout = os.getenv('DB_CONNECTION_TIMEOUT', '60')
 
 # Constructing the database URL
 database_url = (
-    f"mssql+pyodbc://{db_user}:{db_password}@{db_server}/{db_database}"
-    "?driver=ODBC+Driver+17+for+SQL+Server"
-    f"&Encrypt={db_encrypt}"
-    f"&TrustServerCertificate={db_trust_cert}"
-    f"&Connection Timeout={db_conn_timeout}"
+    f"mssql+pymssql://{db_user}:{db_password}@{db_server}/{db_database}"
 )
 # Utility Function
 def get_database_url():

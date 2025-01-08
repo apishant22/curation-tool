@@ -18,8 +18,7 @@ username = os.getenv('DB_USER')
 password = os.getenv('DB_PASSWORD')
 
 connection_string = (
-    f"mssql+pyodbc://{username}:{password}@{server}/{database}"
-    "?driver=ODBC+Driver+17+for+SQL+Server&Encrypt=yes&TrustServerCertificate=no"
+    f"mssql+pymssql://{username}:{password}@{server}/{database}"
 )
 
 engine = create_engine(
@@ -27,7 +26,12 @@ engine = create_engine(
     echo=False,
     pool_pre_ping=True,
     pool_recycle=3600,
-    connect_args={"timeout": 60}
+    connect_args={
+        'login_timeout': 60,
+        'timeout': 60,
+        'tds_version': '7.4'  # Ensures compatibility with newer SQL Server versions
+    }
+    
 )
 
 Session = scoped_session(sessionmaker(bind=engine))
