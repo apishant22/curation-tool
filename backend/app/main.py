@@ -16,7 +16,37 @@ from backend.app.author_recommender import get_acm_recommendations_and_field_aut
 
 CACHE_LIFETIME = timedelta(weeks=4)
 app = Flask(__name__)
-CORS(app, resources={r"/*": {"origins": "https://curation-tool.vercel.app", "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"]}})
+# Enhanced CORS configuration
+CORS(app, resources={
+    r"/*": {
+        "origins": [
+            "https://curation-tool.vercel.app",
+            "http://localhost:3000"  # Adding localhost for development
+        ],
+        "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+        "allow_headers": ["Content-Type", "Authorization", "X-Requested-With"],
+        "expose_headers": ["Content-Range", "X-Content-Range"],
+        "supports_credentials": True,
+        "max_age": 600  # Cache preflight requests for 10 minutes
+    }
+})
+
+# Add error handlers
+@app.errorhandler(404)
+def not_found_error(error):
+    return jsonify({"error": "Resource not found"}), 404
+
+@app.errorhandler(500)
+def internal_error(error):
+    return jsonify({"error": "Internal server error"}), 500
+
+@app.after_request
+def after_request(response):
+    # Ensure proper headers are set for all responses
+    response.headers.add('Access-Control-Allow-Origin', 'https://curation-tool.vercel.app')
+    response.headers.add('Access-Control-Allow-Headers', 'Content-Type,Authorization')
+    response.headers.add('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS')
+    return response
 
 def _search(search_type, name, page):
     normalized_name = name.lower()

@@ -76,9 +76,6 @@ def convert_to_json(name):
 
     # Write to JSON file
     json_string = json.dumps(graph_data, indent=4)
-    with open("graph.json", "w") as json_file:
-        json.dump(graph_data, json_file, indent=4)
-
     print(json_string)
     return json_string
 
