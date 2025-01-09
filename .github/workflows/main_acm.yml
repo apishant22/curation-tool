@@ -79,5 +79,5 @@ jobs:
         uses: azure/webapps-deploy@v3
         id: deploy-to-webapp
         with:
-          app-name: "acm"
+          app-name: "acmbackend"
           slot-name: "Production"
