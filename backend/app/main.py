@@ -13,39 +13,40 @@ import backend.llm.llmNew as llm
 import backend.authorNetworkCode as nw
 from backend.app.author_recommender import get_acm_recommendations_and_field_authors
 
-
 CACHE_LIFETIME = timedelta(weeks=4)
 app = Flask(__name__)
-# Enhanced CORS configuration
+
+# Define allowed origins
+ALLOWED_ORIGINS = [
+    "https://curation-tool.vercel.app",
+    "http://localhost:3000"
+]
+
+# Simplified CORS configuration
 CORS(app, resources={
     r"/*": {
-        "origins": [
-            "https://curation-tool.vercel.app",
-            "http://localhost:3000"  # Adding localhost for development
-        ],
+        "origins": ALLOWED_ORIGINS,
         "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
         "allow_headers": ["Content-Type", "Authorization", "X-Requested-With"],
         "expose_headers": ["Content-Range", "X-Content-Range"],
         "supports_credentials": True,
-        "max_age": 600  # Cache preflight requests for 10 minutes
+        "max_age": 600
     }
 })
 
-# Add error handlers
-@app.errorhandler(404)
-def not_found_error(error):
-    return jsonify({"error": "Resource not found"}), 404
-
-@app.errorhandler(500)
-def internal_error(error):
-    return jsonify({"error": "Internal server error"}), 500
-
 @app.after_request
 def after_request(response):
-    # Ensure proper headers are set for all responses
-    response.headers.add('Access-Control-Allow-Origin', 'https://curation-tool.vercel.app')
-    response.headers.add('Access-Control-Allow-Headers', 'Content-Type,Authorization')
-    response.headers.add('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS')
+    # Get the origin from the request
+    origin = request.headers.get('Origin')
+    
+    # If the origin is in our allowed origins, set it in the response
+    if origin in ALLOWED_ORIGINS:
+        response.headers['Access-Control-Allow-Origin'] = origin
+        
+    response.headers['Access-Control-Allow-Headers'] = 'Content-Type,Authorization'
+    response.headers['Access-Control-Allow-Methods'] = 'GET,PUT,POST,DELETE,OPTIONS'
+    response.headers['Access-Control-Allow-Credentials'] = 'true'
+    
     return response
 
 def _search(search_type, name, page):
