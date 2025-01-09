@@ -50,6 +50,7 @@ const AuthorNetwork: React.FC<NetworkProps> = ({
   };
 
   const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL;
+  const WEB_URL = process.env.NEXT_PUBLIC_URL;
 
   const containerRef = useRef<HTMLDivElement>(null);
   // Fetch the graph data from the backend
@@ -255,13 +256,13 @@ const AuthorNetwork: React.FC<NetworkProps> = ({
             {
               if (node?.link)
                 window.open(
-                  `${BASE_URL}/summary?name=${encodeURI(
+                  `${WEB_URL}/summary?name=${encodeURI(
                     node.name
                   )}&profileId=${parseLink(node.link)}`,
                   "_blank"
                 );
               console.log(
-                `${BASE_URL}/summary?name=${encodeURI(
+                `${WEB_URL}/summary?name=${encodeURI(
                   node.name
                 )}&profileId=${parseLink(node.link)}`
               );
