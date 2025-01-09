@@ -1,17 +1,16 @@
-import asyncio
 from datetime import timedelta
 
 import requests
 from flask import Flask, jsonify, request
 from flask_cors import CORS
-import os
-import json
 import backend.app.author_scraper as scraper
 import backend.db.db_helper as db
 import backend.db.models as model
 import backend.llm.llmNew as llm
 import backend.authorNetworkCode as nw
 from backend.app.author_recommender import get_acm_recommendations_and_field_authors
+import asyncio
+
 
 CACHE_LIFETIME = timedelta(weeks=4)
 app = Flask(__name__)
@@ -188,7 +187,6 @@ def remove_author(author_name):
 def get_recommendations():
     try:
         data = request.get_json()
-
         print(f"[DEBUG] Raw input data: {data}")
 
         if not isinstance(data, dict) or 'authors' not in data:
@@ -204,7 +202,9 @@ def get_recommendations():
         except ValueError:
             return jsonify({"error": "Invalid input: max_recommendations and max_results_per_field must be integers."}), 400
 
-        results = asyncio.run(get_acm_recommendations_and_field_authors(
+        loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(loop)
+        results = loop.run_until_complete(get_acm_recommendations_and_field_authors(
             authors=authors,
             max_recommendations=max_recommendations,
             max_results_per_field=max_results_per_field
@@ -213,7 +213,7 @@ def get_recommendations():
         return jsonify(results), 200
 
     except Exception as e:
-        print(f"[ERROR] Exception occurred: {e} ")
+        print(f"[ERROR] Exception occurred: {e}")
         return jsonify({"error": f"An unexpected error occurred: {str(e)}"}), 500
 
 @app.route('/authors_with_summaries', methods=['GET'])
