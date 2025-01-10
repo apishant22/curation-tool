@@ -158,7 +158,7 @@ const Homepage: React.FC = () => {
         <Container>
           {/* Header */}
           <div className="border-b-[1px] flex flex-col items-center gap-10">
-            <div className="pt-4 pb-4">
+            <div className=" flex flex-col justify-center items-center">
               <HomeLogo />
             </div>
             <div className="pl-5 pr-5">

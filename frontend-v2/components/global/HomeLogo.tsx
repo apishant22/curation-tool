@@ -10,7 +10,7 @@ const HomeLogo = () => {
     <Image
       onClick={() => router.push("/")}
       alt={"ACM Logo"}
-      src={"/images/logo-main.png"}
+      src={"/images/acm-logo.png"}
       width={300}
       height={300}
       className="hidden cursor-pointer md:block"
