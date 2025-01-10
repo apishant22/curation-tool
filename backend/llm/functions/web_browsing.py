@@ -7,7 +7,7 @@ ddg = DuckDuckGoSearchManager()
 scraper = WebContentScraper()
 
 
-def text_search(query: str, num_results: int = 3) -> str:
+def text_search(query: str, num_results: int = 7) -> str:
     """Conducts a general web text search and retrieves information from the internet in response to user queries.
 
     This function is best used when the user's query is seeking broad information available on various websites. It
