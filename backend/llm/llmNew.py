@@ -36,23 +36,28 @@ assistant = AzureOpenAIFunctions(
 
 def log(response):
     try:
-        with open("logfile.txt", 'a') as file:
-            file.write("Response recieved " + datetime.now().strftime('%d-%m-%Y %H:%M:%S') + '\n')
-            file.write(str(response) + '\n')
-            file.write("=======================" + '\n')
+        with open("logfile.txt", 'a', encoding='utf-8') as log_file:
+            log_file.write("Response recieved " + datetime.now().strftime('%d-%m-%Y %H:%M:%S') + '\n')
+            log_file.write(str(response) + '\n')
+            log_file.write("=======================" + '\n')
         print("Response logged successfully.")
+    except IOError as e:
+        print(f"Failed to open logfile.txt: {e}")
     except Exception as e:
         print(f"An error occurred while logging the response: {e}")
     
 def load_prompt(prompt):
     prompt_path = os.path.join(os.path.dirname(__file__), prompt)
     try:
-        with open(prompt_path, "r") as file:
+        with open(prompt_path, "r", encoding='utf-8') as file:
             prompt = file.read()
         return prompt
     except FileNotFoundError:
         print(f"Error: The file 'prompt.txt' was not found at {prompt_path}")
         return "Default prompt text or handle the error appropriately."
+    except UnicodeError as e:
+        print(f"Encoding error: {e}")
+        return "Error reading prompt file due to encoding issues."
     
 
 def request(author_name):

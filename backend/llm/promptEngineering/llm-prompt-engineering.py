@@ -1,5 +1,6 @@
 import os
 import sys
+import duckduckgo_search
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', '..')))
 
@@ -25,12 +26,14 @@ assistant = AzureOpenAIFunctions(
 def load_prompt(prompt):
     prompt_path = os.path.join(os.path.dirname(__file__), prompt)
     try:
-        with open(prompt_path, "r") as file:
+        with open(prompt_path, "r", encoding='utf-8') as file:
             prompt = file.read()
         return prompt
     except FileNotFoundError:
-        #print(f"Error: The file {prompt} was not found at {prompt_path}")
         return "Default prompt text or handle the error appropriately."
+    except UnicodeError as e:
+        print(f"Encoding error: {e}")
+        return "Error reading prompt file due to encoding issues."
     
 def request(author_name, prompt_file):
     prompt_path = os.path.join(os.path.dirname(__file__), prompt_file)
@@ -38,18 +41,24 @@ def request(author_name, prompt_file):
     if author is None:
         print("Author not found in the database.")
         return {"reply": "Author not found in the database."}
+    
     conversation = llmNew.Conversation(conversation=[])
     system_message = llmNew.Message(role='system', content=load_prompt(prompt_file))
     conversation.conversation.insert(0, system_message)
     prompt_message = llmNew.Message(role='user', content=str(author))
     conversation.conversation.insert(1, prompt_message)
     conversation_dict = [message.model_dump() for message in conversation.conversation]
-    response = assistant.ask(conversation_dict)
-    summary = response.choices[0].message.content
-    # add the summary to a new file with the same name as the prompt_file + '_summary.txt'
-    with open(prompt_path + '_summary.txt', 'w') as file:
-        file.write(summary)
-    llmNew.log(response)
+    
+    try:
+        response = assistant.ask(conversation_dict)
+        summary = response.choices[0].message.content
+        with open(prompt_path + '_summary.txt', 'w', encoding='utf-8') as file:
+            file.write(summary)
+        llmNew.log(response)
+        return {"reply": summary}
+    except (duckduckgo_search.exceptions.DuckDuckGoSearchException, UnicodeError) as e:
+        print(f"Error occurred: {e}")
+        return {"reply": f"Operation failed: {str(e)}"}
 
 # Test the function
-request('Cigdem Sengul', "few_shot_enhanced.txt")
+request('Cigdem Sengul', "few_shot_new_enhanced.txt")
