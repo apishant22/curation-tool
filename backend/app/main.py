@@ -129,6 +129,14 @@ def query(name, profile_link):
 
     return jsonify(response), 200
 
+@app.route('/progress/<profile_link>', methods=['GET'])
+def get_progress(profile_link):
+    progress = scraper.redis_client.get(f"progress:{profile_link}")
+    if progress:
+        return jsonify({"status": progress.decode('utf-8')}), 200
+    return jsonify({"status": "No progress available."}), 404
+
+
 # TODO make this work with the new database
 @app.route('/misc_profiles/<int:number>')
 def misc_profiles(number):

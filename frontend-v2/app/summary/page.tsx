@@ -123,11 +123,11 @@ function Page() {
 
   if (loading) {
     return (
-      <div className="pt-48 flex justify-center">
-        <Container>
-          <Loading />
-        </Container>
-      </div>
+        <div className="pt-48 flex justify-center">
+          <Container>
+            <Loading profileLink={String(profileId)} />
+          </Container>
+        </div>
     );
   }
 

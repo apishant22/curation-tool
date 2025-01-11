@@ -1,3 +1,5 @@
+import re
+
 import requests
 from bs4 import BeautifulSoup
 import math
@@ -6,6 +8,10 @@ from backend.db.db_helper import *
 from backend.app.acm_author_searcher import ACMAuthorSearcher
 from backend.llm import llmNew
 import time
+from redis import Redis, ConnectionPool
+
+pool = ConnectionPool(host='localhost', port=6379, max_connections=50)
+redis_client = Redis(connection_pool=pool)
 
 def delayed_request(url, headers=None, params=None, timeout=10):
     time.sleep(1)
@@ -228,7 +234,6 @@ def scrape_latest_publication(profile_link):
         'Publication Date': publication_date,
         'Citation Count': citation_count,
     }
-    print("Latest Scraped Publication:", json.dumps(latest_publication, indent=4))
     return latest_publication
 
 def get_latest_publication(publications):
@@ -242,86 +247,117 @@ def get_latest_publication(publications):
     )
     return latest_publication
 
+def extract_profile_id(profile_link):
+    match = re.search(r"profile/(\d+)", profile_link)
+    return match.group(1) if match else profile_link
+
+def update_progress(profile_link, status):
+    profile_id = extract_profile_id(profile_link)
+    print(f"Updating progress for {profile_id}: {status}")
+    redis_client.set(f"progress:{profile_id}", status, ex=300)
+
+
 def update_author_if_needed(author_name, profile_link):
     try:
-        existing_researcher =get_researcher_by_profile_link(profile_link)
+        update_progress(profile_link, "Checking database for existing author...")
+        existing_researcher = get_researcher_by_profile_link(profile_link)
 
         if existing_researcher:
             author_name = existing_researcher.name
-            print(f"Profile link {profile_link} found in database. Using associated name: {author_name}")
+            update_progress(profile_link, "Author found in database. Checking for updates...")
         else:
-            print(f"Profile link {profile_link} not found in database. Proceeding with provided name: {author_name}")
+            update_progress(profile_link, "Author not found in database. Proceeding with scraping...")
 
+        update_progress(profile_link, "Scraping latest publications...")
         latest_scraped_publication = scrape_latest_publication(profile_link)
         if not latest_scraped_publication:
-            print("No latest publication found.")
+            update_progress(profile_link, "No latest publication found.")
             return None, None
 
+        update_progress(profile_link, "Fetching author details from database...")
         author_details_db = get_author_details_from_db(author_name)
 
         if not author_details_db or "Publications" not in author_details_db:
-            print("No publication data found in the database for this author. Scraping and adding new author data...")
-
+            update_progress(profile_link, "No details in database. Scraping full author details...")
             scraped_author_details_json = scrape_author_details(author_name, profile_link)
             if not scraped_author_details_json:
-                print("Failed to retrieve full author details during scrape.")
+                update_progress(profile_link, "Scraping failed. Process stopped.")
                 return None, None
 
             scraped_author_details = json.loads(scraped_author_details_json)
+            update_progress(profile_link, "Storing scraped author details in database...")
             store_author_details_in_db(scraped_author_details)
+
             author_details_db = get_author_details_from_db(author_name)
             if not author_details_db:
                 print(f"Failed to retrieve updated details from database for new author: {author_name}")
+                update_progress(profile_link, "Failed to update database. Process stopped.")
                 return None, None
 
-            print("New Author Details:", json.dumps(author_details_db, indent=4))
-            llmNew.request(author_name)
+            try:
+                update_progress(profile_link, "Generating new summary using LLM...")
+                llmNew.request(author_name)
+            except Exception as e:
+                update_progress(profile_link, "Generating new summary using LLM...")
             summary = get_researcher_summary(author_name)
+            update_progress(profile_link, "Process complete. Author details updated successfully.")
             return summary, author_details_db
 
         latest_db_publication = get_latest_publication(author_details_db["Publications"])
         db_pub_date = latest_db_publication.get("Publication Date") if latest_db_publication else None
         scraped_pub_date = latest_scraped_publication.get("Publication Date")
-
+        '''
         print("Latest Publication in Database:",
               json.dumps(latest_db_publication, indent=4) if latest_db_publication else "None")
         print("Latest Scraped Publication:", json.dumps(latest_scraped_publication, indent=4))
+        '''
 
         if db_pub_date and scraped_pub_date:
             db_pub_date_obj = datetime.strptime(db_pub_date, "%Y-%m-%d")
             scraped_pub_date_obj = datetime.strptime(scraped_pub_date, "%Y-%m-%d")
 
             if db_pub_date_obj >= scraped_pub_date_obj:
+                update_progress(profile_link, "No new publications found. Checking summary...")
                 summary = get_researcher_summary(author_name)
                 if summary and summary != "Summary not available.":
-                    print("Data is up-to-date, and summary is present.")
+                    update_progress(profile_link, "Process complete. No updates required.")
                     return summary, author_details_db
                 else:
-                    print("Summary missing. Generating summary...")
-                    llmNew.request(author_name)
+                    try:
+                        update_progress(profile_link, "Generating new summary using LLM...")
+                        llmNew.request(author_name)
+                    except Exception as e:
+                        update_progress(profile_link, "Generating new summary using LLM...")
                     summary = get_researcher_summary(author_name)
+                    update_progress(profile_link, "Process complete. Summary updated successfully.")
                     return summary, author_details_db
 
-        print("New publication found or mismatch in data. Performing full scrape and updating database.")
+        update_progress(profile_link, "Scraping full author details due to new publication...")
         scraped_author_details_json = scrape_author_details(author_name, profile_link)
         if not scraped_author_details_json:
-            print("Failed to retrieve full author details.")
+            update_progress(profile_link, "Failed to scrape author details. Process stopped.")
             return None, None
 
         scraped_author_details = json.loads(scraped_author_details_json)
+        update_progress(profile_link, "Updating author details in database...")
         update_author_details_in_db(scraped_author_details)
 
         author_details_db_after_update = get_author_details_from_db(author_name)
-        print("Author Details After Update:", json.dumps(author_details_db_after_update, indent=4))
-        llmNew.request(author_name)
+        try:
+            update_progress(profile_link, "Generating summary using LLM for updated author details...")
+            llmNew.request(author_name)
+        except Exception as e:
+            update_progress(profile_link, "Generating summary using LLM for updated author details...")
         summary = get_researcher_summary(author_name)
+        update_progress(profile_link, "Process complete. Author details and summary updated successfully.")
         return summary, author_details_db_after_update
 
     except KeyError as e:
-        print(f"KeyError during update: {e}")
-    except Exception as e:
-        print(f"An error occurred: {e}")
         return None, None
+    except Exception as e:
+        return None, None
+
+
 
 
 '''
