@@ -11,9 +11,12 @@ import backend.authorNetworkCode as nw
 from backend.app.author_recommender import get_acm_recommendations_and_field_authors
 import asyncio
 
+from backend.app.progress_manager import ProgressManager
 
 CACHE_LIFETIME = timedelta(weeks=4)
 app = Flask(__name__)
+
+progress_manager = ProgressManager()
 
 # Define allowed origins
 ALLOWED_ORIGINS = [
@@ -131,10 +134,10 @@ def query(name, profile_link):
 
 @app.route('/progress/<profile_link>', methods=['GET'])
 def get_progress(profile_link):
-    progress = scraper.redis_client.get(f"progress:{profile_link}")
-    if progress:
-        return jsonify({"status": progress.decode('utf-8')}), 200
-    return jsonify({"status": "No progress available."}), 404
+    status = progress_manager.get_progress(profile_link)
+    if status == "No progress available.":
+        return jsonify({"status": status}), 404
+    return jsonify({"status": status}), 200
 
 
 # TODO make this work with the new database

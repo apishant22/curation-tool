@@ -4,6 +4,8 @@ import requests
 from bs4 import BeautifulSoup
 import math
 import json
+
+from backend.app.progress_manager import ProgressManager
 from backend.db.db_helper import *
 from backend.app.acm_author_searcher import ACMAuthorSearcher
 from backend.llm import llmNew
@@ -247,14 +249,15 @@ def get_latest_publication(publications):
     )
     return latest_publication
 
+progress_manager = ProgressManager()
+
 def extract_profile_id(profile_link):
     match = re.search(r"profile/(\d+)", profile_link)
     return match.group(1) if match else profile_link
 
 def update_progress(profile_link, status):
     profile_id = extract_profile_id(profile_link)
-    print(f"Updating progress for {profile_id}: {status}")
-    redis_client.set(f"progress:{profile_id}", status, ex=300)
+    progress_manager.update_progress(profile_id, status)
 
 
 def update_author_if_needed(author_name, profile_link):
