@@ -174,96 +174,98 @@ const Homepage: React.FC = () => {
 
           <Container>
             {/* Content: SpotlightCard + AuthorNetwork */}
-            <div className="flex flex-row gap-8 justify-between items-start pb-10 w-full group relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 pt-12">
-              <div className="text-left max-w-[395px]">
-                <h2 className="text-xl font-bold mb-5 ">Spotlight</h2>
-                <div className="flex-1 rounded-lg">
-                  <div className="text-neutral-600 dark:text-neutral-400">
-                    {/* Recently Searched */}
-                    {recentAuthors.length > 0 && (
-                      <div className="relative">
-                        {/* Left Arrow */}
-                        {recentIndex > 0 && (
-                          <button
-                            onClick={() => {
-                              setRecentIndex((prev) => Math.max(0, prev - 1));
-                            }}
-                            className="absolute left-[-50px] top-1/2 transform -translate-y-1/2 bg-gray-800 text-white p-2 rounded-full shadow-md transition-opacity duration-300 opacity-0 group-hover:opacity-100 hover:scale-105 z-10">
-                            <IoIosArrowBack size={20} />
-                          </button>
-                        )}
+            {recentAuthors.length > 0 && (
+              <div className="flex flex-row gap-8 justify-between items-start pb-10 w-full group relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 pt-12">
+                <div className="text-left max-w-[395px]">
+                  <h2 className="text-xl font-bold mb-5 ">Spotlight</h2>
+                  <div className="flex-1 rounded-lg">
+                    <div className="text-neutral-600 dark:text-neutral-400">
+                      {/* Recently Searched */}
+                      {recentAuthors.length > 0 && (
+                        <div className="relative">
+                          {/* Left Arrow */}
+                          {recentIndex > 0 && (
+                            <button
+                              onClick={() => {
+                                setRecentIndex((prev) => Math.max(0, prev - 1));
+                              }}
+                              className="absolute left-[-50px] top-1/2 transform -translate-y-1/2 bg-gray-800 text-white p-2 rounded-full shadow-md transition-opacity duration-300 opacity-0 group-hover:opacity-100 hover:scale-105 z-10">
+                              <IoIosArrowBack size={20} />
+                            </button>
+                          )}
 
-                        {/* Carousel */}
-                        <div className="overflow-hidden relative">
-                          <div
-                            className="flex flex-row transition-transform duration-1000"
-                            style={{
-                              transform: `translateX(-${recentIndex * 100}%)`,
-                            }}>
-                            {recentAuthors.map((author, index) => (
-                              <div
+                          {/* Carousel */}
+                          <div className="overflow-hidden relative">
+                            <div
+                              className="flex flex-row transition-transform duration-1000"
+                              style={{
+                                transform: `translateX(-${recentIndex * 100}%)`,
+                              }}>
+                              {recentAuthors.map((author, index) => (
+                                <div
+                                  key={index}
+                                  className={`min-w-[20%] flex-shrink-0 p-2`}>
+                                  <SpotlightCard
+                                    name={author.Name}
+                                    profileLink={author["Profile Link"]}
+                                    summary={
+                                      author.Summary || "No summary available."
+                                    }
+                                  />
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+
+                          {/* Right Arrow */}
+                          {recentIndex < recentAuthors.length - 1 && (
+                            <button
+                              onClick={() => {
+                                setRecentIndex((prev) =>
+                                  Math.min(prev + 1, recentAuthors.length - 1)
+                                );
+                              }}
+                              className="absolute right-[-50px] top-1/2 transform -translate-y-1/2 bg-gray-800 text-white p-2 rounded-full shadow-md transition-opacity duration-300 opacity-0 group-hover:opacity-100 hover:scale-105 z-10">
+                              <IoIosArrowForward size={20} />
+                            </button>
+                          )}
+
+                          {/* Dot Navigation */}
+                          <div className="flex justify-center mt-4 space-x-2">
+                            {recentAuthors.map((_, index) => (
+                              <button
                                 key={index}
-                                className={`min-w-[20%] flex-shrink-0 p-2`}>
-                                <SpotlightCard
-                                  name={author.Name}
-                                  profileLink={author["Profile Link"]}
-                                  summary={
-                                    author.Summary || "No summary available."
-                                  }
-                                />
-                              </div>
+                                onClick={() => setRecentIndex(index)}
+                                className={`h-2 w-2 rounded-full transition-all ${
+                                  index === recentIndex
+                                    ? "bg-gray-600 scale-75"
+                                    : "bg-gray-200"
+                                }`}
+                              />
                             ))}
                           </div>
                         </div>
-
-                        {/* Right Arrow */}
-                        {recentIndex < recentAuthors.length - 1 && (
-                          <button
-                            onClick={() => {
-                              setRecentIndex((prev) =>
-                                Math.min(prev + 1, recentAuthors.length - 1)
-                              );
-                            }}
-                            className="absolute right-[-50px] top-1/2 transform -translate-y-1/2 bg-gray-800 text-white p-2 rounded-full shadow-md transition-opacity duration-300 opacity-0 group-hover:opacity-100 hover:scale-105 z-10">
-                            <IoIosArrowForward size={20} />
-                          </button>
-                        )}
-
-                        {/* Dot Navigation */}
-                        <div className="flex justify-center mt-4 space-x-2">
-                          {recentAuthors.map((_, index) => (
-                            <button
-                              key={index}
-                              onClick={() => setRecentIndex(index)}
-                              className={`h-2 w-2 rounded-full transition-all ${
-                                index === recentIndex
-                                  ? "bg-gray-600 scale-75"
-                                  : "bg-gray-200"
-                              }`}
-                            />
-                          ))}
-                        </div>
-                      </div>
-                    )}
+                      )}
+                    </div>
                   </div>
                 </div>
-              </div>
 
-              <div className="flex-1 text-center item-end">
-                <div className="max-w-4xl max-h-[400px]">
-                  <div className="flex-1">
-                    <AuthorNetwork
-                      authorName={presentedAuthor || ""}
-                      width={800}
-                      height={400}
-                    />
+                <div className="flex-1 text-center item-end">
+                  <div className="max-w-4xl max-h-[400px]">
+                    <div className="flex-1 border rounded-md">
+                      <AuthorNetwork
+                        authorName={presentedAuthor || ""}
+                        width={800}
+                        height={400}
+                      />
+                    </div>
                   </div>
+                  <h4 className="font-bold mb-5 text-gray-400 pt-2">
+                    Collaboration Network
+                  </h4>
                 </div>
-                <h4 className="font-bold mb-5 text-gray-400 pt-2">
-                  Collaboration Network
-                </h4>
               </div>
-            </div>
+            )}
           </Container>
 
           {/* Recommendations */}

@@ -163,6 +163,7 @@ const AuthorNetwork: React.FC<NetworkProps> = ({
         margin: "0 auto",
         position: "relative",
         overflow: "hidden",
+        border: "1px rounded solid",
       }}>
       <div
         style={{
@@ -195,7 +196,16 @@ const AuthorNetwork: React.FC<NetworkProps> = ({
           graphData={graphData}
           nodeLabel={(node) => node.name || node.id}
           nodeCanvasObject={(node, ctx, globalScale) => {
-            const label = node.name || node.id;
+            const capitalizeWords = (str) => {
+              return str
+                .split(" ")
+                .map(
+                  (word) =>
+                    word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
+                )
+                .join(" ");
+            };
+            const label = capitalizeWords(node.name || node.id);
             const fontSize = 12 / globalScale;
             //const isHovered = node.id === hoveredNode?.id;
             const nodeColor =
@@ -270,7 +280,7 @@ const AuthorNetwork: React.FC<NetworkProps> = ({
           }
           width={width}
           height={height}
-          backgroundColor="rgba(250,250,250,0.2)"
+          backgroundColor="rgba(250,250,250,0.05)"
           enablePointerInteraction={true}
         />
       </div>
