@@ -880,7 +880,7 @@ const Tiptap = ({ name, summary }) => {
 
         {/* Improvement Popup */}
         {isEdit && isPopupOpen && (
-          <div className="improvement-popup popup right-8 w-[600px] h-[350px] bg-white p-4 rounded-lg shadow-lg fixed bottom-5 z-30 transition-all duration-500">
+          <div className="improvement-popup popup right-8 md:w-[500px] md:h-[300px] bg-white p-4 rounded-lg shadow-lg fixed bottom-5 z-30 transition-all duration-500">
             <h3 className="font-bold mb-2 text-lg">Improve Text</h3>
             <div className="max-h-[125px] overflow-y-auto mb-3 p-2 bg-gray-200 rounded-md border-l-4 border-blue-500">
               {selectedText}
