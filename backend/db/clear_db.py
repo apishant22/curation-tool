@@ -14,7 +14,7 @@ username = os.getenv('DB_USER')
 password = os.getenv('DB_PASSWORD')
 
 connection_string = (
-    f"mssql+pyodbc://{username}:{password}@{server}/{database}"
+    f"mssql+pymssql://{username}:{password}@{server}/{database}"
 )
 
 engine = create_engine(
