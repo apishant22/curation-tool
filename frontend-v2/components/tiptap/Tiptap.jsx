@@ -696,6 +696,7 @@ const Tiptap = ({ name, summary }) => {
                 className="px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600"
                 onClick={async () => {
                   await handleRemoveAuthor();
+                  removeAuthorFromSessionStorage();
                   toast.success(`${capitalizedName} removed successfully!`);
                   onClose();
                 }}>
@@ -706,6 +707,27 @@ const Tiptap = ({ name, summary }) => {
         );
       },
     });
+  };
+
+  const handleBack =  async () => {
+    if (!name.trim()) {
+      toast.warn("Author name cannot be empty.");
+      return;
+    }
+    await handleRemoveAuthor();
+    removeAuthorFromSessionStorage();
+  };
+
+  const removeAuthorFromSessionStorage = () => {
+    Object.keys(sessionStorage).forEach((key) => {
+      if (key.startsWith("author_") && key.includes(name)) {
+        sessionStorage.removeItem(key);
+      }
+    });
+
+    const storedAuthors = JSON.parse(sessionStorage.getItem("authors") || "[]");
+    const updatedAuthors = storedAuthors.filter((author) => author.Name !== name);
+    sessionStorage.setItem("authors", JSON.stringify(updatedAuthors));
   };
 
   return (
@@ -726,17 +748,20 @@ const Tiptap = ({ name, summary }) => {
           <div className="flex items-center gap-4">
             {/* Back Button */}
             <Button
-              onClick={() => {
-                const cachedData = sessionStorage.getItem("cachedURL");
-                if (cachedData) {
-                  router.push(cachedData);
-                } else {
-                  console.warn("No cached URL found in sessionStorage");
-                  router.back();
-                }
-              }}
-              className="flex items-center justify-center w-10 h-10 rounded-full bg-gray-900 text-white hover:bg-gray-700 shadow-md hover:shadow-lg transition-all"
-              title="Back">
+                onClick={async () => {
+                  await handleBack();
+
+                  const cachedData = sessionStorage.getItem("cachedURL");
+                  if (cachedData) {
+                    router.push(cachedData);
+                  } else {
+                    console.warn("No cached URL found in sessionStorage");
+                    router.back();
+                  }
+                }}
+                className="flex items-center justify-center w-10 h-10 rounded-full bg-gray-900 text-white hover:bg-gray-700 shadow-md hover:shadow-lg transition-all"
+                title="Back"
+            >
               <IoMdArrowBack size={20} />
             </Button>
 
