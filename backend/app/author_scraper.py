@@ -8,7 +8,7 @@ import json
 from backend.app.progress_manager import ProgressManager
 from backend.db.db_helper import *
 from backend.app.acm_author_searcher import ACMAuthorSearcher
-from backend.llm import llmNew
+# from backend.llm import llmNew
 import time
 
 def delayed_request(url, headers=None, params=None, timeout=10):
@@ -53,9 +53,13 @@ def identify_input_type_and_search(input_value, page_number, search_type, max_pa
 def get_estimated_max_pages(input_value, timeout=None):
     formatted_name = input_value.replace(' ', '+')
     headers = {
-        'User-Agent': 'Mozilla/5.0',
-        'Accept': 'text/html'
+        "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 12_3_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Safari/537.36",
+        "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+        "Accept-Language": "en-US,en;q=0.5",
+        "DNT": "1",
+        "Connection": "keep-alive",
     }
+
 
     initial_url = f"https://dl.acm.org/action/doSearch?AllField={formatted_name}&startPage=0&content=people&target=people-tab&sortBy=relevancy&groupByField=ContribIdSingleValued"
     try:
@@ -84,7 +88,14 @@ def get_estimated_max_pages(input_value, timeout=None):
 
 # Function to scrape detailed information of an author from ACM profile link
 def scrape_author_details(author_name, profile_link):
-    headers = {'User-Agent': 'Mozilla/5.0', 'Accept': 'text/html'}
+    headers = {
+        "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 12_3_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Safari/537.36",
+        "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+        "Accept-Language": "en-US,en;q=0.5",
+        "DNT": "1",
+        "Connection": "keep-alive",
+    }
+
     response = delayed_request(profile_link, headers=headers)
 
     if response.status_code != 200:
@@ -102,6 +113,8 @@ def scrape_author_details(author_name, profile_link):
         "Publications": publications
     }
 
+    print("Scraping Author:", json.dumps(author_details, indent=4))
+
     return json.dumps(author_details, indent=4)
 
 def extract_subject_fields(soup):
@@ -115,7 +128,13 @@ def extract_subject_fields(soup):
 
 def scrape_author_publications(profile_link, author_name):
     publications_url = f"{profile_link}/publications?Role=author&startPage=0&pageSize=50"
-    headers = {'User-Agent': 'Mozilla/5.0', 'Accept': 'text/html'}
+    headers = {
+        "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 12_3_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Safari/537.36",
+        "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+        "Accept-Language": "en-US,en;q=0.5",
+        "DNT": "1",
+        "Connection": "keep-alive",
+    }
 
     response = delayed_request(publications_url, headers=headers)
 
@@ -130,14 +149,14 @@ def scrape_author_publications(profile_link, author_name):
     publications = []
 
     for item in publication_items:
-        title_tag = item.find('h5', class_='issue-item__title')
-        title = title_tag.text.strip() if title_tag else 'Unknown title'
+        title_link = item.find('a', href=True)
+        if not title_link:
+            print("No title link found in publication item.")
+            continue
 
-        doi_tag = item.find('div', class_='issue-item__detail').find_all('a', href=True)
-        doi = next(
-            (link['href'].replace("https://doi.org/", "") for link in doi_tag if "https://doi.org/" in link['href']),
-            'No DOI'
-        )
+        title = title_link.text.strip()
+        doi = title_link['href'].replace('/doi/', '')
+
         if doi in unique_publications:
             continue
         unique_publications.add(doi)
@@ -158,7 +177,7 @@ def scrape_author_publications(profile_link, author_name):
             except Exception as e:
                 print(f"Error processing co-author '{co_author.get('title', 'Unknown')}': {e}")
 
-        if doi != 'No DOI':
+        if doi:
             abstract, publication_date, citation_count = get_metadata_from_doi(doi)
         else:
             abstract, publication_date, citation_count = 'N/A', 'Unknown', 0
@@ -167,12 +186,13 @@ def scrape_author_publications(profile_link, author_name):
             'Title': title,
             'DOI': doi,
             'Abstract': abstract,
-            'Publication Date': publication_date,
+            'Publication Date': publication_date if publication_date != "Unknown" else None,
             'Citation Count': citation_count,
             'Co-Authors': co_authors,
         })
 
     return publications
+
 
 
 def get_metadata_from_doi(doi):
@@ -198,7 +218,13 @@ def get_metadata_from_doi(doi):
 
 def scrape_latest_publication(profile_link):
     publications_url = f"{profile_link}/publications?Role=author&startPage=0&pageSize=1"
-    headers = {'User-Agent': 'Mozilla/5.0', 'Accept': 'text/html'}
+    headers = {
+        "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 12_3_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Safari/537.36",
+        "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+        "Accept-Language": "en-US,en;q=0.5",
+        "DNT": "1",
+        "Connection": "keep-alive",
+    }
 
     response = requests.get(publications_url, headers=headers)
     if response.status_code != 200:
@@ -210,14 +236,17 @@ def scrape_latest_publication(profile_link):
     if not latest_item:
         return None
 
-    title_tag = latest_item.find('h5', class_='issue-item__title')
-    title = title_tag.text.strip() if title_tag else 'Unknown title'
+    # Find the DOI and title from the `<a>` tag directly
+    title_link = latest_item.find('a', href=True)
+    if not title_link:
+        print(f"No title link found for {profile_link}")
+        return None
 
-    doi_tag = latest_item.find('div', class_='issue-item__detail').find_all('a', href=True)
-    doi = next((link['href'].replace("https://doi.org/", "") for link in doi_tag if "https://doi.org/" in link['href']),
-               'No DOI')
+    title = title_link.text.strip() if title_link else 'Unknown title'
+    doi = title_link['href'].replace('/doi/', '')
 
-    if doi != 'No DOI':
+    # Fetch metadata using the DOI
+    if doi:
         abstract, publication_date, citation_count = get_metadata_from_doi(doi)
     else:
         abstract, publication_date, citation_count = 'N/A', 'Unknown', 0
@@ -295,7 +324,7 @@ def update_author_if_needed(author_name, profile_link):
 
             try:
                 update_progress(profile_link, "Generating new summary using LLM...")
-                llmNew.request(author_name)
+                # llmNew.request(author_name)
             except Exception as e:
                 update_progress(profile_link, "Generating new summary using LLM...")
             summary = get_researcher_summary(author_name)
@@ -305,11 +334,11 @@ def update_author_if_needed(author_name, profile_link):
         latest_db_publication = get_latest_publication(author_details_db["Publications"])
         db_pub_date = latest_db_publication.get("Publication Date") if latest_db_publication else None
         scraped_pub_date = latest_scraped_publication.get("Publication Date")
-        '''
+
         print("Latest Publication in Database:",
               json.dumps(latest_db_publication, indent=4) if latest_db_publication else "None")
         print("Latest Scraped Publication:", json.dumps(latest_scraped_publication, indent=4))
-        '''
+
 
         if db_pub_date and scraped_pub_date:
             db_pub_date_obj = datetime.strptime(db_pub_date, "%Y-%m-%d")
@@ -324,7 +353,7 @@ def update_author_if_needed(author_name, profile_link):
                 else:
                     try:
                         update_progress(profile_link, "Generating new summary using LLM...")
-                        llmNew.request(author_name)
+                        # llmNew.request(author_name)
                     except Exception as e:
                         update_progress(profile_link, "Generating new summary using LLM...")
                     summary = get_researcher_summary(author_name)
@@ -344,7 +373,7 @@ def update_author_if_needed(author_name, profile_link):
         author_details_db_after_update = get_author_details_from_db(author_name)
         try:
             update_progress(profile_link, "Generating summary using LLM for updated author details...")
-            llmNew.request(author_name)
+            # llmNew.request(author_name)
         except Exception as e:
             update_progress(profile_link, "Generating summary using LLM for updated author details...")
         summary = get_researcher_summary(author_name)
@@ -415,6 +444,15 @@ author_name = "Les Carr"
 profile_link = "https://dl.acm.org/profile/81100072950"
 
 author_details_json = update_author_if_needed(author_name, profile_link)
+
+print("\nDetailed Author Information:")
+print(json.dumps(author_details_json, indent=4))
+'''
+'''
+author_name = "Elsa Gunter"
+profile_link = "https://dl.acm.org/profile/81100274275"
+
+author_details_json = scrape_author_details(author_name, profile_link)
 
 print("\nDetailed Author Information:")
 print(json.dumps(author_details_json, indent=4))
