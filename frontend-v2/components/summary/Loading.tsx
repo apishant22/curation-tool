@@ -6,6 +6,8 @@ import { Loader2, Sparkles, BookOpenCheck } from "lucide-react";
 const Loading = ({ profileLink }: { profileLink: string }) => {
   const [status, setStatus] = useState<string>("Starting process...");
 
+  const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL;
+
   // Map statuses to progress values
   const statusProgressMap: { [key: string]: number } = {
     "Starting process...": 0,
@@ -29,7 +31,7 @@ const Loading = ({ profileLink }: { profileLink: string }) => {
 
   const fetchProgress = async () => {
     try {
-      const response = await fetch(`http://localhost:3002/progress/${profileLink}`);
+      const response = await fetch(`${BASE_URL}/progress/${profileLink}`);
       if (response.ok) {
         const data = await response.json();
         setStatus(data.status);
@@ -51,47 +53,46 @@ const Loading = ({ profileLink }: { profileLink: string }) => {
   const progress = statusProgressMap[status] || 0;
 
   return (
-      <div className="flex items-center justify-center bg-white dark:bg-black">
-        <div className="flex flex-grow flex-col max-w-[1024px] justify-center bg-white dark:bg-zinc-800 shadow-2xl p-8 pt-12 rounded-lg animate-fadeIn">
-          <div className="flex flex-col items-center space-y-6">
-            {/* Animated header with sparkles */}
-            <div className="relative flex items-center justify-center">
-              <h2 className="text-xl font-bold text-gray-800 dark:text-neutral-400 text-center">
-                Hold on, we&apos;re gathering the author&apos;s information!
-              </h2>
-              <Sparkles className="absolute right-0 translate-x-8 text-blue-500 animate-bounce delay-100 mb-12" />
-            </div>
+    <div className="flex items-center justify-center bg-white dark:bg-black">
+      <div className="flex flex-grow flex-col max-w-[1024px] justify-center bg-white dark:bg-zinc-800 shadow-2xl p-8 pt-12 rounded-lg animate-fadeIn">
+        <div className="flex flex-col items-center space-y-6">
+          {/* Animated header with sparkles */}
+          <div className="relative flex items-center justify-center">
+            <h2 className="text-xl font-bold text-gray-800 dark:text-neutral-400 text-center">
+              Hold on, we&apos;re gathering the author&apos;s information!
+            </h2>
+            <Sparkles className="absolute right-0 translate-x-8 text-blue-500 animate-bounce delay-100 mb-12" />
+          </div>
 
-            {/* Status Message */}
-            <div className="text-center text-gray-600 max-w-md animate-typing overflow-hidden whitespace-nowrap dark:text-neutral-400">
-              {status}
-            </div>
+          {/* Status Message */}
+          <div className="text-center text-gray-600 max-w-md animate-typing overflow-hidden whitespace-nowrap dark:text-neutral-400">
+            {status}
+          </div>
 
-            {/* Progress Bar */}
-            <div className="w-full h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden mt-4 relative">
-              <div
-                  className="h-full bg-blue-500 dark:bg-blue-400 transition-all duration-500"
-                  style={{ width: `${progress}%` }}
-              ></div>
-              <div className="absolute right-0 -top-6 text-sm text-gray-600 dark:text-gray-400">
-                {progress}%
-              </div>
+          {/* Progress Bar */}
+          <div className="w-full h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden mt-4 relative">
+            <div
+              className="h-full bg-blue-500 dark:bg-blue-400 transition-all duration-500"
+              style={{ width: `${progress}%` }}></div>
+            <div className="absolute right-0 -top-6 text-sm text-gray-600 dark:text-gray-400">
+              {progress}%
             </div>
+          </div>
 
-            {/* Status Message with Spinner */}
-            <div className="flex items-center justify-center space-x-2 text-md text-gray-600 dark:text-neutral-400">
-              {progress < 85 ? (
-                  <Loader2 className="w-4 h-4 animate-spin text-blue-500" />
-              ) : (
-                  <BookOpenCheck className="w-4 h-4 text-green-500 animate-pulse" />
-              )}
-              <span className="animate-pulse">
+          {/* Status Message with Spinner */}
+          <div className="flex items-center justify-center space-x-2 text-md text-gray-600 dark:text-neutral-400">
+            {progress < 85 ? (
+              <Loader2 className="w-4 h-4 animate-spin text-blue-500" />
+            ) : (
+              <BookOpenCheck className="w-4 h-4 text-green-500 animate-pulse" />
+            )}
+            <span className="animate-pulse">
               {progress < 100 ? "Generating page..." : "Finalizing!"}
             </span>
-            </div>
           </div>
         </div>
       </div>
+    </div>
   );
 };
 
