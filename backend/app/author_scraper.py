@@ -8,7 +8,7 @@ import json
 from backend.app.progress_manager import ProgressManager
 from backend.db.db_helper import *
 from backend.app.acm_author_searcher import ACMAuthorSearcher
-# from backend.llm import llmNew
+from backend.llm import llmNew
 import time
 
 def delayed_request(url, headers=None, params=None, timeout=10):
@@ -324,7 +324,7 @@ def update_author_if_needed(author_name, profile_link):
 
             try:
                 update_progress(profile_link, "Generating new summary using LLM...")
-                # llmNew.request(author_name)
+                llmNew.request(author_name)
             except Exception as e:
                 update_progress(profile_link, "Generating new summary using LLM...")
             summary = get_researcher_summary(author_name)
@@ -353,7 +353,7 @@ def update_author_if_needed(author_name, profile_link):
                 else:
                     try:
                         update_progress(profile_link, "Generating new summary using LLM...")
-                        # llmNew.request(author_name)
+                        llmNew.request(author_name)
                     except Exception as e:
                         update_progress(profile_link, "Generating new summary using LLM...")
                     summary = get_researcher_summary(author_name)
@@ -373,7 +373,7 @@ def update_author_if_needed(author_name, profile_link):
         author_details_db_after_update = get_author_details_from_db(author_name)
         try:
             update_progress(profile_link, "Generating summary using LLM for updated author details...")
-            # llmNew.request(author_name)
+            llmNew.request(author_name)
         except Exception as e:
             update_progress(profile_link, "Generating summary using LLM for updated author details...")
         summary = get_researcher_summary(author_name)
