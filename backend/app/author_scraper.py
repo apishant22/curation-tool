@@ -10,10 +10,6 @@ from backend.db.db_helper import *
 from backend.app.acm_author_searcher import ACMAuthorSearcher
 from backend.llm import llmNew
 import time
-from redis import Redis, ConnectionPool
-
-pool = ConnectionPool(host='localhost', port=6379, max_connections=50)
-redis_client = Redis(connection_pool=pool)
 
 def delayed_request(url, headers=None, params=None, timeout=10):
     time.sleep(1)

@@ -123,11 +123,11 @@ function Page() {
 
   if (loading) {
     return (
-        <div className="pt-48 flex justify-center">
-          <Container>
-            <Loading profileLink={String(profileId)} />
-          </Container>
-        </div>
+      <div className="pt-48 flex justify-center">
+        <Container>
+          <Loading profileLink={String(profileId)} />
+        </Container>
+      </div>
     );
   }
 
@@ -199,7 +199,7 @@ function Page() {
           </div>
         </Container>
         {loading ? (
-          <Loading />
+          <Loading profileLink="" />
         ) : (
           <>
             <div className="flex flex-grow shadow-2xl dark:bg-zinc-900">
