@@ -948,34 +948,35 @@ const Tiptap = ({ name, summary }) => {
 
         {/* Improvement Popup */}
         {isEdit && isPopupOpen && (
-          <div className="improvement-popup popup right-8 md:w-[500px] md:h-[300px] bg-white p-4 rounded-lg shadow-lg fixed bottom-5 z-30 transition-all duration-500">
-            <h3 className="font-bold mb-2 text-lg">Improve Text</h3>
-            <div className="max-h-[125px] overflow-y-auto mb-3 p-2 bg-gray-200 rounded-md border-l-4 border-blue-500">
-              {selectedText}
+            <div className="improvement-popup popup right-8 md:w-[500px] bg-white p-4 rounded-lg shadow-lg fixed bottom-5 z-30 transition-all duration-500">
+              <h3 className="font-bold mb-4 text-lg">Improve Text</h3>
+              <div className="max-h-[100px] overflow-y-auto mb-3 p-2 bg-gray-200 rounded-md border-l-4 border-blue-500">
+                {selectedText}
+              </div>
+              <textarea
+                  className="w-full h-24 p-3 border rounded-md text-gray-900 dark:bg-zinc-800 dark:text-gray-200 focus:border-blue-500 resize-none"
+                  placeholder="Enter your improvement"
+                  value={improvementReason}
+                  onChange={(e) => setImprovementReason(e.target.value)}
+              />
+              <div className="flex justify-end gap-4 mt-4">
+                <button
+                    className="bg-green-500 text-white px-4 py-2 rounded-md shadow hover:bg-green-600 transition-transform duration-300 ease-in-out flex items-center gap-1"
+                    onClick={applyImprovement}>
+                  ✓ Apply
+                </button>
+                <button
+                    className="bg-gray-500 text-white px-4 py-2 rounded-md shadow hover:bg-gray-600 transition-transform duration-300 ease-in-out flex items-center gap-1"
+                    onClick={() => {
+                      setIsPopupOpen(false);
+                      setImprovementPopupOpen(false);
+                    }}>
+                  ✕ Cancel
+                </button>
+              </div>
             </div>
-            <textarea
-              className="w-full p-3 border rounded-md text-gray-900 dark:bg-zinc-800 dark:text-gray-200 focus:border-blue-500 mb-3 resize-none"
-              placeholder="Enter your improvement"
-              value={improvementReason}
-              onChange={(e) => setImprovementReason(e.target.value)}
-            />
-            <div className="flex justify-end gap-4 mt-2">
-              <button
-                className="bg-green-500 text-white px-4 py-2 rounded-md shadow hover:bg-green-600 transition-transform duration-300 ease-in-out flex items-center gap-1"
-                onClick={applyImprovement}>
-                ✓ Apply
-              </button>
-              <button
-                className="bg-gray-500 text-white px-4 py-2 rounded-md shadow hover:bg-gray-600 transition-transform duration-300 ease-in-out flex items-center gap-1"
-                onClick={() => {
-                  setIsPopupOpen(false);
-                  setImprovementPopupOpen(false);
-                }}>
-                ✕ Cancel
-              </button>
-            </div>
-          </div>
         )}
+
 
         {/* Improvement Requests Timeline */}
         {isEdit && improvementRequests.length > 0 && (
