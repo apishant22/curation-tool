@@ -164,19 +164,25 @@ function Page() {
               </Alert>
 
               <div className="flex flex-col gap-4">
+                {/* Retry Button */}
                 <Buttons
-                  onClick={() => {
-                    if (cachedData) {
-                      router.push(cachedData);
-                    } else if (window.history.length > 1) {
-                      router.back();
-                    } else {
-                      window.close();
-                      window.location.href = "lastPage";
-                    }
-                  }}
-                  label={"Go back to the last page"}
-                  outline
+                    onClick={() => window.location.reload()}
+                    label={"Retry"}
+                    outline={false} // Ensures the button is blue
+                />
+                <Buttons
+                    onClick={() => {
+                      if (cachedData) {
+                        router.push(cachedData);
+                      } else if (window.history.length > 1) {
+                        router.back();
+                      } else {
+                        window.close();
+                        window.location.href = "lastPage";
+                      }
+                    }}
+                    label={"Go back to the last page"}
+                    outline
                 />
                 <p className="text-sm text-gray-500 text-center">
                   If the problem persists, please try again later.

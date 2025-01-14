@@ -13,34 +13,35 @@ interface ButtonProps {
 }
 
 const Button: React.FC<ButtonProps> = ({
-  label,
-  onClick,
-  disabled,
-  outline,
-  small,
-  icon: Icon,
+   label,
+   onClick,
+   disabled,
+   outline = false,
+   small,
+   icon: Icon,
 }) => {
-  return (
-    <button
-      onClick={onClick}
-      disabled={disabled}
-      className={`relative w-full rounded-lg transition hover:opacity-80 disabled:cursor-not-allowed disabled:opacity-70
+    return (
+        <button
+            onClick={onClick}
+            disabled={disabled}
+            className={`relative w-full rounded-lg transition hover:opacity-80 hover:shadow-lg disabled:cursor-not-allowed disabled:opacity-70
       ${
-        outline ? "bg-white" : "bg-blue-400"
-      } 
-      ${outline ? "border-black" : "border-blue-400"} 
-      ${
-        outline ? "text-black" : "text-white"
-      } 
+                outline ? "bg-white border-black text-black" : "bg-white border-blue-500 text-blue-500"
+            } 
       ${small ? "py-1" : "py-3"} ${small ? "text-sm" : "text-md"} 
+      ${small ? "font-light" : "font-semibold"} 
+      ${small ? "border-[1px]" : "border-2"} 
       ${
-        small ? "font-light" : "font-semibold"
-      } 
-      ${small ? "border-[1px]" : "border-2"} `}>
-      {Icon && <Icon size={24} className="absolute left-4 top-3" />}
-      {label}
-    </button>
-  );
+                outline
+                    ? "hover:bg-gray-50 focus:ring-2 focus:ring-gray-400"
+                    : "hover:bg-blue-50 focus:ring-2 focus:ring-blue-400"
+            }`}>
+            {Icon && <Icon size={24} className="absolute left-4 top-3" />}
+            {label}
+        </button>
+    );
 };
+
+
 
 export default Button;
