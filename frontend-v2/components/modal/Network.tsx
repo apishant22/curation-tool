@@ -5,6 +5,7 @@ import React, { useEffect, useState } from "react";
 import dynamic from "next/dynamic";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { AlertCircle } from "lucide-react";
+import {useEditMode} from "@/components/summary/EditModeContext";
 
 const ForceGraph3D = dynamic(
   () => import("react-force-graph").then((mod) => mod.ForceGraph2D),
@@ -42,6 +43,7 @@ const AuthorNetwork: React.FC<NetworkProps> = ({
   const [loading, setLoading] = useState(true);
   const fgRef = useRef<any>(null);
   const img = new Image();
+  const { isEdit } = useEditMode();
   img.src = "./images/avatar.png";
 
   const parseLink = (link: string) => {
@@ -165,29 +167,33 @@ const AuthorNetwork: React.FC<NetworkProps> = ({
         overflow: "hidden",
         border: "1px rounded solid",
       }}>
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "flex-end",
-          alignItems: "flex-end",
-          padding: "10px 10px",
-          position: "absolute",
-          gap: 10,
-          top: 0,
-          right: 0,
-          zIndex: 10,
-        }}>
-        <div>
-          <div className="p-1 font-sans font-semibold text-blue-600 rounded-md">
-            <span>Co-authors: {nodeCount - 1} </span>
+      {!isEdit && (
+        <div
+            style={{
+              display: "flex",
+              justifyContent: "flex-end",
+              alignItems: "flex-end",
+              padding: "10px 10px",
+              position: "absolute",
+              gap: 10,
+              top: 0,
+              right: 0,
+              zIndex: 10,
+            }}>
+
+            <div>
+              <div className="p-1 font-sans font-semibold text-blue-600 rounded-md">
+                <span>Co-authors: {nodeCount - 1} </span>
+              </div>
+            </div>
+            <div>
+              <div className="p-1 font-sans font-semibold text-blue-600 rounded-md">
+                <span> Relations: {linkCount}</span>
+              </div>
+            </div>
           </div>
-        </div>
-        <div>
-          <div className="p-1 font-sans font-semibold text-blue-600 rounded-md">
-            <span> Relations: {linkCount}</span>
-          </div>
-        </div>
-      </div>
+      )}
+
 
       <div>
         {/*Main body*/}

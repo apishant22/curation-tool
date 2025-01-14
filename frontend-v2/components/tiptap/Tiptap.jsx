@@ -35,10 +35,11 @@ import Shepherd from "shepherd.js";
 import "shepherd.js/dist/css/shepherd.css";
 import { confirmAlert } from "react-confirm-alert";
 import "react-confirm-alert/src/react-confirm-alert.css";
+import {useEditMode} from "@/components/summary/EditModeContext";
 
 const Tiptap = ({ name, summary }) => {
   const [content, setContent] = useState(summary);
-  const [isEdit, setIsEdit] = useState(false);
+  const { isEdit, setIsEdit } = useEditMode();
   const [selectedText, setSelectedText] = useState("");
   const [improvementReason, setImprovementReason] = useState("");
   const [isPopupOpen, setIsPopupOpen] = useState(false);

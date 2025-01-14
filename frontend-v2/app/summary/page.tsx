@@ -14,6 +14,7 @@ import React, { useEffect, useState } from "react";
 import Tiptap from "@/components/tiptap/Tiptap";
 import { fetchRecommendations } from "@/utils/fetchRecommendations";
 import Search from "@/components/navbar/Search";
+import {EditModeProvider} from "@/components/summary/EditModeContext";
 
 function Page() {
   const searchParams = useSearchParams();
@@ -202,6 +203,7 @@ function Page() {
           <Loading profileLink="" />
         ) : (
           <>
+            <EditModeProvider>
             <div className="flex flex-grow shadow-2xl dark:bg-zinc-900">
               <div className="w-[70%] p-4 flex flex-col">
                 <div className="p-2">
@@ -219,6 +221,7 @@ function Page() {
                 />
               </div>
             </div>
+            </EditModeProvider>
           </>
         )}
       </Container>
