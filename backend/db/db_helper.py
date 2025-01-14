@@ -399,6 +399,26 @@ def update_researcher_summary(author_name, new_summary, session=None):
         if session is not None:
             session.close()
 
+def delete_researcher_summary(author_name, session=None):
+    if session is None:
+        session = get_session()
+    try:
+        researcher = session.query(Researcher).filter(func.lower(Researcher.name) == func.lower(author_name)).first()
+
+        if researcher.summary:
+            researcher.summary = None
+            session.commit()
+            print(f"Successfully removed the summary for researcher with name: {author_name}")
+        else:
+            print(f"No summary found for author: {author_name}")
+    except SQLAlchemyError as e:
+        session.rollback()
+        print(f"Error updating researcher summary: {e}")
+    finally:
+        if session is not None:
+            session.close()
+
+
 def get_researcher_by_profile_link(profile_link, session=None):
     if session is None:
         session = get_session()

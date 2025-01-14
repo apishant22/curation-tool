@@ -253,6 +253,37 @@ const Tiptap = ({ name, summary }) => {
     }
   };
 
+  const handleRemoveSumamry = async () => {
+    try {
+      setLoading(true);
+      const response = await axios.post(
+          `${BASE_URL}/remove_summary/${encodeURIComponent(name)}`,
+          {},
+          {
+            headers: {
+              "Content-Type": "application/json",
+            },
+          }
+      );
+      if (response.status === 200) {
+        console.log("Author summary successfully removed!");
+        router.push("/");
+      } else {
+        console.log("Failed to remove the author summary.");
+      }
+    } catch (error) {
+      console.error("Remove author summary failed:", error);
+      if (error.response && error.response.data && error.response.data.error) {
+        console.log(`Error: ${error.response.data.error}`);
+      } else {
+        console.log("An error occurred while removing the author summary.");
+      }
+    } finally {
+      setLoading(false);
+    }
+  }
+
+
   const handleRemoveAuthor = async () => {
     try {
       setLoading(true);
@@ -694,6 +725,17 @@ const Tiptap = ({ name, summary }) => {
                 No
               </button>
               <button
+                className= "px-4 py-2 bg-yellow-500 text-white rounded-md hover:bg-yellow-600"
+                onClick={async  () => {
+                  await handleRemoveSumamry();
+                  removeAuthorFromSessionStorage();
+                  toast.success(`${capitalizedName} summary removed successfully!`);
+                  onClose();
+                }}
+              >
+                Only Summary
+              </button>
+              <button
                 className="px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600"
                 onClick={async () => {
                   await handleRemoveAuthor();
@@ -701,7 +743,7 @@ const Tiptap = ({ name, summary }) => {
                   toast.success(`${capitalizedName} removed successfully!`);
                   onClose();
                 }}>
-                Yes, Remove
+                Yes, Entirely
               </button>
             </div>
           </div>
@@ -715,7 +757,7 @@ const Tiptap = ({ name, summary }) => {
       toast.warn("Author name cannot be empty.");
       return;
     }
-    await handleRemoveAuthor();
+    await handleRemoveSumamry();
     removeAuthorFromSessionStorage();
   };
 
