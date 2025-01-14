@@ -1,14 +1,29 @@
-import React, { createContext, useContext, useState } from "react";
+import React, { createContext, useContext, useState, Dispatch, SetStateAction } from "react";
 
-const EditModeContext = createContext();
+interface EditModeContextType {
+    isEdit: boolean;
+    setIsEdit: Dispatch<SetStateAction<boolean>>;
+}
 
-export const EditModeProvider = ({ children }) => {
+const EditModeContext = createContext<EditModeContextType>({
+    isEdit: false,
+    setIsEdit: () => {},
+});
+
+export const EditModeProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     const [isEdit, setIsEdit] = useState(false);
+
     return (
         <EditModeContext.Provider value={{ isEdit, setIsEdit }}>
-    {children}
-    </EditModeContext.Provider>
-);
+            {children}
+        </EditModeContext.Provider>
+    );
 };
 
-export const useEditMode = () => useContext(EditModeContext);
+export const useEditMode = () => {
+    const context = useContext(EditModeContext);
+    if (!context) {
+        throw new Error("useEditMode must be used within an EditModeProvider");
+    }
+    return context;
+};

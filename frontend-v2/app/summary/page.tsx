@@ -210,23 +210,23 @@ function Page() {
         ) : (
           <>
             <EditModeProvider>
-            <div className="flex flex-grow shadow-2xl dark:bg-zinc-900">
-              <div className="w-[70%] p-4 flex flex-col">
-                <div className="p-2">
-                  <AuthorHeader
-                    name={data?.author_details?.Name || "No name available"}
+              <div className="flex flex-grow shadow-2xl dark:bg-zinc-900">
+                <div className="w-[70%] p-4 flex flex-col">
+                  <div className="p-2">
+                    <AuthorHeader
+                      name={data?.author_details?.Name || "No name available"}
+                    />
+                  </div>
+
+                  <Tiptap name={name} summary={data?.summary} />
+                </div>
+                <div className="flex max-w-[600px] p-3 flex-col gap-4 mt-6 overflow-auto">
+                  <PublicationCard
+                    publications={data?.author_details?.Publications || []}
+                    name={data?.author_details?.Name}
                   />
                 </div>
-
-                <Tiptap name={name} summary={data?.summary} />
               </div>
-              <div className="flex max-w-[600px] p-3 flex-col gap-4 mt-6 overflow-auto">
-                <PublicationCard
-                  publications={data?.author_details?.Publications || []}
-                  name={data?.author_details?.Name}
-                />
-              </div>
-            </div>
             </EditModeProvider>
           </>
         )}
