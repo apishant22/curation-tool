@@ -35,47 +35,20 @@ const ContentCard: React.FC<ContentCardProps> = ({
     return text;
   };
 
-  const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL;
-
   const handleCardClick = async () => {
+    const formattedName = name.trim().replace(/\s+/g, " ").toLowerCase();
     const profileIdMatch = profileLink.match(/profile\/(\d+)$/);
     const profileId = profileIdMatch ? profileIdMatch[1] : "";
-    const formattedName = name.trim().replace(/\s+/g, " ").toLowerCase();
     const searchParams = new URLSearchParams({
       name: formattedName,
       profileId: profileId,
     });
 
-    if (!profileId) {
-      toast.error("Invalid profile link.");
-      return;
-    }
+    toast.success(
+      "Item has been successfully clicked! Redirecting to the details page."
+    );
 
-    const apiUrl = `${BASE_URL}/query/${encodeURIComponent(name)}/${profileId}`;
-    console.log("API URL:", apiUrl);
-
-    try {
-      toast.loading("Fetching author details...");
-      const response = await fetch(apiUrl);
-
-      if (!response.ok) {
-        throw new Error(
-          `Failed to fetch author details. Status: ${response.status}`
-        );
-      }
-
-      const data = await response.json();
-      toast.dismiss();
-
-      if (data.message) {
-        toast.success(data.message);
-      }
-
-      router.push(`/summary?${searchParams.toString()}`);
-    } catch (error) {
-      console.error("Error fetching author details:", error);
-      toast.error("Failed to fetch author details.");
-    }
+    router.push(`/summary?${searchParams.toString()}`);
   };
 
   return (
