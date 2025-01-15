@@ -14,7 +14,7 @@ import React, { useEffect, useState } from "react";
 import Tiptap from "@/components/tiptap/Tiptap";
 import { fetchRecommendations } from "@/utils/fetchRecommendations";
 import Search from "@/components/navbar/Search";
-import { EditModeProvider } from "@/components/summary/EditModeContext";
+import {EditModeProvider} from "@/components/summary/EditModeContext";
 
 function Page() {
   const searchParams = useSearchParams();
@@ -22,7 +22,6 @@ function Page() {
   const [loading, setLoading] = useState(true);
   const [data, setData] = useState<any>(null);
   const [error, setError] = useState<string | null>(null);
-  const [err, setErr] = useState(false);
   const name = searchParams.get("name") || "";
   const profileId = parseInt(searchParams.get("profileId") || "0", 10);
 
@@ -53,13 +52,10 @@ function Page() {
     try {
       setLoading(true);
       const response = await fetch(`${BASE_URL}/query/${name}/${profileId}`);
-
-      const fetchedData = await response.json();
       if (!response.ok) {
-        console.error(fetchedData.message);
-        setLoading(true);
-        setErr(true);
+        throw new Error(`HTTP error! Status: ${response.status}`);
       }
+      const fetchedData = await response.json();
       sessionStorage.setItem(
         `author_${name}_${profileId}`,
         JSON.stringify(fetchedData)
@@ -150,7 +146,7 @@ function Page() {
     sessionStorage.setItem("lastPage", window.location.href);
   }
 
-  if (err) {
+  if (!data?.author_details) {
     sessionStorage.removeItem(`author_${name}_${profileId}`);
 
     return (
@@ -170,23 +166,23 @@ function Page() {
               <div className="flex flex-col gap-4">
                 {/* Retry Button */}
                 <Buttons
-                  onClick={() => window.location.reload()}
-                  label={"Retry"}
-                  outline={false} // Ensures the button is blue
+                    onClick={() => window.location.reload()}
+                    label={"Retry"}
+                    outline={false} // Ensures the button is blue
                 />
                 <Buttons
-                  onClick={() => {
-                    if (cachedData) {
-                      router.push(cachedData);
-                    } else if (window.history.length > 1) {
-                      router.back();
-                    } else {
-                      window.close();
-                      window.location.href = "lastPage";
-                    }
-                  }}
-                  label={"Go back to the last page"}
-                  outline
+                    onClick={() => {
+                      if (cachedData) {
+                        router.push(cachedData);
+                      } else if (window.history.length > 1) {
+                        router.back();
+                      } else {
+                        window.close();
+                        window.location.href = "lastPage";
+                      }
+                    }}
+                    label={"Go back to the last page"}
+                    outline
                 />
                 <p className="text-sm text-gray-500 text-center">
                   If the problem persists, please try again later.
