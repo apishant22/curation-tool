@@ -34,7 +34,7 @@
     "components/modal/EditorModal.jsx",
     "components/summary/SelectableSummary.tsx",
     "components/summary/RegenerateCard.jsx",
-    "../middleware.ts"
+    "middleware.ts"
   ],
   "exclude": ["node_modules"]
 }
