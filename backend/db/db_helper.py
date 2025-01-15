@@ -153,14 +153,14 @@ def store_author_details_in_db(author_details, session=None):
         if not primary_author:
             primary_author = Researcher(name=primary_author_name, profile_link=primary_author_profile_link)
             session.add(primary_author)
-            session.commit()
+            session.flush()
 
         for field_name in fields_of_study:
             field = session.query(Fields_of_Study).filter_by(field_name=field_name).first()
             if not field:
                 field = Fields_of_Study(field_name=field_name)
                 session.add(field)
-                session.commit()
+                session.flush()
             if field not in primary_author.fields_of_study:
                 primary_author.fields_of_study.append(field)
 
@@ -175,13 +175,13 @@ def store_author_details_in_db(author_details, session=None):
                     citations=pub.get('Citation Count', 0),
                 )
                 session.add(publication)
-                session.commit()
+                session.flush()
+
             else:
                 publication.title = pub['Title']
                 publication.abstract = pub.get('Abstract', publication.abstract)
                 publication.publication_date = convert_date_string(pub.get('Publication Date'))
                 publication.citations = pub.get('Citation Count', publication.citations)
-                session.commit()
 
             if primary_author not in publication.researchers:
                 publication.researchers.append(primary_author)
@@ -195,7 +195,7 @@ def store_author_details_in_db(author_details, session=None):
                 if not co_author_entry:
                     co_author_entry = Researcher(name=co_author_name, profile_link=co_author_profile_link)
                     session.add(co_author_entry)
-                    session.commit()
+                    session.flush()
 
                 if co_author_entry not in publication.researchers:
                     publication.researchers.append(co_author_entry)

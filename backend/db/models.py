@@ -18,7 +18,7 @@ class Researcher(Base):
 
 class Paper(Base):
     __tablename__ = 'Paper'
-    doi = Column(String, primary_key=True)
+    doi = Column(String, primary_key=True, unique=True, nullable=False)
     title = Column(String, nullable=True)
     publication_date = Column(Date, nullable=True)
     abstract = Column(String, nullable=True)

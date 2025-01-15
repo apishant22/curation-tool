@@ -1,4 +1,5 @@
 import re
+import traceback
 
 import requests
 from bs4 import BeautifulSoup
@@ -268,6 +269,9 @@ def get_latest_publication(publications):
         pub for pub in publications if pub["Publication Date"] and pub["Publication Date"] != "None"
     ]
 
+    if not valid_publications:
+        return None
+
     latest_publication = max(
         valid_publications,
         key=lambda pub: datetime.strptime(pub["Publication Date"], "%Y-%m-%d")
@@ -381,8 +385,10 @@ def update_author_if_needed(author_name, profile_link):
         return summary, author_details_db_after_update
 
     except KeyError as e:
+        traceback.print_exc()
         return None, None
     except Exception as e:
+        traceback.print_exc()
         return None, None
 
 
