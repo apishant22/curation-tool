@@ -14,7 +14,7 @@ import React, { useEffect, useState } from "react";
 import Tiptap from "@/components/tiptap/Tiptap";
 import { fetchRecommendations } from "@/utils/fetchRecommendations";
 import Search from "@/components/navbar/Search";
-import {EditModeProvider} from "@/components/summary/EditModeContext";
+import { EditModeProvider } from "@/components/summary/EditModeContext";
 
 function Page() {
   const searchParams = useSearchParams();
@@ -52,10 +52,16 @@ function Page() {
     try {
       setLoading(true);
       const response = await fetch(`${BASE_URL}/query/${name}/${profileId}`);
-      if (!response.ok) {
-        throw new Error(`HTTP error! Status: ${response.status}`);
-      }
       const fetchedData = await response.json();
+
+      if (!response.ok) {
+        throw new Error(
+          fetchedData.message || `HTTP error! Status: ${response.status}`
+        );
+      }
+      if (!fetchedData.author_details) {
+        throw new Error("Author details not found");
+      }
       sessionStorage.setItem(
         `author_${name}_${profileId}`,
         JSON.stringify(fetchedData)
@@ -100,27 +106,77 @@ function Page() {
 
   useEffect(() => {
     const cachedData = sessionStorage.getItem(`author_${name}_${profileId}`);
+
     if (cachedData) {
-      setData(JSON.parse(cachedData));
+      const parsedData = JSON.parse(cachedData);
+      if (!parsedData.author_details) {
+        // Remove invalid cached data
+        sessionStorage.removeItem(`author_${name}_${profileId}`);
+        setError("Author details not found");
+        setLoading(false);
+        return;
+      }
+      setData(parsedData);
       setLoading(false);
     } else {
       setLoading(true);
       fetchAuthor(name, profileId)
-        .then((fetchedData) => setData(fetchedData))
+        .then((fetchedData) => {
+          if (!fetchedData.author_details) {
+            throw new Error("Author details not found");
+          }
+          setData(fetchedData);
+        })
         .catch((error) => {
           console.error("Querying author failed:", error);
-          setError(
-            "An error occurred while fetching data. Redirecting to the results page..."
-          );
-          setTimeout(() => {
-            router.back();
-          }, 2000);
+          setError(error.message || "An error occurred while fetching data");
         })
         .finally(() => {
           setLoading(false);
         });
     }
   }, [name, profileId]);
+
+  const ErrorDisplay = ({ error, onRetry, onBack }) => (
+    <div className="pt-48 flex justify-center">
+      <Container>
+        <div className="min-h-[50vh] flex items-center justify-center p-4">
+          <div className="max-w-md w-full">
+            <Alert variant="destructive" className="mb-4">
+              <AlertCircle className="h-4 w-4" />
+              <AlertTitle className="ml-2">Error</AlertTitle>
+              <AlertDescription className="mt-2">
+                {error ||
+                  "We couldn't load the required data. This might be due to a network issue or the content might be unavailable."}
+              </AlertDescription>
+            </Alert>
+
+            <div className="flex flex-col gap-4">
+              <Buttons onClick={onRetry} label="Retry" outline={false} />
+              <Buttons
+                onClick={onBack}
+                label="Go back to the last page"
+                outline
+              />
+              <p className="text-sm text-gray-500 text-center">
+                If the problem persists, please try again later.
+              </p>
+            </div>
+          </div>
+        </div>
+      </Container>
+    </div>
+  );
+  const handleBack = () => {
+    if (cachedData) {
+      router.push(cachedData);
+    } else if (window.history.length > 1) {
+      router.back();
+    } else {
+      window.close();
+      window.location.href = "lastPage";
+    }
+  };
 
   if (loading) {
     return (
@@ -132,67 +188,21 @@ function Page() {
     );
   }
 
-  if (error || !data) {
+  // Handle all error cases with the ErrorDisplay component
+  if (error || !data || !data?.author_details) {
+    sessionStorage.removeItem(`author_${name}_${profileId}`);
     return (
-      <div className="pt-48 flex justify-center">
-        <Container>
-          <p className="text-red-500">{error}</p>
-        </Container>
-      </div>
+      <ErrorDisplay
+        error={error || "Author details not found"}
+        onRetry={() => window.location.reload()}
+        onBack={handleBack}
+      />
     );
   }
+
   const cachedData = sessionStorage.getItem(`currentPagePath`);
   if (typeof window !== "undefined") {
     sessionStorage.setItem("lastPage", window.location.href);
-  }
-
-  if (!data?.author_details) {
-    sessionStorage.removeItem(`author_${name}_${profileId}`);
-
-    return (
-      <div className="pt-48 flex justify-center">
-        <Container>
-          <div className="min-h-[50vh] flex items-center justify-center p-4">
-            <div className="max-w-md w-full">
-              <Alert variant="destructive" className="mb-4">
-                <AlertCircle className="h-4 w-4" />
-                <AlertTitle className="ml-2">Error</AlertTitle>
-                <AlertDescription className="mt-2">
-                  We couldn&apos;t load the required data. This might be due to
-                  a network issue or the content might be unavailable.
-                </AlertDescription>
-              </Alert>
-
-              <div className="flex flex-col gap-4">
-                {/* Retry Button */}
-                <Buttons
-                    onClick={() => window.location.reload()}
-                    label={"Retry"}
-                    outline={false} // Ensures the button is blue
-                />
-                <Buttons
-                    onClick={() => {
-                      if (cachedData) {
-                        router.push(cachedData);
-                      } else if (window.history.length > 1) {
-                        router.back();
-                      } else {
-                        window.close();
-                        window.location.href = "lastPage";
-                      }
-                    }}
-                    label={"Go back to the last page"}
-                    outline
-                />
-                <p className="text-sm text-gray-500 text-center">
-                  If the problem persists, please try again later.
-                </p>
-              </div>
-            </div>
-          </div>
-        </Container>
-      </div>
-    );
   }
 
   return (
