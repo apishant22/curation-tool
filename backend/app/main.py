@@ -123,6 +123,8 @@ def query(name, profile_link):
     print(f"Author Name: {name}, Profile Link: {profile_link}")
 
     update_result, author_details_db = scraper.update_author_if_needed(name, profile_link)
+    if author_details_db is None:
+        return jsonify({"error": "Can't scrape this author!"}), 500
 
     response = {'author_details': author_details_db}
     if update_result is None:
