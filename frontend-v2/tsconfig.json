@@ -33,7 +33,8 @@
     "components/editor/EditorContext.jsx",
     "components/modal/EditorModal.jsx",
     "components/summary/SelectableSummary.tsx",
-    "components/summary/RegenerateCard.jsx"
+    "components/summary/RegenerateCard.jsx",
+    "../middleware.ts"
   ],
   "exclude": ["node_modules"]
 }
