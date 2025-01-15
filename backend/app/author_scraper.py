@@ -12,7 +12,7 @@ from backend.app.acm_author_searcher import ACMAuthorSearcher
 from backend.llm import llmNew
 import time
 
-def delayed_request(url, headers=None, params=None, timeout=10):
+def delayed_request(url, headers=None, params=None, timeout=30):
     time.sleep(1)
     response = requests.get(url, headers=headers, params=params, timeout=timeout)
     return response
