@@ -165,40 +165,45 @@ def store_author_details_in_db(author_details, session=None):
                 primary_author.fields_of_study.append(field)
 
         for pub in publications:
-            publication = session.query(Paper).filter_by(doi=pub['DOI']).first()
-            if not publication:
-                publication = Paper(
-                    doi=pub['DOI'],
-                    title=pub['Title'],
-                    abstract=pub.get('Abstract', None),
-                    publication_date=convert_date_string(pub.get('Publication Date')),
-                    citations=pub.get('Citation Count', 0),
-                )
-                session.add(publication)
-                session.flush()
-
-            else:
-                publication.title = pub['Title']
-                publication.abstract = pub.get('Abstract', publication.abstract)
-                publication.publication_date = convert_date_string(pub.get('Publication Date'))
-                publication.citations = pub.get('Citation Count', publication.citations)
-
-            if primary_author not in publication.researchers:
-                publication.researchers.append(primary_author)
-
-            co_authors = pub.get('Co-Authors', [])
-            for co_author in co_authors:
-                co_author_name = co_author['Name']
-                co_author_profile_link = co_author.get('Profile Link', None)
-
-                co_author_entry = session.query(Researcher).filter_by(profile_link=co_author_profile_link).first()
-                if not co_author_entry:
-                    co_author_entry = Researcher(name=co_author_name, profile_link=co_author_profile_link)
-                    session.add(co_author_entry)
+            try:
+                publication = session.query(Paper).filter_by(doi=pub['DOI']).first()
+                if not publication:
+                    publication = Paper(
+                        doi=pub['DOI'],
+                        title=pub['Title'],
+                        abstract=pub.get('Abstract', None),
+                        publication_date=convert_date_string(pub.get('Publication Date')),
+                        citations=pub.get('Citation Count', 0),
+                    )
+                    session.add(publication)
                     session.flush()
+                else:
+                    publication.title = pub['Title']
+                    publication.abstract = pub.get('Abstract', publication.abstract)
+                    publication.publication_date = convert_date_string(pub.get('Publication Date'))
+                    publication.citations = pub.get('Citation Count', publication.citations)
 
-                if co_author_entry not in publication.researchers:
-                    publication.researchers.append(co_author_entry)
+                if primary_author not in publication.researchers:
+                    publication.researchers.append(primary_author)
+
+                co_authors = pub.get('Co-Authors', [])
+                for co_author in co_authors:
+                    co_author_name = co_author['Name']
+                    co_author_profile_link = co_author.get('Profile Link', None)
+
+                    co_author_entry = session.query(Researcher).filter_by(profile_link=co_author_profile_link).first()
+                    if not co_author_entry:
+                        co_author_entry = Researcher(name=co_author_name, profile_link=co_author_profile_link)
+                        session.add(co_author_entry)
+                        session.flush()
+
+                    if co_author_entry not in publication.researchers:
+                        publication.researchers.append(co_author_entry)
+
+            except Exception as e:
+                session.rollback()
+                print(f"Skipping duplicate or problematic publication with DOI {pub['DOI']}: {e}")
+                continue
 
         session.commit()
 
@@ -207,6 +212,7 @@ def store_author_details_in_db(author_details, session=None):
         raise e
     finally:
         session.close()
+
 
 # Function to get author details from the database
 def get_author_details_from_db(author_name, session=None):
