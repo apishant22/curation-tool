@@ -14,7 +14,7 @@ class ProgressManager:
         self.progress_store[profile_link] = status
 
     def get_progress(self, profile_link, max_retries=10, retry_delay=0.5):
-        retries = 5
+        retries = 0
         while retries < max_retries:
             progress = self.progress_store.get(profile_link)
             if progress:
