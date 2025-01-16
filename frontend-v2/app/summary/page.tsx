@@ -182,7 +182,7 @@ function Page() {
     return (
       <div className="pt-48 flex justify-center">
         <Container>
-          <Loading profileLink={String(profileId)} />
+          <Loading />
         </Container>
       </div>
     );
@@ -216,7 +216,7 @@ function Page() {
           </div>
         </Container>
         {loading ? (
-          <Loading profileLink="" />
+          <Loading />
         ) : (
           <>
             <EditModeProvider>
