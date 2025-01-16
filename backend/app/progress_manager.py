@@ -1,3 +1,6 @@
+import time
+
+
 class ProgressManager:
     _instance = None
     def __new__(cls, *args, **kwargs):
@@ -10,10 +13,19 @@ class ProgressManager:
         print(f"Updating progress for {profile_link}: {status}")
         self.progress_store[profile_link] = status
 
-    def get_progress(self, profile_link):
-        print(f"Progress Store: {self.progress_store}")
-        print(f"Fetching progress for profile_link: {profile_link}")
-        return self.progress_store.get(profile_link, "No progress available.")
+    def get_progress(self, profile_link, max_retries=10, retry_delay=0.5):
+        retries = 0
+        while retries < max_retries:
+            progress = self.progress_store.get(profile_link)
+            if progress:
+                print(f"Progress found for profile_link {profile_link}: {progress}")
+                return progress
+            print(f"Progress not available for {profile_link}. Retrying... ({retries + 1}/{max_retries})")
+            time.sleep(retry_delay)
+            retries += 1
+
+        print(f"Progress still not available for {profile_link} after {max_retries} retries.")
+        return "No progress available."
 
     def clear_progress(self, profile_link):
         if profile_link in self.progress_store:
