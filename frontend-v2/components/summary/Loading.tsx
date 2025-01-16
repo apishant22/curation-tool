@@ -46,9 +46,14 @@ const Loading = ({ profileLink }: { profileLink: string }) => {
   };
 
   useEffect(() => {
-    const interval = setInterval(fetchProgress, 2000); // Poll every 2 seconds
-    return () => clearInterval(interval); // Cleanup on unmount
-  }, []);
+    const delay = setTimeout(() => {
+      const interval = setInterval(fetchProgress, 2000);
+      return () => clearInterval(interval);
+    }, 2000);
+
+    return () => clearTimeout(delay);
+  }, [profileLink]);
+
 
   // Determine progress based on the current status
   const progress = statusProgressMap[status] || 0;
