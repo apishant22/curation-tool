@@ -138,12 +138,12 @@ def query(name, profile_link):
 
     return jsonify(response), 200
 
-@app.route('/progress/<profile_link>', methods=['GET'])
-def get_progress(profile_link):
-    status = progress_manager.get_progress(profile_link)
-    if status == "No progress available.":
-        return jsonify({"status": status}), 404
-    return jsonify({"status": status}), 200
+# @app.route('/progress/<profile_link>', methods=['GET'])
+# def get_progress(profile_link):
+#     status = progress_manager.get_progress(profile_link)
+#     if status == "No progress available.":
+#         return jsonify({"status": status}), 404
+#     return jsonify({"status": status}), 200
 
 
 # TODO make this work with the new database

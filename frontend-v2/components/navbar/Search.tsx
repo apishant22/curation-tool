@@ -19,8 +19,8 @@ const Search = () => {
   const [counter] = useState(0);
   const router = useRouter();
   const [isOpen, setIsOpen] = useState(false);
-  const [category, setCategory] = useState("Researcher");
-  const [placeholder, setPlaceholder] = useState("Search researcher ...");
+  const [category, setCategory] = useState("Author");
+  const [placeholder, setPlaceholder] = useState("Search author ...");
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   // get the value from the search bar
@@ -152,7 +152,7 @@ const Search = () => {
                   <div className="p-1">
                     <FaUserGraduate />
                   </div>
-                  <div className="pl-1 flex-grow">Researcher</div>
+                  <div className="pl-1 flex-grow">Author</div>
                 </div>
               </div>
               <hr />
