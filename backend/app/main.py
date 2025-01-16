@@ -142,7 +142,7 @@ def query(name, profile_link):
 # def get_progress(profile_link):
 #     status = progress_manager.get_progress(profile_link)
 #     if status == "No progress available.":
-#         return jsonify({"status": "Initializing progress..."}), 200
+#         return jsonify({"status": "Starting process..."}), 200
 #     return jsonify({"status": status}), 200
 
 
