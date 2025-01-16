@@ -11,6 +11,8 @@ class ProgressManager:
         self.progress_store[profile_link] = status
 
     def get_progress(self, profile_link):
+        print(f"Progress Store: {self.progress_store}")
+        print(f"Fetching progress for profile_link: {profile_link}")
         return self.progress_store.get(profile_link, "No progress available.")
 
     def clear_progress(self, profile_link):
