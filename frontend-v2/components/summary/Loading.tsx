@@ -31,7 +31,8 @@ const Loading = ({ profileLink }: { profileLink: string }) => {
 
   const fetchProgress = async () => {
     try {
-      const response = await fetch(`${BASE_URL}/progress/${profileLink}`);
+      const profileId = profileLink.split("/").pop();
+      const response = await fetch(`${BASE_URL}/progress/${profileId}`);
       if (response.ok) {
         const data = await response.json();
         setStatus(data.status);
