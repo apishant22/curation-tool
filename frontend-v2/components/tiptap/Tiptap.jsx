@@ -151,11 +151,12 @@ const Tiptap = ({ name, summary }) => {
         break;
     }
 
+    const formattedName = name.replace(/\s+/g, "_");
     const blob = new Blob([content], { type: "text/plain" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = `exported_content.${format}`;
+    a.download = `${formattedName}_summary.${format}`;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
