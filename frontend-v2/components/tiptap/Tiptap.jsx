@@ -90,6 +90,7 @@ const Tiptap = ({ name, summary }) => {
       Paragraph.configure({
         HTMLAttributes: {
           class: "mb-3 text-gray-600 leading-relaxed dark:text-neutral-200",
+          style: "margin-top: 0.5em;",
         },
       }),
       Underline,
@@ -879,6 +880,25 @@ const Tiptap = ({ name, summary }) => {
             className={`flex justify-end ${
               isEdit ? "relative z-20 mb-4 -top-4" : ""
             }`}>
+            {/* Cancel Button */}
+            {isEdit && (
+                <button
+                    onClick={() => {
+                      if (editor) {
+                        editor.commands.setContent(summary);
+                        setIsEdit(false);
+                      }
+                    }}
+                    className={`px-3 py-3 -translate-y-48 translate-x-50 flex items-center text-white rounded-full shadow-md hover:shadow-lg hover:scale-105 transition-transform duration-300 ease-in-out`}
+                    style={{
+                      background: "linear-gradient(to right, #f87171, #ef4444)",
+                      fontSize: "0.9rem",
+                      fontWeight: "bold",
+                    }}>
+                  <IoMdClose className="mr-2" />
+                  Discard Changes
+                </button>
+            )}
             <button
               onClick={toggleEdit}
               className={`px-3 py-3 flex items-center text-white rounded-full shadow-md hover:shadow-lg hover:scale-105 transition-transform duration-300 ease-in-out ${
@@ -970,8 +990,26 @@ const Tiptap = ({ name, summary }) => {
                 </div>
               </>
             )}
+            {/* Regenerate Summary Button */}
+            <div className="flex justify-center mt-6">
+              {isEdit && (
+              <button
+                  onClick={() => {
+                    if (editor) {
+                      const allText = editor.getText();
+                      setSelectedText(allText);
+                      setImprovementReason("");
+                      setIsPopupOpen(true);
+                    }
+                  }}
+                  className="px-6 py-3 text-white font-semibold bg-gradient-to-r from-blue-500 to-blue-700 rounded-lg shadow-md hover:from-blue-600 hover:to-blue-800 transition-transform transform hover:scale-105">
+                Regenerate Summary
+              </button>
+              )}
+            </div>
           </div>
         </div>
+
 
         {/* Improvement Popup */}
         {isEdit && isPopupOpen && (
@@ -1066,6 +1104,7 @@ const Tiptap = ({ name, summary }) => {
         </Button>
       </div>
       <style jsx global>{`
+        
         .shepherd-element {
           background: #fff;
           border-radius: 12px;

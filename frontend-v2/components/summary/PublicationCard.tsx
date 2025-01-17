@@ -1,6 +1,5 @@
 "use client";
 import React, { useState } from "react";
-import AuthorNetwork from "@/components/modal/Network";
 import { Timeline } from "flowbite-react";
 import {
   Select,
@@ -31,7 +30,6 @@ interface PublicationCardProps {
 
 const PublicationCard: React.FC<PublicationCardProps> = ({
   publications,
-  name,
 }) => {
   const [sortBy, setSortBy] = useState<"date" | "citations">("date");
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
@@ -74,14 +72,6 @@ const PublicationCard: React.FC<PublicationCardProps> = ({
 
   return (
       <div className="flex flex-col justify-center items-center">
-        <div className="pt-5">
-          <AuthorNetwork
-              authorName={name || ""}
-              width={450}
-              height={300}
-          />
-        </div>
-
 
         <div className="flex justify-center gap-4 p-4">
           <Select

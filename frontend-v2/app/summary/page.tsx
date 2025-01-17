@@ -15,6 +15,8 @@ import Tiptap from "@/components/tiptap/Tiptap";
 import { fetchRecommendations } from "@/utils/fetchRecommendations";
 import Search from "@/components/navbar/Search";
 import { EditModeProvider } from "@/components/summary/EditModeContext";
+import AuthorNetwork from "@/components/modal/Network";
+import CoAuthorRewindModal from "@/components/summary/CoAuthorRewindModal";
 
 function Page() {
   const searchParams = useSearchParams();
@@ -24,6 +26,8 @@ function Page() {
   const [error, setError] = useState<string | null>(null);
   const name = searchParams.get("name") || "";
   const profileId = parseInt(searchParams.get("profileId") || "0", 10);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [rewindData, setRewindData] = useState(null);
 
   const getStoredAuthors = () => {
     const storedAuthors = sessionStorage.getItem("authors");
@@ -205,6 +209,21 @@ function Page() {
     sessionStorage.setItem("lastPage", window.location.href);
   }
 
+  const handleCoAuthorRewind = async (name) => {
+    try {
+      const response = await fetch(`${BASE_URL}/coauthor_rewind/${name}`);
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || `HTTP error! Status: ${response.status}`);
+      }
+      const data = await response.json();
+      setRewindData(data);
+      setIsModalOpen(true);
+    } catch (error) {
+      console.error("Failed to fetch co-author rewind data:", error);
+    }
+  };
+
   return (
     <div className="pt-4">
       <Container>
@@ -231,6 +250,28 @@ function Page() {
                   <Tiptap name={name} summary={data?.summary} />
                 </div>
                 <div className="flex max-w-[600px] p-3 flex-col gap-4 mt-6 overflow-auto">
+                  <div className="pt-5">
+                    <AuthorNetwork
+                        authorName={name || ""}
+                        width={450}
+                        height={300}
+                    />
+                  </div>
+                  <div className="flex justify-center mb-4">
+                    <button
+                        onClick={() => handleCoAuthorRewind(data?.author_details?.Name)}
+                        className="w-[450px] px-6 py-3 text-white font-semibold bg-gradient-to-r from-blue-500 to-blue-700 rounded-lg shadow-md hover:from-blue-600 hover:to-blue-800 transition-transform transform hover:scale-105"
+                    >
+                      View Co-Author Rewind
+                    </button>
+                    {/* Co-Author Rewind Modal */}
+                    <CoAuthorRewindModal
+                        isOpen={isModalOpen}
+                        onClose={() => setIsModalOpen(false)}
+                        rewindData={rewindData}
+                    />
+                  </div>
+
                   <PublicationCard
                     publications={data?.author_details?.Publications || []}
                     name={data?.author_details?.Name}

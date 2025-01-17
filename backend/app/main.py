@@ -1,3 +1,4 @@
+import json
 from datetime import timedelta
 
 import requests
@@ -255,4 +256,18 @@ def get_authors_with_summaries():
 
     except Exception as e:
         print(f"Error fetching authors with summaries: {e}")
+        return jsonify({"error": f"An unexpected error occurred: {str(e)}"}), 500
+
+@app.route('/coauthor_rewind/<string:author_name>', methods=['GET'])
+def coauthor_rewind(author_name):
+    try:
+        wrapped_data = db.get_author_wrapped(author_name)
+        print(json.dumps(wrapped_data, indent=4))
+        if not wrapped_data:
+            return jsonify({"error": "No data found for the given profile ID."}), 404
+
+        return jsonify(wrapped_data), 200
+
+    except Exception as e:
+        print(f"Error in /coauthor_rewind route: {e}")
         return jsonify({"error": f"An unexpected error occurred: {str(e)}"}), 500

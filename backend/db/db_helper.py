@@ -495,3 +495,67 @@ def get_latest_authors_with_summaries(limit=6, session=None):
     finally:
         if session is not None:
             session.close()
+
+def get_author_wrapped(author_name, session=None):
+    if session is None:
+        session = get_session()
+
+    try:
+        researcher = session.query(Researcher).filter(Researcher.name == author_name).first()
+        if not researcher:
+            return None
+
+        researcher_id = researcher.id
+        researcher_profile_link = researcher.profile_link
+
+        papers = (
+            session.query(Paper)
+            .join(PaperAuthors)
+            .filter(PaperAuthors.id == researcher_id)
+            .all()
+        )
+
+        co_author_counts = {}
+
+        for paper in papers:
+            co_authors = (
+                session.query(Researcher)
+                .join(PaperAuthors, Researcher.id == PaperAuthors.id)
+                .filter(PaperAuthors.doi == paper.doi, Researcher.id != researcher_id)
+                .all()
+            )
+
+            for co_author in co_authors:
+                # Skip the author if their profile link matches the main researcher
+                if co_author.profile_link == researcher_profile_link:
+                    continue
+
+                if co_author.name in co_author_counts:
+                    co_author_counts[co_author.name]["count"] += 1
+                else:
+                    co_author_counts[co_author.name] = {
+                        "count": 1,
+                        "profile_link": co_author.profile_link
+                    }
+
+        wrapped_data = {
+            "Author Name": researcher.name,
+            "Profile Link": researcher.profile_link,
+            "Total Co-Authors": len(co_author_counts),
+            "Co-Author Summary": [
+                {
+                    "Name": co_author,
+                    "Profile Link": details["profile_link"],
+                    "Collaboration Count": details["count"]
+                }
+                for co_author, details in sorted(
+                    co_author_counts.items(), key=lambda item: item[1]["count"], reverse=True
+                )
+            ],
+        }
+
+        return wrapped_data
+    except Exception as e:
+        print(f"Error retrieving author wrapped details: {e}")
+        return None
+
