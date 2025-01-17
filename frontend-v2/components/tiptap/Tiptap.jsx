@@ -18,6 +18,8 @@ import {
   FaEdit,
   FaTrashAlt,
   FaSave,
+  FaUndo,
+  FaRedo
 } from "react-icons/fa";
 import {
   MdFormatListBulleted,
@@ -323,104 +325,129 @@ const Tiptap = ({ name, summary }) => {
   };
 
   const renderToolbar = () => (
-    <div className="editor-toolbar flex items-center gap-4 mb-4 bg-gray-100 dark:bg-zinc-800 p-2 rounded-lg">
-      <button
-        onClick={() => {
-          editor.chain().focus().toggleBold().run();
-          toast.success("Bold formatting applied!");
-        }}
-        className="hover:bg-gray-200 dark:hover:bg-zinc-700 p-2 rounded-md"
-        title="Bold">
-        <FaBold size={16} />
-      </button>
-      <button
-        onClick={() => {
-          editor.chain().focus().toggleItalic().run();
-          toast.success("Italic formatting applied!");
-        }}
-        className="hover:bg-gray-200 dark:hover:bg-zinc-700 p-2 rounded-md"
-        title="Italic">
-        <FaItalic size={16} />
-      </button>
-      <button
-        onClick={() => {
-          editor.chain().focus().toggleHeading({ level: 1 }).run();
-          toast.success("Heading 1 applied!");
-        }}
-        className="hover:bg-gray-200 dark:hover:bg-zinc-700 p-2 rounded-md"
-        title="Heading 1">
-        H<sub>1</sub>
-      </button>
-      <button
-        onClick={() => {
-          editor.chain().focus().toggleHeading({ level: 2 }).run();
-          toast.success("Heading 2 applied!");
-        }}
-        className="hover:bg-gray-200 dark:hover:bg-zinc-700 p-2 rounded-md"
-        title="Heading 2">
-        H<sub>2</sub>
-      </button>
-      <button
-        onClick={() => {
-          editor.chain().focus().toggleHeading({ level: 3 }).run();
-          toast.success("Heading 3 applied!");
-        }}
-        className="hover:bg-gray-200 dark:hover:bg-zinc-700 p-2 rounded-md"
-        title="Heading 3">
-        H<sub>3</sub>
-      </button>
-      <button
-        onClick={() => {
-          editor.chain().focus().toggleBulletList().run();
-          toast.success("Bullet list applied!");
-        }}
-        className="hover:bg-gray-200 dark:hover:bg-zinc-700 p-2 rounded-md"
-        title="Bullet List">
-        <MdFormatListBulleted size={16} />
-      </button>
-      <button
-        onClick={() => {
-          editor.chain().focus().toggleOrderedList().run();
-          toast.success("Ordered list applied!");
-        }}
-        className="hover:bg-gray-200 dark:hover:bg-zinc-700 p-2 rounded-md"
-        title="Ordered List">
-        <MdFormatListNumbered size={16} />
-      </button>
-      <button
-        onClick={() => {
-          if (editor.isActive("link")) {
-            editor.chain().focus().unsetLink().run();
-            toast.success("Link removed!");
-          } else {
-            const url = prompt("Enter the URL");
-            if (url) {
-              const formattedUrl = !/^https?:\/\//i.test(url)
-                ? `https://${url}`
-                : url;
-              editor.chain().focus().setLink({ href: formattedUrl }).run();
-              toast.success("Link added!");
-            }
-          }
-        }}
-        className="hover:bg-gray-200 dark:hover:bg-zinc-700 p-2 rounded-md"
-        title="Link">
-        <FaLink size={16} />
-      </button>
-      {isClient && (
+      <div className="editor-toolbar flex items-center gap-4 mb-4 bg-gray-100 dark:bg-zinc-800 p-2 rounded-lg">
+        <div className="flex gap-2 mr-4">
+          <button
+              onClick={() => editor.chain().focus().undo().run()}
+              className="hover:bg-gray-200 dark:hover:bg-zinc-700 p-2 rounded-md"
+              title="Undo"
+          >
+            <FaUndo size={16} />
+          </button>
+          <button
+              onClick={() => editor.chain().focus().redo().run()}
+              className="hover:bg-gray-200 dark:hover:bg-zinc-700 p-2 rounded-md"
+              title="Redo"
+          >
+            <FaRedo size={16} />
+          </button>
+        </div>
         <button
-          onClick={() => {
-            if (!isTourRunning) {
-              setIsTourRunning(true);
-              startTour();
-            }
-          }}
-          className="ml-auto text-gray-800 hover:text-gray-600 text-2xl font-semibold focus:outline-none"
-          title="Start Guided Tour">
-          𝒾
+            onClick={() => {
+              editor.chain().focus().toggleBold().run();
+              toast.success("Bold formatting applied!");
+            }}
+            className="hover:bg-gray-200 dark:hover:bg-zinc-700 p-2 rounded-md"
+            title="Bold"
+        >
+          <FaBold size={16} />
         </button>
-      )}
-    </div>
+        <button
+            onClick={() => {
+              editor.chain().focus().toggleItalic().run();
+              toast.success("Italic formatting applied!");
+            }}
+            className="hover:bg-gray-200 dark:hover:bg-zinc-700 p-2 rounded-md"
+            title="Italic"
+        >
+          <FaItalic size={16} />
+        </button>
+        <button
+            onClick={() => {
+              editor.chain().focus().toggleHeading({ level: 1 }).run();
+              toast.success("Heading 1 applied!");
+            }}
+            className="hover:bg-gray-200 dark:hover:bg-zinc-700 p-2 rounded-md"
+            title="Heading 1"
+        >
+          H<sub>1</sub>
+        </button>
+        <button
+            onClick={() => {
+              editor.chain().focus().toggleHeading({ level: 2 }).run();
+              toast.success("Heading 2 applied!");
+            }}
+            className="hover:bg-gray-200 dark:hover:bg-zinc-700 p-2 rounded-md"
+            title="Heading 2"
+        >
+          H<sub>2</sub>
+        </button>
+        <button
+            onClick={() => {
+              editor.chain().focus().toggleHeading({ level: 3 }).run();
+              toast.success("Heading 3 applied!");
+            }}
+            className="hover:bg-gray-200 dark:hover:bg-zinc-700 p-2 rounded-md"
+            title="Heading 3"
+        >
+          H<sub>3</sub>
+        </button>
+        <button
+            onClick={() => {
+              editor.chain().focus().toggleBulletList().run();
+              toast.success("Bullet list applied!");
+            }}
+            className="hover:bg-gray-200 dark:hover:bg-zinc-700 p-2 rounded-md"
+            title="Bullet List"
+        >
+          <MdFormatListBulleted size={16} />
+        </button>
+        <button
+            onClick={() => {
+              editor.chain().focus().toggleOrderedList().run();
+              toast.success("Ordered list applied!");
+            }}
+            className="hover:bg-gray-200 dark:hover:bg-zinc-700 p-2 rounded-md"
+            title="Ordered List"
+        >
+          <MdFormatListNumbered size={16} />
+        </button>
+        <button
+            onClick={() => {
+              if (editor.isActive("link")) {
+                editor.chain().focus().unsetLink().run();
+                toast.success("Link removed!");
+              } else {
+                const url = prompt("Enter the URL");
+                if (url) {
+                  const formattedUrl = !/^https?:\/\//i.test(url)
+                      ? `https://${url}`
+                      : url;
+                  editor.chain().focus().setLink({ href: formattedUrl }).run();
+                  toast.success("Link added!");
+                }
+              }
+            }}
+            className="hover:bg-gray-200 dark:hover:bg-zinc-700 p-2 rounded-md"
+            title="Link"
+        >
+          <FaLink size={16} />
+        </button>
+        {isClient && (
+            <button
+                onClick={() => {
+                  if (!isTourRunning) {
+                    setIsTourRunning(true);
+                    startTour();
+                  }
+                }}
+                className="ml-auto text-gray-800 hover:text-gray-600 text-2xl font-semibold focus:outline-none"
+                title="Start Guided Tour"
+            >
+              𝒾
+            </button>
+        )}
+      </div>
   );
 
   useEffect(() => {
