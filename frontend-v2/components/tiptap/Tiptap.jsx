@@ -1171,35 +1171,35 @@ const Tiptap = ({ name, summary }) => {
           font-weight: 500;
         }
 
-        .shepherd-element
-          .shepherd-footer
+        .shepherd-element,
+          .shepherd-footer,
           .shepherd-button[data-shepherd-button-id="next"] {
           background: #2563eb;
           border-color: #2563eb;
           color: #fff;
         }
-        .shepherd-element
-          .shepherd-footer
+        .shepherd-element,
+          .shepherd-footer,
           .shepherd-button[data-shepherd-button-id="next"]:hover {
           background: #1d4ed8;
           border-color: #1d4ed8;
         }
 
-        .shepherd-element
-          .shepherd-footer
+        .shepherd-element,
+          .shepherd-footer,
           .shepherd-button[data-shepherd-button-id="back"],
-        .shepherd-element
-          .shepherd-footer
+        .shepherd-element,
+          .shepherd-footer,
           .shepherd-button[data-shepherd-button-id="skip"] {
           background: #f3f4f6;
           color: #374151;
           border: 1px solid #d1d5db;
         }
-        .shepherd-element
-          .shepherd-footer
+        .shepherd-element,
+          .shepherd-footer,
           .shepherd-button[data-shepherd-button-id="back"]:hover,
-        .shepherd-element
-          .shepherd-footer
+        .shepherd-element,
+          .shepherd-footer,
           .shepherd-button[data-shepherd-button-id="skip"]:hover {
           background: #e5e7eb;
           border-color: #d1d5db;
