@@ -27,8 +27,13 @@ const SpotlightCard: React.FC<SpotlightCardProps> = ({
     if (!summary) {
       return "Summary not available.";
     }
-    const lines = summary.split("\n").filter((line) => !line.startsWith("#"));
-    return lines.join(" ").trim();
+
+    const biographyMatch = summary.match(/\*\*Biography:\*\*\s*(.+?)(\n|$)/s);
+    if (biographyMatch) {
+      return biographyMatch[1].trim();
+    }
+
+    return "Biography not available.";
   };
 
   const truncateWithEllipsis = (text: string, maxWords: number): string => {
