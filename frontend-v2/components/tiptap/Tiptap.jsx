@@ -466,6 +466,11 @@ const Tiptap = ({ name, summary }) => {
   const startTour = () => {
     if (!isClient) return;
 
+    if (window.currentTour) {
+      window.currentTour.cancel();
+      window.currentTour = null;
+    }
+
     const tour = new Shepherd.Tour({
       useModalOverlay: true,
       defaultStepOptions: {
@@ -477,6 +482,8 @@ const Tiptap = ({ name, summary }) => {
       },
       modalOverlayOpeningPadding: 10,
     });
+
+    window.currentTour = tour;
 
     tour.addStep({
       id: "editor-container",
@@ -501,19 +508,56 @@ const Tiptap = ({ name, summary }) => {
         },
         {
           text: "Next",
-          action: tour.next,
+          action: () => {
+            document.querySelector(".regenerate-summary")?.scrollIntoView({
+              behavior: "auto",
+            });
+            tour.next();
+          },
+        },
+      ],
+    });
+
+    tour.addStep({
+      id: "regenerate-summary",
+      text: "Use this to regenerate the entire text",
+      attachTo: { element: ".regenerate-summary", on: "bottom" },
+      highlightClass: "shepherd-highlight",
+      buttons: [
+        {
+          text: "Back",
+          action: () => {
+            document.querySelector(".editor-toolbar")?.scrollIntoView({
+              behavior: "smooth",
+            });
+            tour.back();
+          },
+        },
+        {
+          text: "Next",
+          action: () => {
+            document.querySelector(".editor-toolbar")?.scrollIntoView({
+              behavior: "smooth",
+            });
+            tour.next();
+          },
         },
       ],
     });
 
     tour.addStep({
       id: "bubble-menu-pen",
-      text: "Highlight some text in the editor and click the pen icon to improve the text.",
+      text: "Or highlight some text in the editor and click the pen icon to improve the text.",
       attachTo: { element: ".bubble-menu-pen", on: "bottom" },
       buttons: [
         {
           text: "Back",
-          action: tour.back,
+          action: () => {
+            document.querySelector(".regenerate-summary")?.scrollIntoView({
+              behavior: "smooth",
+            });
+            tour.back();
+          },
         },
       ],
       when: {
@@ -687,11 +731,12 @@ const Tiptap = ({ name, summary }) => {
 
     tour.on("complete", () => {
       setIsTourRunning(false);
+      window.currentTour = null;
     });
 
     tour.on("cancel", () => {
       setIsTourRunning(false);
-      tour.complete();
+      window.currentTour = null;
     });
   };
 
@@ -994,18 +1039,20 @@ const Tiptap = ({ name, summary }) => {
             {/* Regenerate Summary Button */}
             <div className="flex justify-center mt-6">
               {isEdit && (
-              <button
-                  onClick={() => {
-                    if (editor) {
-                      const allText = editor.getText();
-                      setSelectedText(allText);
-                      setImprovementReason("");
-                      setIsPopupOpen(true);
-                    }
-                  }}
-                  className="px-6 py-3 text-white font-semibold bg-gradient-to-r from-blue-500 to-blue-700 rounded-lg shadow-md hover:from-blue-600 hover:to-blue-800 transition-transform transform hover:scale-105">
-                Regenerate Summary
-              </button>
+              <div className="regenerate-summary p-2">
+                <button
+                    onClick={() => {
+                      if (editor) {
+                        const allText = editor.getText();
+                        setSelectedText(allText);
+                        setImprovementReason("");
+                        setIsPopupOpen(true);
+                      }
+                    }}
+                    className="px-6 py-3 text-white font-semibold bg-gradient-to-r from-blue-500 to-blue-700 rounded-lg shadow-md hover:from-blue-600 hover:to-blue-800 transition-transform transform hover:scale-105">
+                  Regenerate Summary
+                </button>
+              </div>
               )}
             </div>
           </div>
@@ -1105,109 +1152,100 @@ const Tiptap = ({ name, summary }) => {
         </Button>
       </div>
       <style jsx global>{`
-        
         .shepherd-element {
-          background: #fff;
-          border-radius: 12px;
-          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-          overflow: hidden;
+          background: #ffffff;
+          border-radius: 6px; 
+          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08); 
           font-family: "Inter", sans-serif;
           color: #333;
-          max-width: 400px;
-          border: 1px solid #e6e6e6;
+          max-width: 320px; 
+          border: 1px solid #e0e0e0;
+          animation: fadeIn 0.3s ease-out;
         }
 
-        .shepherd-element .shepherd-header {
-          background: #f9f9f9;
-          font-weight: 500;
-          font-size: 16px;
-          padding: 12px 16px 40px;
-          display: flex;
-          align-items: center;
-          position: relative;
-          border-bottom: 1px solid #e6e6e6;
+        @keyframes fadeIn {
+          from {
+            opacity: 0;
+            transform: translateY(10px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
         }
 
         .shepherd-has-cancel-icon .shepherd-cancel-icon {
           position: absolute;
-          top: 50%;
-          left: 10px;
-          transform: translateY(-50%);
-          color: #666;
+          top: 10px;
+          right: 10px;
+          font-size: 16px;
+          color: #555;
           cursor: pointer;
-          font-size: 21px;
-          line-height: 1;
-          transition: color 0.2s ease;
-          padding: 4px;
+          transition: color 0.2s ease, transform 0.2s ease;
         }
         .shepherd-has-cancel-icon .shepherd-cancel-icon:hover {
-          color: #333;
+          color: #ff6b6b;
+          transform: scale(1.1);
         }
 
         .shepherd-element .shepherd-content {
-          padding: 16px 20px;
-          font-size: 14px;
-          line-height: 1.6;
+          padding: 14px 16px; 
+          font-size: 13px; 
+          line-height: 1.4;
           color: #444;
+          text-align: center; 
         }
 
-        .shepherd-element .shepherd-footer {
-          background: #f9f9f9;
-          border-top: 1px solid #e6e6e6;
-          padding: 12px 16px;
+        .shepherd-footer {
+          padding: 12px 16px; 
           display: flex;
-          justify-content: flex-end;
-          gap: 8px;
+          justify-content: center;
+          gap: 10px; 
         }
 
-        .shepherd-element .shepherd-footer .shepherd-button {
-          border-radius: 8px;
-          padding: 8px 14px;
-          font-size: 14px;
-          cursor: pointer;
-          transition: background 0.2s ease, color 0.2s ease,
-            border-color 0.2s ease;
-          border: 1px solid transparent;
+        .shepherd-footer .shepherd-button {
+          border-radius: 6px;
+          padding: 6px 14px; 
+          font-size: 13px; 
           font-weight: 500;
+          cursor: pointer;
+          border: 1px solid transparent;
+          transition: 0.2s ease;
         }
-
-        .shepherd-element,
-          .shepherd-footer,
-          .shepherd-button[data-shepherd-button-id="next"] {
+        .shepherd-footer .shepherd-button[data-shepherd-button-id="next"] {
           background: #2563eb;
-          border-color: #2563eb;
-          color: #fff;
+          color: #ffffff;
+          border: 1px solid #2563eb;
         }
-        .shepherd-element,
-          .shepherd-footer,
-          .shepherd-button[data-shepherd-button-id="next"]:hover {
+        .shepherd-footer .shepherd-button[data-shepherd-button-id="next"]:hover {
           background: #1d4ed8;
-          border-color: #1d4ed8;
         }
 
-        .shepherd-element,
-          .shepherd-footer,
-          .shepherd-button[data-shepherd-button-id="back"],
-        .shepherd-element,
-          .shepherd-footer,
-          .shepherd-button[data-shepherd-button-id="skip"] {
-          background: #f3f4f6;
-          color: #374151;
+        .shepherd-footer .shepherd-button[data-shepherd-button-id="back"],
+        .shepherd-footer .shepherd-button[data-shepherd-button-id="skip"] {
+          background: #f9fafb;
+          color: #555;
           border: 1px solid #d1d5db;
         }
-        .shepherd-element,
-          .shepherd-footer,
-          .shepherd-button[data-shepherd-button-id="back"]:hover,
-        .shepherd-element,
-          .shepherd-footer,
-          .shepherd-button[data-shepherd-button-id="skip"]:hover {
-          background: #e5e7eb;
-          border-color: #d1d5db;
+        .shepherd-footer .shepherd-button[data-shepherd-button-id="back"]:hover,
+        .shepherd-footer .shepherd-button[data-shepherd-button-id="skip"]:hover {
+          background: #f1f5f9;
+          border-color: #cbd5e1;
         }
 
-        .shepherd-element * {
-          -webkit-font-smoothing: antialiased;
-          -moz-osx-font-smoothing: grayscale;
+        .shepherd-footer .shepherd-button:focus {
+          outline: none;
+          box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.4); 
+        }
+
+        @media (max-width: 768px) {
+          .shepherd-element {
+            max-width: 90%;
+            font-size: 12px; 
+          }
+          .shepherd-footer .shepherd-button {
+            padding: 6px 10px; 
+          }
         }
       `}</style>
     </div>
