@@ -23,12 +23,13 @@ const SpotlightCard: React.FC<SpotlightCardProps> = ({
       .join(" ");
   };
 
-  const extractMainBody = (summary?: string): string => {
+  const extractMainBody = (summary) => {
     if (!summary) {
       return "Summary not available.";
     }
 
-    const biographyMatch = summary.match(/\*\*Biography:\*\*\s*(.+?)(\n|$)/s);
+    const biographyMatch = summary.match(/## Biography\s+([\s\S]*?)(\n##|\n?$)/);
+
     if (biographyMatch) {
       return biographyMatch[1].trim();
     }
