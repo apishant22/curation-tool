@@ -826,15 +826,6 @@ const Tiptap = ({ name, summary }) => {
     });
   };
 
-  const handleBack =  async () => {
-    if (!name.trim()) {
-      toast.warn("Author name cannot be empty.");
-      return;
-    }
-    await handleRemoveSumamry();
-    removeAuthorFromSessionStorage();
-  };
-
   const removeAuthorFromSessionStorage = () => {
     Object.keys(sessionStorage).forEach((key) => {
       if (key.startsWith("author_") && key.includes(name)) {
@@ -866,8 +857,6 @@ const Tiptap = ({ name, summary }) => {
             {/* Back Button */}
             <Button
                 onClick={async () => {
-                  await handleBack();
-
                   const cachedData = sessionStorage.getItem("cachedURL");
                   if (cachedData) {
                     router.push(cachedData);
