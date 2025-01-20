@@ -71,8 +71,7 @@ const CoAuthorRewindModal = ({ isOpen, onClose, rewindData }) => {
             <div className="bg-white w-3/4 max-w-2xl p-6 rounded-lg shadow-lg">
                 <div className="flex justify-between items-center mb-4">
                     <h2 className="text-xl font-semibold">
-                        Here&#39;s {formatName(rewindData["Author Name"])}&#39;s Co-Author
-                        Rewind
+                        Here&#39;s {formatName(rewindData["Author Name"])}&#39;s Top Collbrations
                     </h2>
                     <button
                         onClick={onClose}
