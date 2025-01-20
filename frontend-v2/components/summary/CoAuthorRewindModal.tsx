@@ -59,6 +59,9 @@ const CoAuthorRewindModal = ({ isOpen, onClose, rewindData }) => {
             name: formattedName,
             profileId: profileId,
         });
+
+        onClose();
+
         toast.success("Redirecting to the summary page...");
         router.push(`/summary?${searchParams.toString()}`);
     };
