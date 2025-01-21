@@ -35,20 +35,27 @@ const Loading = ({ profileLink }: { profileLink: string }) => {
       const response = await fetch(`${BASE_URL}/progress/${profileId}`);
       if (response.ok) {
         const data = await response.json();
+        console.log("Fetched status:", data.status);
         setStatus(data.status);
       } else {
-        setStatus("Unable to fetch progress updates.");
+        console.error("Failed to fetch progress. HTTP Status:", response.status);
+        setStatus("Failed to fetch progress. Please try again later.");
       }
     } catch (error) {
-      console.error("Error fetching progress:", error);
-      setStatus("An error occurred while fetching progress.");
+      console.error("Error fetching progress:", error.message || error);
+      setStatus("A network error occurred. Please check your connection.");
     }
   };
 
   useEffect(() => {
-    const interval = setInterval(fetchProgress, 2000); // Poll every 2 seconds
-    return () => clearInterval(interval); // Cleanup on unmount
-  }, []);
+    const interval = setInterval(fetchProgress, 3000);
+    if (status === "Process complete. Author details updated successfully." ||
+        status === "Process complete. Author details and summary updated successfully." ||
+        status === "Process complete. No updates required.") {
+      clearInterval(interval); // Stop polling
+    }
+    return () => clearInterval(interval); // Cleanup
+  }, [status]);
 
   // Determine progress based on the current status
   const progress = statusProgressMap[status] || 0;
