@@ -220,7 +220,7 @@ function Page() {
 
   const handleViewChange = (viewType: string) => {
     const params = new URLSearchParams(window.location.search);
-    params.set("view", viewType); // Change the "view" query parameter
+    params.set("view", viewType);
     router.push(`${window.location.pathname}?${params.toString()}`);
   };
 
@@ -265,7 +265,7 @@ function Page() {
                     <button
                       onClick={() => handleViewChange("rewind")}
                       className="w-[450px] px-6 py-3 text-white font-semibold bg-gradient-to-r from-blue-500 to-blue-700 rounded-lg shadow-md hover:from-blue-600 hover:to-blue-800 transition-transform transform hover:scale-105">
-                      {formatName(name)}&#39;s Rewind
+                      {formatName(name)}&#39;s Overview
                     </button>
                   </div>
 
