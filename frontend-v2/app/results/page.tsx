@@ -126,6 +126,7 @@ function ResultsPage() {
     toast.success(
       "Item has been successfully clicked! Redirecting to the details page."
     );
+    sessionStorage.setItem("resultsURL", window.location.href);
 
     router.push(`/summary?${searchParams.toString()}`);
   };

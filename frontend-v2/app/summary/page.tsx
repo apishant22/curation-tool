@@ -34,10 +34,10 @@ function Page() {
   };
 
   const formatName = (name) =>
-      name
-          .split(" ")
-          .map((part) => part.charAt(0).toUpperCase() + part.slice(1).toLowerCase())
-          .join(" ");
+    name
+      .split(" ")
+      .map((part) => part.charAt(0).toUpperCase() + part.slice(1).toLowerCase())
+      .join(" ");
 
   const updateStoredAuthors = (newAuthor: {
     Name: string;
@@ -191,7 +191,7 @@ function Page() {
     return (
       <div className="pt-48 flex justify-center">
         <Container>
-          <Loading />
+          <Loading profileLink={String(profileId)} />
         </Container>
       </div>
     );
@@ -225,12 +225,7 @@ function Page() {
   };
 
   if (view === "rewind") {
-    return (
-        <AuthorRewindPage
-            authorDetails={data.author_details}
-            onBack={() => handleViewChange("summary")}
-        />
-    );
+    return <AuthorRewindPage authorDetails={data.author_details} />;
   }
 
   return (
@@ -244,7 +239,7 @@ function Page() {
           </div>
         </Container>
         {loading ? (
-          <Loading />
+          <Loading profileLink={String(profileId)} />
         ) : (
           <>
             <EditModeProvider>
@@ -261,16 +256,15 @@ function Page() {
                 <div className="flex max-w-[600px] p-3 flex-col gap-4 mt-6 overflow-auto">
                   <div className="pt-5">
                     <AuthorNetwork
-                        authorName={name || ""}
-                        width={450}
-                        height={300}
+                      authorName={name || ""}
+                      width={450}
+                      height={300}
                     />
                   </div>
                   <div className="flex justify-center mb-4">
                     <button
-                        onClick={() => handleViewChange("rewind")}
-                        className="w-[450px] px-6 py-3 text-white font-semibold bg-gradient-to-r from-blue-500 to-blue-700 rounded-lg shadow-md hover:from-blue-600 hover:to-blue-800 transition-transform transform hover:scale-105"
-                    >
+                      onClick={() => handleViewChange("rewind")}
+                      className="w-[450px] px-6 py-3 text-white font-semibold bg-gradient-to-r from-blue-500 to-blue-700 rounded-lg shadow-md hover:from-blue-600 hover:to-blue-800 transition-transform transform hover:scale-105">
                       {formatName(name)}&#39;s Rewind
                     </button>
                   </div>
