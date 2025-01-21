@@ -1069,7 +1069,7 @@ const Tiptap = ({ name, summary }) => {
 
         {/* Improvement Requests Timeline */}
         {isEdit && improvementRequests.length > 0 && (
-          <div className="improvement-timeline fixed right-8 top-9 w-[600px] max-h-[58vh] p-6 bg-white dark:bg-zinc-800 rounded-lg shadow-md transition-all duration-500 ease-in-out">
+          <div className="improvement-timeline fixed right-8 top-9 w-[550px] max-h-[58vh] p-6 bg-white dark:bg-zinc-800 rounded-lg shadow-md transition-all duration-500 ease-in-out">
             <div className="flex justify-between items-center mb-4">
               <h3 className="text-lg font-bold border-b-2 border-blue-500">
                 Improvement List
