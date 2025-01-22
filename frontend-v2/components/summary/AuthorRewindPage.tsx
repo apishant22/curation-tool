@@ -81,7 +81,7 @@ const AuthorHighlight = ({ authorDetails }) => {
               <IoMdArrowBack size={24} className="dark:text-white" />
             </button>
             <h1 className="text-4xl font-bold text-center flex-1 dark:text-white">
-              {formatName(Name)}&#39;s Rewind
+              {formatName(Name)}&#39;s Overview
             </h1>
           </div>
 
