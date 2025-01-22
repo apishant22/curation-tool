@@ -53,3 +53,5 @@ npm run dev
 # ignore, for deployment to vercel purposes
 
 # ignore
+
+# deploy to vercel
