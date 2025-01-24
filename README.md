@@ -42,7 +42,9 @@ cd frontend-productions
 npm install
 ```
 
-3. Start the frontend server.
+3. To do the changes on local development, remove the `middleware.ts` file temporarily to the root project. After doing changes, put back again the `middleware.ts` file in the `frontend-v2` directory. This is to disable authentication temporarily.
+
+4. Start the frontend server.
 
 ```
 npm run dev
