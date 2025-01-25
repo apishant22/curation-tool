@@ -1,6 +1,6 @@
 import json
 from backend.db import db_helper
-from backend.db.models import PaperAuthors,Researcher
+from backend.db.models import PaperAuthors, Researcher
 
 def retrieve_formatted_records(model, filters=None):
     session = db_helper.get_session()
@@ -10,15 +10,15 @@ def retrieve_formatted_records(model, filters=None):
 
     results = query.all()
     return [{key: str(value) for key, value in result.__dict__.items() if not key.startswith('_')}
-                for result in results]
+            for result in results]
 
-def generatesNodesAndEdges(id,max_nodes=50):
+def generatesNodesAndEdges(id, max_nodes=50):
     var = retrieve_formatted_records(PaperAuthors, {'id': id})
     nodes = []
     edges = []
     relevantdois = []
     ids = []
-    idset = []
+    idset = set()
 
     for record in var:
         relevantdois.append(record.get('doi'))
@@ -31,19 +31,19 @@ def generatesNodesAndEdges(id,max_nodes=50):
 
     for element in ids:
         for number in element:
-            if number not in idset:
-                idset.append(number)
+            idset.add(number)
 
     temp = retrieve_formatted_records(Researcher, {'id': id})[0]
     nodes.append({"id": temp.get("id"), "name": temp.get("name"), "link": temp.get("profile_link")})
 
     for item in idset:
-        if len(nodes) >= 51:
+        if len(nodes) >= max_nodes + 1:
             break
         record = retrieve_formatted_records(Researcher, {'id': int(item)})[0]
-        nodes.append({"id": record.get("id"), "name": record.get("name"), "link": record.get("profile_link")})
+        if not any(node['link'] == record.get("profile_link") for node in nodes):
+            nodes.append({"id": record.get("id"), "name": record.get("name"), "link": record.get("profile_link")})
 
-    node_ids = {node['id'] for node in nodes}  # Track included node IDs
+    node_ids = {node['id'] for node in nodes}
 
     for lists in ids:
         for person1 in lists:
@@ -54,13 +54,13 @@ def generatesNodesAndEdges(id,max_nodes=50):
                     if edge not in edges and reverse_edge not in edges:
                         edges.append(edge)
 
+    # Add edges connecting the main node to collaborators
     for lists in ids:
         for person1 in lists:
             if person1 in node_ids:
                 edges.append({"source": temp.get("id"), "target": person1})
 
     return nodes, edges
-
 
 def convert_to_json(name):
     # Retrieve the ID for the given name
@@ -79,4 +79,4 @@ def convert_to_json(name):
     print(json_string)
     return json_string
 
-# convert_to_json("Leslie Anthony Carr")
+# convert_to_json("JERZY WILDE")

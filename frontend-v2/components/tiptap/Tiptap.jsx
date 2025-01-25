@@ -19,7 +19,7 @@ import {
   FaTrashAlt,
   FaSave,
   FaUndo,
-  FaRedo
+  FaRedo,
 } from "react-icons/fa";
 import {
   MdFormatListBulleted,
@@ -37,7 +37,7 @@ import Shepherd from "shepherd.js";
 import "shepherd.js/dist/css/shepherd.css";
 import { confirmAlert } from "react-confirm-alert";
 import "react-confirm-alert/src/react-confirm-alert.css";
-import {useEditMode} from "@/components/summary/EditModeContext";
+import { useEditMode } from "@/components/summary/EditModeContext";
 
 const Tiptap = ({ name, summary }) => {
   const [content, setContent] = useState(summary);
@@ -261,13 +261,13 @@ const Tiptap = ({ name, summary }) => {
     try {
       setLoading(true);
       const response = await axios.post(
-          `${BASE_URL}/remove_summary/${encodeURIComponent(name)}`,
-          {},
-          {
-            headers: {
-              "Content-Type": "application/json",
-            },
-          }
+        `${BASE_URL}/remove_summary/${encodeURIComponent(name)}`,
+        {},
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
       );
       if (response.status === 200) {
         console.log("Author summary successfully removed!");
@@ -285,8 +285,7 @@ const Tiptap = ({ name, summary }) => {
     } finally {
       setLoading(false);
     }
-  }
-
+  };
 
   const handleRemoveAuthor = async () => {
     try {
@@ -327,129 +326,118 @@ const Tiptap = ({ name, summary }) => {
   };
 
   const renderToolbar = () => (
-      <div className="editor-toolbar flex items-center gap-4 mb-4 bg-gray-100 dark:bg-zinc-800 p-2 rounded-lg">
-        <div className="flex gap-2 mr-4">
-          <button
-              onClick={() => editor.chain().focus().undo().run()}
-              className="hover:bg-gray-200 dark:hover:bg-zinc-700 p-2 rounded-md"
-              title="Undo"
-          >
-            <FaUndo size={16} />
-          </button>
-          <button
-              onClick={() => editor.chain().focus().redo().run()}
-              className="hover:bg-gray-200 dark:hover:bg-zinc-700 p-2 rounded-md"
-              title="Redo"
-          >
-            <FaRedo size={16} />
-          </button>
-        </div>
+    <div className="editor-toolbar flex items-center gap-4 mb-4 bg-gray-100 dark:bg-zinc-800 p-2 rounded-lg">
+      <div className="flex gap-2 mr-4">
         <button
-            onClick={() => {
-              editor.chain().focus().toggleBold().run();
-              toast.success("Bold formatting applied!");
-            }}
-            className="hover:bg-gray-200 dark:hover:bg-zinc-700 p-2 rounded-md"
-            title="Bold"
-        >
-          <FaBold size={16} />
+          onClick={() => editor.chain().focus().undo().run()}
+          className="hover:bg-gray-200 dark:hover:bg-zinc-700 p-2 rounded-md"
+          title="Undo">
+          <FaUndo size={16} />
         </button>
         <button
-            onClick={() => {
-              editor.chain().focus().toggleItalic().run();
-              toast.success("Italic formatting applied!");
-            }}
-            className="hover:bg-gray-200 dark:hover:bg-zinc-700 p-2 rounded-md"
-            title="Italic"
-        >
-          <FaItalic size={16} />
+          onClick={() => editor.chain().focus().redo().run()}
+          className="hover:bg-gray-200 dark:hover:bg-zinc-700 p-2 rounded-md"
+          title="Redo">
+          <FaRedo size={16} />
         </button>
-        <button
-            onClick={() => {
-              editor.chain().focus().toggleHeading({ level: 1 }).run();
-              toast.success("Heading 1 applied!");
-            }}
-            className="hover:bg-gray-200 dark:hover:bg-zinc-700 p-2 rounded-md"
-            title="Heading 1"
-        >
-          H<sub>1</sub>
-        </button>
-        <button
-            onClick={() => {
-              editor.chain().focus().toggleHeading({ level: 2 }).run();
-              toast.success("Heading 2 applied!");
-            }}
-            className="hover:bg-gray-200 dark:hover:bg-zinc-700 p-2 rounded-md"
-            title="Heading 2"
-        >
-          H<sub>2</sub>
-        </button>
-        <button
-            onClick={() => {
-              editor.chain().focus().toggleHeading({ level: 3 }).run();
-              toast.success("Heading 3 applied!");
-            }}
-            className="hover:bg-gray-200 dark:hover:bg-zinc-700 p-2 rounded-md"
-            title="Heading 3"
-        >
-          H<sub>3</sub>
-        </button>
-        <button
-            onClick={() => {
-              editor.chain().focus().toggleBulletList().run();
-              toast.success("Bullet list applied!");
-            }}
-            className="hover:bg-gray-200 dark:hover:bg-zinc-700 p-2 rounded-md"
-            title="Bullet List"
-        >
-          <MdFormatListBulleted size={16} />
-        </button>
-        <button
-            onClick={() => {
-              editor.chain().focus().toggleOrderedList().run();
-              toast.success("Ordered list applied!");
-            }}
-            className="hover:bg-gray-200 dark:hover:bg-zinc-700 p-2 rounded-md"
-            title="Ordered List"
-        >
-          <MdFormatListNumbered size={16} />
-        </button>
-        <button
-            onClick={() => {
-              if (editor.isActive("link")) {
-                editor.chain().focus().unsetLink().run();
-                toast.success("Link removed!");
-              } else {
-                const url = prompt("Enter the URL");
-                if (url) {
-                  const formattedUrl = !/^https?:\/\//i.test(url)
-                      ? `https://${url}`
-                      : url;
-                  editor.chain().focus().setLink({ href: formattedUrl }).run();
-                  toast.success("Link added!");
-                }
-              }
-            }}
-            className="hover:bg-gray-200 dark:hover:bg-zinc-700 p-2 rounded-md"
-            title="Link"
-        >
-          <FaLink size={16} />
-        </button>
-        {isClient && (
-            <button
-                onClick={() => {
-                  if (!isTourRunning) {
-                    setIsTourRunning(true);
-                    startTour();
-                  }
-                }}
-                className="ml-auto text-gray-800 hover:text-gray-600 text-2xl font-semibold focus:outline-none"
-                title="Start Guided Tour"
-            >
-              𝒾
-            </button>
-        )}
       </div>
+      <button
+        onClick={() => {
+          editor.chain().focus().toggleBold().run();
+          toast.success("Bold formatting applied!");
+        }}
+        className="hover:bg-gray-200 dark:hover:bg-zinc-700 p-2 rounded-md"
+        title="Bold">
+        <FaBold size={16} />
+      </button>
+      <button
+        onClick={() => {
+          editor.chain().focus().toggleItalic().run();
+          toast.success("Italic formatting applied!");
+        }}
+        className="hover:bg-gray-200 dark:hover:bg-zinc-700 p-2 rounded-md"
+        title="Italic">
+        <FaItalic size={16} />
+      </button>
+      <button
+        onClick={() => {
+          editor.chain().focus().toggleHeading({ level: 1 }).run();
+          toast.success("Heading 1 applied!");
+        }}
+        className="hover:bg-gray-200 dark:hover:bg-zinc-700 p-2 rounded-md"
+        title="Heading 1">
+        H<sub>1</sub>
+      </button>
+      <button
+        onClick={() => {
+          editor.chain().focus().toggleHeading({ level: 2 }).run();
+          toast.success("Heading 2 applied!");
+        }}
+        className="hover:bg-gray-200 dark:hover:bg-zinc-700 p-2 rounded-md"
+        title="Heading 2">
+        H<sub>2</sub>
+      </button>
+      <button
+        onClick={() => {
+          editor.chain().focus().toggleHeading({ level: 3 }).run();
+          toast.success("Heading 3 applied!");
+        }}
+        className="hover:bg-gray-200 dark:hover:bg-zinc-700 p-2 rounded-md"
+        title="Heading 3">
+        H<sub>3</sub>
+      </button>
+      <button
+        onClick={() => {
+          editor.chain().focus().toggleBulletList().run();
+          toast.success("Bullet list applied!");
+        }}
+        className="hover:bg-gray-200 dark:hover:bg-zinc-700 p-2 rounded-md"
+        title="Bullet List">
+        <MdFormatListBulleted size={16} />
+      </button>
+      <button
+        onClick={() => {
+          editor.chain().focus().toggleOrderedList().run();
+          toast.success("Ordered list applied!");
+        }}
+        className="hover:bg-gray-200 dark:hover:bg-zinc-700 p-2 rounded-md"
+        title="Ordered List">
+        <MdFormatListNumbered size={16} />
+      </button>
+      <button
+        onClick={() => {
+          if (editor.isActive("link")) {
+            editor.chain().focus().unsetLink().run();
+            toast.success("Link removed!");
+          } else {
+            const url = prompt("Enter the URL");
+            if (url) {
+              const formattedUrl = !/^https?:\/\//i.test(url)
+                ? `https://${url}`
+                : url;
+              editor.chain().focus().setLink({ href: formattedUrl }).run();
+              toast.success("Link added!");
+            }
+          }
+        }}
+        className="hover:bg-gray-200 dark:hover:bg-zinc-700 p-2 rounded-md"
+        title="Link">
+        <FaLink size={16} />
+      </button>
+      {isClient && (
+        <button
+          onClick={() => {
+            if (!isTourRunning) {
+              setIsTourRunning(true);
+              startTour();
+            }
+          }}
+          className="ml-auto text-gray-800 hover:text-gray-600 text-2xl font-semibold focus:outline-none"
+          title="Start Guided Tour">
+          𝒾
+        </button>
+      )}
+    </div>
   );
 
   useEffect(() => {
@@ -762,7 +750,7 @@ const Tiptap = ({ name, summary }) => {
                 className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600"
                 onClick={async () => {
                   await handleUpdateSummary(content);
-                  onClose()
+                  onClose();
                   toast.success("Summary Saved!");
                 }}>
                 I Understand
@@ -798,14 +786,15 @@ const Tiptap = ({ name, summary }) => {
                 No
               </button>
               <button
-                className= "px-4 py-2 bg-yellow-500 text-white rounded-md hover:bg-yellow-600"
-                onClick={async  () => {
+                className="px-4 py-2 bg-yellow-500 text-white rounded-md hover:bg-yellow-600"
+                onClick={async () => {
                   await handleRemoveSumamry();
                   removeAuthorFromSessionStorage();
-                  toast.success(`${capitalizedName} summary removed successfully!`);
+                  toast.success(
+                    `${capitalizedName} summary removed successfully!`
+                  );
                   onClose();
-                }}
-              >
+                }}>
                 Only Summary
               </button>
               <button
@@ -833,7 +822,9 @@ const Tiptap = ({ name, summary }) => {
     });
 
     const storedAuthors = JSON.parse(sessionStorage.getItem("authors") || "[]");
-    const updatedAuthors = storedAuthors.filter((author) => author.Name !== name);
+    const updatedAuthors = storedAuthors.filter(
+      (author) => author.Name !== name
+    );
     sessionStorage.setItem("authors", JSON.stringify(updatedAuthors));
   };
 
@@ -855,18 +846,17 @@ const Tiptap = ({ name, summary }) => {
           <div className="flex items-center gap-4">
             {/* Back Button */}
             <Button
-                onClick={async () => {
-                  const cachedData = sessionStorage.getItem("cachedURL");
-                  if (cachedData) {
-                    router.push(cachedData);
-                  } else {
-                    console.warn("No cached URL found in sessionStorage");
-                    router.back();
-                  }
-                }}
-                className="flex items-center justify-center w-10 h-10 rounded-full bg-gray-900 text-white hover:bg-gray-700 shadow-md hover:shadow-lg transition-all"
-                title="Back"
-            >
+              onClick={async () => {
+                const cachedData = sessionStorage.getItem("resultsURL");
+                if (cachedData) {
+                  router.push(cachedData);
+                } else {
+                  console.warn("No cached URL found in sessionStorage");
+                  router.push("/");
+                }
+              }}
+              className="flex items-center justify-center w-10 h-10 rounded-full bg-gray-900 text-white hover:bg-gray-700 shadow-md hover:shadow-lg transition-all"
+              title="Back">
               <IoMdArrowBack size={20} />
             </Button>
 
@@ -916,22 +906,22 @@ const Tiptap = ({ name, summary }) => {
             }`}>
             {/* Cancel Button */}
             {isEdit && (
-                <button
-                    onClick={() => {
-                      if (editor) {
-                        editor.commands.setContent(summary);
-                        setIsEdit(false);
-                      }
-                    }}
-                    className={`px-3 py-3 -translate-y-48 translate-x-50 flex items-center text-white rounded-full shadow-md hover:shadow-lg hover:scale-105 transition-transform duration-300 ease-in-out`}
-                    style={{
-                      background: "linear-gradient(to right, #f87171, #ef4444)",
-                      fontSize: "0.9rem",
-                      fontWeight: "bold",
-                    }}>
-                  <IoMdClose className="mr-2" />
-                  Discard Changes
-                </button>
+              <button
+                onClick={() => {
+                  if (editor) {
+                    editor.commands.setContent(summary);
+                    setIsEdit(false);
+                  }
+                }}
+                className={`px-3 py-3 -translate-y-48 translate-x-50 flex items-center text-white rounded-full shadow-md hover:shadow-lg hover:scale-105 transition-transform duration-300 ease-in-out`}
+                style={{
+                  background: "linear-gradient(to right, #f87171, #ef4444)",
+                  fontSize: "0.9rem",
+                  fontWeight: "bold",
+                }}>
+                <IoMdClose className="mr-2" />
+                Discard Changes
+              </button>
             )}
             <button
               onClick={toggleEdit}
@@ -1027,8 +1017,8 @@ const Tiptap = ({ name, summary }) => {
             {/* Regenerate Summary Button */}
             <div className="flex justify-center mt-6">
               {isEdit && (
-              <div className="regenerate-summary p-2">
-                <button
+                <div className="regenerate-summary p-2">
+                  <button
                     onClick={() => {
                       if (editor) {
                         const allText = editor.getText();
@@ -1038,50 +1028,48 @@ const Tiptap = ({ name, summary }) => {
                       }
                     }}
                     className="px-6 py-3 text-white font-semibold bg-gradient-to-r from-blue-500 to-blue-700 rounded-lg shadow-md hover:from-blue-600 hover:to-blue-800 transition-transform transform hover:scale-105">
-                  Regenerate Summary
-                </button>
-              </div>
+                    Regenerate Summary
+                  </button>
+                </div>
               )}
             </div>
           </div>
         </div>
 
-
         {/* Improvement Popup */}
         {isEdit && isPopupOpen && (
-            <div className="improvement-popup popup right-8 md:w-[500px] bg-white p-4 rounded-lg shadow-lg fixed bottom-5 z-30 transition-all duration-500">
-              <h3 className="font-bold mb-4 text-lg">Improve Text</h3>
-              <div className="max-h-[100px] overflow-y-auto mb-3 p-2 bg-gray-200 rounded-md border-l-4 border-blue-500">
-                {selectedText}
-              </div>
-              <textarea
-                  className="w-full h-24 p-3 border rounded-md text-gray-900 dark:bg-zinc-800 dark:text-gray-200 focus:border-blue-500 resize-none"
-                  placeholder="Enter your improvement"
-                  value={improvementReason}
-                  onChange={(e) => setImprovementReason(e.target.value)}
-              />
-              <div className="flex justify-end gap-4 mt-4">
-                <button
-                    className="bg-green-500 text-white px-4 py-2 rounded-md shadow hover:bg-green-600 transition-transform duration-300 ease-in-out flex items-center gap-1"
-                    onClick={applyImprovement}>
-                  ✓ Apply
-                </button>
-                <button
-                    className="bg-gray-500 text-white px-4 py-2 rounded-md shadow hover:bg-gray-600 transition-transform duration-300 ease-in-out flex items-center gap-1"
-                    onClick={() => {
-                      setIsPopupOpen(false);
-                      setImprovementPopupOpen(false);
-                    }}>
-                  ✕ Cancel
-                </button>
-              </div>
+          <div className="improvement-popup popup right-8 md:w-[500px] bg-white p-4 rounded-lg shadow-lg fixed bottom-5 z-30 transition-all duration-500">
+            <h3 className="font-bold mb-4 text-lg">Improve Text</h3>
+            <div className="max-h-[100px] overflow-y-auto mb-3 p-2 bg-gray-200 rounded-md border-l-4 border-blue-500">
+              {selectedText}
             </div>
+            <textarea
+              className="w-full h-24 p-3 border rounded-md text-gray-900 dark:bg-zinc-800 dark:text-gray-200 focus:border-blue-500 resize-none"
+              placeholder="Enter your improvement"
+              value={improvementReason}
+              onChange={(e) => setImprovementReason(e.target.value)}
+            />
+            <div className="flex justify-end gap-4 mt-4">
+              <button
+                className="bg-green-500 text-white px-4 py-2 rounded-md shadow hover:bg-green-600 transition-transform duration-300 ease-in-out flex items-center gap-1"
+                onClick={applyImprovement}>
+                ✓ Apply
+              </button>
+              <button
+                className="bg-gray-500 text-white px-4 py-2 rounded-md shadow hover:bg-gray-600 transition-transform duration-300 ease-in-out flex items-center gap-1"
+                onClick={() => {
+                  setIsPopupOpen(false);
+                  setImprovementPopupOpen(false);
+                }}>
+                ✕ Cancel
+              </button>
+            </div>
+          </div>
         )}
-
 
         {/* Improvement Requests Timeline */}
         {isEdit && improvementRequests.length > 0 && (
-          <div className="improvement-timeline fixed right-8 top-9 w-[600px] max-h-[58vh] p-6 bg-white dark:bg-zinc-800 rounded-lg shadow-md transition-all duration-500 ease-in-out">
+          <div className="improvement-timeline fixed right-8 top-9 w-[550px] max-h-[58vh] p-6 bg-white dark:bg-zinc-800 rounded-lg shadow-md transition-all duration-500 ease-in-out">
             <div className="flex justify-between items-center mb-4">
               <h3 className="text-lg font-bold border-b-2 border-blue-500">
                 Improvement List
@@ -1142,11 +1130,11 @@ const Tiptap = ({ name, summary }) => {
       <style jsx global>{`
         .shepherd-element {
           background: #ffffff;
-          border-radius: 6px; 
-          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08); 
+          border-radius: 6px;
+          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
           font-family: "Inter", sans-serif;
           color: #333;
-          max-width: 320px; 
+          max-width: 320px;
           border: 1px solid #e0e0e0;
           animation: fadeIn 0.3s ease-out;
         }
@@ -1177,24 +1165,24 @@ const Tiptap = ({ name, summary }) => {
         }
 
         .shepherd-element .shepherd-content {
-          padding: 14px 16px; 
-          font-size: 13px; 
+          padding: 14px 16px;
+          font-size: 13px;
           line-height: 1.4;
           color: #444;
-          text-align: center; 
+          text-align: center;
         }
 
         .shepherd-footer {
-          padding: 12px 16px; 
+          padding: 12px 16px;
           display: flex;
           justify-content: center;
-          gap: 10px; 
+          gap: 10px;
         }
 
         .shepherd-footer .shepherd-button {
           border-radius: 6px;
-          padding: 6px 14px; 
-          font-size: 13px; 
+          padding: 6px 14px;
+          font-size: 13px;
           font-weight: 500;
           cursor: pointer;
           border: 1px solid transparent;
@@ -1205,7 +1193,8 @@ const Tiptap = ({ name, summary }) => {
           color: #ffffff;
           border: 1px solid #2563eb;
         }
-        .shepherd-footer .shepherd-button[data-shepherd-button-id="next"]:hover {
+        .shepherd-footer
+          .shepherd-button[data-shepherd-button-id="next"]:hover {
           background: #1d4ed8;
         }
 
@@ -1216,23 +1205,24 @@ const Tiptap = ({ name, summary }) => {
           border: 1px solid #d1d5db;
         }
         .shepherd-footer .shepherd-button[data-shepherd-button-id="back"]:hover,
-        .shepherd-footer .shepherd-button[data-shepherd-button-id="skip"]:hover {
+        .shepherd-footer
+          .shepherd-button[data-shepherd-button-id="skip"]:hover {
           background: #f1f5f9;
           border-color: #cbd5e1;
         }
 
         .shepherd-footer .shepherd-button:focus {
           outline: none;
-          box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.4); 
+          box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.4);
         }
 
         @media (max-width: 768px) {
           .shepherd-element {
             max-width: 90%;
-            font-size: 12px; 
+            font-size: 12px;
           }
           .shepherd-footer .shepherd-button {
-            padding: 6px 10px; 
+            padding: 6px 10px;
           }
         }
       `}</style>

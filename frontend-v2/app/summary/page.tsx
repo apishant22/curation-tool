@@ -16,7 +16,7 @@ import { fetchRecommendations } from "@/utils/fetchRecommendations";
 import Search from "@/components/navbar/Search";
 import { EditModeProvider } from "@/components/summary/EditModeContext";
 import AuthorNetwork from "@/components/modal/Network";
-import CoAuthorRewindModal from "@/components/summary/CoAuthorRewindModal";
+import AuthorRewindPage from "@/components/summary/AuthorRewindPage";
 
 function Page() {
   const searchParams = useSearchParams();
@@ -26,13 +26,18 @@ function Page() {
   const [error, setError] = useState<string | null>(null);
   const name = searchParams.get("name") || "";
   const profileId = parseInt(searchParams.get("profileId") || "0", 10);
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [rewindData, setRewindData] = useState(null);
+  const view = searchParams.get("view");
 
   const getStoredAuthors = () => {
     const storedAuthors = sessionStorage.getItem("authors");
     return storedAuthors ? JSON.parse(storedAuthors) : [];
   };
+
+  const formatName = (name) =>
+    name
+      .split(" ")
+      .map((part) => part.charAt(0).toUpperCase() + part.slice(1).toLowerCase())
+      .join(" ");
 
   const updateStoredAuthors = (newAuthor: {
     Name: string;
@@ -186,7 +191,7 @@ function Page() {
     return (
       <div className="pt-48 flex justify-center">
         <Container>
-          <Loading />
+          <Loading profileLink={String(profileId)} />
         </Container>
       </div>
     );
@@ -204,25 +209,24 @@ function Page() {
     );
   }
 
+  if (view === "rewind") {
+    return <AuthorRewindPage authorDetails={data.author_details} />;
+  }
+
   const cachedData = sessionStorage.getItem(`currentPagePath`);
   if (typeof window !== "undefined") {
     sessionStorage.setItem("lastPage", window.location.href);
   }
 
-  const handleCoAuthorRewind = async (name) => {
-    try {
-      const response = await fetch(`${BASE_URL}/coauthor_rewind/${name}`);
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || `HTTP error! Status: ${response.status}`);
-      }
-      const data = await response.json();
-      setRewindData(data);
-      setIsModalOpen(true);
-    } catch (error) {
-      console.error("Failed to fetch co-author rewind data:", error);
-    }
+  const handleViewChange = (viewType: string) => {
+    const params = new URLSearchParams(window.location.search);
+    params.set("view", viewType);
+    router.push(`${window.location.pathname}?${params.toString()}`);
   };
+
+  if (view === "rewind") {
+    return <AuthorRewindPage authorDetails={data.author_details} />;
+  }
 
   return (
     <div className="pt-4">
@@ -235,7 +239,7 @@ function Page() {
           </div>
         </Container>
         {loading ? (
-          <Loading />
+          <Loading profileLink={String(profileId)} />
         ) : (
           <>
             <EditModeProvider>
@@ -252,24 +256,17 @@ function Page() {
                 <div className="flex max-w-[600px] p-3 flex-col gap-4 mt-6 overflow-auto">
                   <div className="pt-5">
                     <AuthorNetwork
-                        authorName={name || ""}
-                        width={450}
-                        height={300}
+                      authorName={name || ""}
+                      width={450}
+                      height={300}
                     />
                   </div>
                   <div className="flex justify-center mb-4">
                     <button
-                        onClick={() => handleCoAuthorRewind(data?.author_details?.Name)}
-                        className="w-[450px] px-6 py-3 text-white font-semibold bg-gradient-to-r from-blue-500 to-blue-700 rounded-lg shadow-md hover:from-blue-600 hover:to-blue-800 transition-transform transform hover:scale-105"
-                    >
-                      View Co-Author Rewind
+                      onClick={() => handleViewChange("rewind")}
+                      className="w-[450px] px-6 py-3 text-white font-semibold bg-gradient-to-r from-blue-500 to-blue-700 rounded-lg shadow-md hover:from-blue-600 hover:to-blue-800 transition-transform transform hover:scale-105">
+                      {formatName(name)}&#39;s Overview
                     </button>
-                    {/* Co-Author Rewind Modal */}
-                    <CoAuthorRewindModal
-                        isOpen={isModalOpen}
-                        onClose={() => setIsModalOpen(false)}
-                        rewindData={rewindData}
-                    />
                   </div>
 
                   <PublicationCard

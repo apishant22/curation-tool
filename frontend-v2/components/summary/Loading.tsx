@@ -1,66 +1,64 @@
+"use client";
+
 import React, { useEffect, useState } from "react";
 import { Loader2, Sparkles, BookOpenCheck } from "lucide-react";
 
-const Loading = () => {
-  const [status, setStatus] = useState("Starting process...");
-  const [progress, setProgress] = useState(0);
+const Loading = ({ profileLink }: { profileLink: string }) => {
+  const [status, setStatus] = useState<string>("Starting process...");
 
-  // Define the sequence of status messages and their corresponding progress values
-  const statusSequence = [
-    { message: "Starting process...", progress: 0, duration: 2000 },
-    {
-      message: "Checking database for existing author...",
-      progress: 10,
-      duration: 2000,
-    },
-    {
-      message: "Scraping latest publications...",
-      progress: 30,
-      duration: 3000,
-    },
-    { message: "Fetching author details...", progress: 50, duration: 2500 },
-    {
-      message: "Analyzing publication history...",
-      progress: 65,
-      duration: 2000,
-    },
-    {
-      message: "Generating summary using LLM...",
-      progress: 85,
-      duration: 3000,
-    },
-    {
-      message: "Process complete. Finalizing details...",
-      progress: 100,
-      duration: 1500,
-    },
-  ];
+  const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL;
+
+  // Map statuses to progress values
+  const statusProgressMap: { [key: string]: number } = {
+    "Starting process...": 0,
+    "Checking database for existing author...": 10,
+    "Author found in database. Checking for updates...": 20,
+    "Author not found in database. Proceeding with scraping...": 20,
+    "Scraping latest publications...": 30,
+    "Fetching author details from database...": 40,
+    "No details in database. Scraping full author details...": 50,
+    "Scraping full author details due to new publication...": 50,
+    "Storing scraped author details in database...": 60,
+    "Updating author details in database...": 60,
+    "No new publications found. Checking summary...": 60,
+    "Generating summary using LLM...": 85,
+    "Generating new summary using LLM...": 85,
+    "Generating summary using LLM for updated author details...": 85,
+    "Process complete. Author details updated successfully.": 100,
+    "Process complete. Author details and summary updated successfully.": 100,
+    "Process complete. No updates required.": 100,
+  };
+
+  const fetchProgress = async () => {
+    try {
+      const profileId = profileLink.split("/").pop();
+      const response = await fetch(`${BASE_URL}/progress/${profileId}`);
+      if (response.ok) {
+        const data = await response.json();
+        console.log("Fetched status:", data.status);
+        setStatus(data.status);
+      } else {
+        console.error("Failed to fetch progress. HTTP Status:", response.status);
+        setStatus("Failed to fetch progress. Please try again later.");
+      }
+    } catch (error) {
+      console.error("Error fetching progress:", error.message || error);
+      setStatus("A network error occurred. Please check your connection.");
+    }
+  };
 
   useEffect(() => {
-    let currentIndex = 0;
+    const interval = setInterval(fetchProgress, 1000);
+    if (status === "Process complete. Author details updated successfully." ||
+        status === "Process complete. Author details and summary updated successfully." ||
+        status === "Process complete. No updates required.") {
+      clearInterval(interval); // Stop polling
+    }
+    return () => clearInterval(interval); // Cleanup
+  }, [status]);
 
-    const updateStatus = () => {
-      if (currentIndex < statusSequence.length) {
-        const { message, progress, duration } = statusSequence[currentIndex];
-        setStatus(message);
-        setProgress(progress);
-
-        currentIndex++;
-
-        if (currentIndex < statusSequence.length) {
-          setTimeout(updateStatus, duration);
-        }
-      }
-    };
-
-    // Start the sequence
-    updateStatus();
-
-    // Cleanup function
-    return () => {
-      currentIndex = statusSequence.length; // This will stop the sequence
-    };
-  }, []);
+  // Determine progress based on the current status
+  const progress = statusProgressMap[status] || 0;
 
   return (
     <div className="flex items-center justify-center bg-white dark:bg-black">
@@ -83,8 +81,7 @@ const Loading = () => {
           <div className="w-full h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden mt-4 relative">
             <div
               className="h-full bg-blue-500 dark:bg-blue-400 transition-all duration-500"
-              style={{ width: `${progress}%` }}
-            />
+              style={{ width: `${progress}%` }}></div>
             <div className="absolute right-0 -top-6 text-sm text-gray-600 dark:text-gray-400">
               {progress}%
             </div>

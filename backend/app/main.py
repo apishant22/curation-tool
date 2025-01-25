@@ -125,12 +125,6 @@ def query(name, profile_link):
 
     update_result, author_details_db = scraper.update_author_if_needed(name, profile_link)
 
-    if author_details_db is None:
-        return jsonify({
-            'error': True,
-            'message': 'Author details not found'
-        }), 404
-
     response = {'author_details': author_details_db}
     if update_result is None:
         response['message'] = "Author details updated, but summary not available yet."
@@ -139,12 +133,11 @@ def query(name, profile_link):
 
     return jsonify(response), 200
 
-# @app.route('/progress/<profile_link>', methods=['GET'])
-# def get_progress(profile_link):
-#     status = progress_manager.get_progress(profile_link)
-#     if status == "No progress available.":
-#         return jsonify({"status": "Starting process..."}), 200
-#     return jsonify({"status": status}), 200
+@app.route('/progress/<profile_link>', methods=['GET'])
+def get_progress(profile_link):
+    status = progress_manager.get_progress(profile_link)
+    print(f"[DEBUG] Fetching progress for {profile_link}: {status}")
+    return jsonify({"status": status}), 200
 
 
 # TODO make this work with the new database

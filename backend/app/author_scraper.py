@@ -288,6 +288,9 @@ def update_progress(profile_link, status):
     profile_id = extract_profile_id(profile_link)
     progress_manager.update_progress(profile_id, status)
 
+def clear_progress(profile_link):
+    profile_id = extract_profile_id(profile_link)
+    progress_manager.clear_progress(profile_id)
 
 def update_author_if_needed(author_name, profile_link):
     try:
@@ -333,6 +336,7 @@ def update_author_if_needed(author_name, profile_link):
                 update_progress(profile_link, "Generating new summary using LLM...")
             summary = get_researcher_summary(author_name)
             update_progress(profile_link, "Process complete. Author details updated successfully.")
+            clear_progress(profile_link)
             return summary, author_details_db
 
         latest_db_publication = get_latest_publication(author_details_db["Publications"])
@@ -353,6 +357,7 @@ def update_author_if_needed(author_name, profile_link):
                 summary = get_researcher_summary(author_name)
                 if summary and summary != "Summary not available.":
                     update_progress(profile_link, "Process complete. No updates required.")
+                    clear_progress(profile_link)
                     return summary, author_details_db
                 else:
                     try:
@@ -362,6 +367,7 @@ def update_author_if_needed(author_name, profile_link):
                         update_progress(profile_link, "Generating new summary using LLM...")
                     summary = get_researcher_summary(author_name)
                     update_progress(profile_link, "Process complete. Summary updated successfully.")
+                    clear_progress(profile_link)
                     return summary, author_details_db
 
         update_progress(profile_link, "Scraping full author details due to new publication...")
@@ -382,6 +388,7 @@ def update_author_if_needed(author_name, profile_link):
             update_progress(profile_link, "Generating summary using LLM for updated author details...")
         summary = get_researcher_summary(author_name)
         update_progress(profile_link, "Process complete. Author details and summary updated successfully.")
+        clear_progress(profile_link)
         return summary, author_details_db_after_update
 
     except KeyError as e:

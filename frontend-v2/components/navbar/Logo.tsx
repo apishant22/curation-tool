@@ -11,9 +11,14 @@ interface LogoProps {
 
 const Logo: React.FC<LogoProps> = ({ src, alt }) => {
   const router = useRouter();
+  const clickFunction = () => {
+    sessionStorage.removeItem("resultsURL");
+    router.refresh();
+    router.push("/");
+  };
   return (
     <Image
-      onClick={() => router.push("/")}
+      onClick={clickFunction}
       alt={alt || "ACM Logo"}
       src={src || "/images/acm-logo.png"}
       width={100}
