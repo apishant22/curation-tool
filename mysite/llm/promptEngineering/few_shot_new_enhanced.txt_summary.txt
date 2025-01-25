@@ -1,0 +1,23 @@
+### Profile: Cigdem Sengul
+
+**Biography:**
+Cigdem Sengul is a distinguished researcher and academic with over a decade of experience in mobile and wireless networks. She currently serves as a faculty member at Brunel University London. Cigdem's career has spanned both academia and industry, where she has made significant contributions to the development of privacy and trust standards in the Internet of Things (IoT). Her academic journey includes a tenure as a Senior Lecturer at Oxford Brookes University from 2012 to 2015, where she focused on wireless and mobile networks, particularly on energy and interference efficiency and the Internet of Robotic Things. Prior to that, she was a Senior Research Scientist at Telekom Innovation Labs, the main research unit of Deutsche Telekom, leading projects on Wireless Mesh Networks from 2008 to 2012.
+
+**Conference Involvement:**
+Cigdem Sengul has been actively involved in numerous conferences and workshops, contributing her expertise and insights to the broader computer science community. She has presented her research at prestigious conferences such as the ACM Workshop on Wireless Network Testbeds (WiNTECH) and the British Human Computer Interaction conference. Her work on MQTT authentication and authorization in IoT was showcased at WiNTECH '21 in New Orleans, highlighting her contributions to the field of wireless network security.
+
+In addition to presenting her research, Cigdem has played significant roles in organizing and chairing conferences. She served as the Communication Co-Chair of ACM Women, and from 2019 to 2022, she was the Communication and Outreach Chair of ACM Women-Europe. These roles involved coordinating communication strategies and outreach efforts to promote diversity and inclusion within the computing community.
+
+**Awards and Recognitions:**
+Cigdem Sengul's contributions to the field have been recognized through various fellowships and awards. She is a Fulbright fellow and has received fellowships from the Department of Computer Science at the University of Illinois at Urbana-Champaign (UIUC) and Vodafone. These accolades underscore her commitment to advancing research in wireless networks and her influence in the academic community.
+
+**Impact on the Field:**
+Cigdem's research has significantly impacted the development of energy-efficient and secure wireless networks. Her work on energy conservation in wireless sensor networks and the development of protocols for improving network efficiency has been widely cited and utilized in both academic and industrial applications. Her involvement in the development of privacy and trust standards for IoT at Nominet has also contributed to the advancement of secure IoT systems.
+
+Beyond her technical contributions, Cigdem is a passionate advocate for diversity and inclusion in computing. She collaborates with the Micro:bit Educational Foundation to support their mission of teaching coding to school children and is the co-author of the book "Networking with the Micro:bit." Her efforts in promoting diversity are further evidenced by her leadership roles in ACM Women and her work as an Equality, Diversity, and Inclusion Champion at Brunel University.
+
+Cigdem Sengul's career is a testament to her dedication to both advancing wireless network technology and fostering an inclusive and diverse computing community. Her contributions continue to shape the field and inspire the next generation of computer scientists.
+
+**Sources:**
+- [Brunel University London Profile](https://www.brunel.ac.uk/people/cigdem-sengul)
+- [Professional Activities at Brunel University](https://www.brunel.ac.uk/people/cigdem-sengul/professional-activities)

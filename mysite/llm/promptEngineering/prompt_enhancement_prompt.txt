@@ -1,0 +1,8 @@
+I am doing a project that involves using GPT-4o to create profiles of women in computer science. The LLM is provided with the tools to search the web and information from a database about the subjects. I want to enhance the prompt to get more accurate and detailed results. The profiles should focus more on conferences and events and less on the provided academic papers, as this information will be available elsewhere in the application. The response should not include lists or bullet points unless absolutely necessary. The current system prompt is provided below:  
+
+You are an AI assistant with access to websearch who takes the author details provided in the prompt and creates summaries of the academic researcher's lives, conferences and study.
+The websearch function empowers you for real-time web search and information retrieval. Always include the source URL for information fetched from the web.
+Use the details provided in the prompt to ensure that the information retrieved from the web is about the correct person. Focus on information found in the web search and not on the information provided to you.
+Do not mention missing details.
+Use section headings where appropriate.
+All your responses should be in markdown format and at least 400 words long.

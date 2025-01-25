@@ -1,0 +1,62 @@
+# Cigdem Sengul: Academic Profile and Contributions
+
+## Background and Career
+
+Cigdem Sengul is a distinguished researcher and educator in the field of computer networks, with a particular focus on wireless and mobile networks. She currently serves as a Senior Lecturer at Brunel University London. Sengul has over a decade of experience in both academia and industry, contributing significantly to the development and standardization of network protocols.
+
+### Academic and Professional Journey
+
+- **Brunel University London**: Senior Lecturer, focusing on network privacy, security, identity, and authorization.
+- **Nominet**: Senior Researcher (2015-2019), working on standards for building privacy and trust in the Internet of Things (IoT).
+- **Oxford Brookes University**: Senior Lecturer (2012-2015), where she lectured and conducted research on energy and interference efficiency in wireless networks.
+- **Telekom Innovation Labs**: Senior Research Scientist (2008-2012), leading projects on Wireless Mesh Networks.
+
+Sengul is also a passionate advocate for diversity in STEM fields, serving as the Communications Co-Chair and Secretary of ACM-W Global, an organization dedicated to supporting women in computing.
+
+## Research Interests
+
+Cigdem Sengul's research spans a wide range of areas within wireless networks, including:
+
+- Network structure
+- Surveys and overviews
+- Wireless access networks
+- Mobile networks
+- Network architectures
+- Network services
+- Distributed architectures
+- Modeling methodologies
+- Network management
+
+Her current research interests lie in network privacy, security, identity, and authorization.
+
+## Notable Publications
+
+### Forward and Backhaul Link Optimization for Energy Efficient OFDMA Small Cell Networks
+- **DOI**: [10.1109/TWC.2016.2636821](https://doi.org/10.1109/TWC.2016.2636821)
+- **Abstract**: This paper addresses the optimization of system energy efficiency in orthogonal frequency division multiple access (OFDMA) small cell networks, considering both forward and backhaul links. The proposed optimization scheme, FBEEOS, reduces signaling overhead and calculation complexity while ensuring non-decreasing system energy efficiency.
+
+### Load-adaptive Networking for Energy-efficient Wireless Access
+- **DOI**: [10.1016/j.comcom.2015.05.004](https://doi.org/10.1016/j.comcom.2015.05.004)
+- **Abstract**: This study explores adaptive networking strategies to enhance energy efficiency in wireless access networks.
+
+### Measurement-based Simulation of WiFi Interference
+- **DOI**: [10.1145/2507924.2507990](https://doi.org/10.1145/2507924.2507990)
+- **Abstract**: The paper proposes BOWLsim-advanced, an interference model based on measurements from WiFi testbeds, demonstrating improved accuracy in complex interference scenarios.
+
+### Energino: Energy Saving Tips for Your Wireless Network
+- **DOI**: [10.1145/2342356.2342406](https://doi.org/10.1145/2342356.2342406)
+- **Abstract**: This demo presents Energino, an energy measurement and control system designed to optimize energy usage in wireless networks.
+
+### TCPSpeaker: Clean and Dirty Sides of the Same Slate
+- **DOI**: [10.1145/1942268.1942284](https://doi.org/10.1145/1942268.1942284)
+- **Abstract**: TCPSpeaker is a transport-protocol translator that bridges TCP flows in wireless mesh networks, enabling the use of new transport protocols within the network while maintaining TCP compatibility at the edges.
+
+## Contributions to the Community
+
+Cigdem Sengul is actively involved in promoting diversity in computing. She collaborates with the Micro:bit Educational Foundation to support coding education for school children and is the co-author of the book "Networking with the Micro:bit." She also holds leadership roles in ACM-W Global, advocating for increased diversity awareness in computing.
+
+## Conclusion
+
+Cigdem Sengul's extensive research and contributions to wireless networks, combined with her dedication to education and diversity in STEM, make her a prominent figure in the field of computer networks. Her work continues to influence both academic research and practical applications in network privacy, security, and efficiency.
+
+For more information, you can visit her [Brunel University profile](https://www.brunel.ac.uk/people/cigdem-sengul) or her [personal website](https://www.cigdemsengul.com/).

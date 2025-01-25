@@ -1,0 +1,29 @@
+### Profile of Cigdem Sengul
+
+#### Biography
+
+Cigdem Sengul is a distinguished researcher and academic with over a decade of experience in mobile and wireless networks. She has made significant contributions to both academia and industry, particularly in the areas of energy efficiency, interference management, and the Internet of Things (IoT). Cigdem's career includes notable positions such as a Senior Researcher at Nominet, where she focused on building privacy and trust in IoT, and a Senior Lecturer at Oxford Brookes University, where she conducted research on wireless and mobile networks. She also worked at Telekom Innovation Labs, leading projects on Wireless Mesh Networks.
+
+Cigdem is currently affiliated with Brunel University London, where she continues to advance her research and contribute to the academic community. Her work has been widely published, with over 50 journal and conference publications to her name. She is also a Fulbright fellow and has received fellowships from the Department of Computer Science at the University of Illinois Urbana-Champaign (UIUC) and Vodafone.
+
+#### Conference Involvement
+
+Cigdem Sengul has been actively involved in various conferences, workshops, and symposiums throughout her career. She has played significant roles in organizing and chairing sessions, as well as presenting her research findings. One of her notable contributions includes her involvement in the ACM Women in Computing community, where she served as the Communication Co-Chair. From 2019 to 2022, she was the Communication and Outreach Chair of ACM Women-Europe, demonstrating her commitment to promoting diversity and inclusion within the field of computer science.
+
+In 2021, Cigdem co-authored a paper titled "An Experimental Evaluation of MQTT Authentication and Authorization in IoT," which was presented at the 15th ACM Workshop on Wireless Network Testbeds (WiNTECH '21) in New Orleans, LA. This work highlights her ongoing research in IoT security and her active participation in leading conferences.
+
+#### Awards and Recognitions
+
+Cigdem Sengul's contributions to the field have been recognized through various awards and fellowships. She is a Fulbright fellow, which is a prestigious recognition of her academic excellence and potential for significant contributions to her field. Additionally, she has received fellowships from the Department of Computer Science at UIUC and Vodafone, further underscoring her expertise and impact in the areas of wireless and mobile networks.
+
+#### Impact on the Field
+
+Cigdem Sengul's research has had a profound impact on the development of energy-efficient and secure wireless networks. Her work on optimizing energy consumption in wireless sensor networks and improving interference management has been widely cited and utilized in both academic and industrial applications. Her involvement in standardizing privacy and trust in IoT at Nominet has also contributed to the advancement of secure IoT systems.
+
+Beyond her technical contributions, Cigdem is a passionate advocate for diversity and inclusion in computing. She collaborates with the Micro:bit Educational Foundation to support their mission of teaching coding to school children and is the co-author of the book "Networking with the Micro:bit." Her efforts in promoting diversity are further evidenced by her leadership roles within ACM Women and her work as an Equality, Diversity, and Inclusion Champion at Brunel University London.
+
+#### Conclusion
+
+Cigdem Sengul's career is marked by her significant contributions to wireless and mobile networks, her active involvement in leading conferences, and her dedication to promoting diversity and inclusion in the field of computer science. Her work continues to influence the development of energy-efficient and secure network systems, and her advocacy for diversity ensures that the field remains inclusive and accessible to all.
+
+For more information, you can visit her profile on Brunel University's website: [Cigdem Sengul at Brunel University](https://www.brunel.ac.uk/people/cigdem-sengul).
