@@ -48,7 +48,7 @@ const Loading = ({ profileLink }: { profileLink: string }) => {
   };
 
   useEffect(() => {
-    const interval = setInterval(fetchProgress, 1000);
+    const interval = setInterval(fetchProgress, 5000);
     if (status === "Process complete. Author details updated successfully." ||
         status === "Process complete. Author details and summary updated successfully." ||
         status === "Process complete. No updates required.") {
